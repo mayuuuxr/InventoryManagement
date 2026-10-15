@@ -5,26 +5,51 @@
         <i data-lucide="refresh-cw" class="w-6 h-6 text-accent"></i>
     </div>
     <h2 class="text-charcoal mb-1">Installing nibba {{ tag }}</h2>
-    <p class="text-sm text-muted mb-2">Your entries were backed up first. The app restarts itself in about a minute.</p>
-    <p class="text-sm font-medium text-charcoal" id="update-state">Please keep this window open…</p>
+    <p class="text-sm text-muted mb-2">Your entries were backed up first. The app restarts itself in a couple of minutes.</p>
+    <div class="mt-4 h-2 bg-subtle rounded-full overflow-hidden" role="progressbar" aria-label="Update progress">
+        <div id="update-bar" class="h-full bg-accent rounded-full transition-all duration-500" style="width: 5%"></div>
+    </div>
+    <p class="text-xs text-muted mt-2" id="update-step">Starting…</p>
+    <p class="text-sm font-medium text-charcoal mt-1" id="update-state">Please keep this window open…</p>
 </div>
 <script>
 (function () {
-    var tries = 0, max = 150;
+    var tries = 0, max = 100, tag = "{{ tag }}";
     var state = document.getElementById("update-state");
+    var bar = document.getElementById("update-bar");
+    var step = document.getElementById("update-step");
+    function paint(pct, label) {
+        if (bar) bar.style.width = pct + "%";
+        if (step && label) step.textContent = label;
+    }
     function poll() {
         tries++;
-        fetch("/accounts/login/", { method: "HEAD", cache: "no-store" }).then(function (res) {
-            window.location.href = "/dashboard/";
-        }).catch(function () {
-            if (tries >= max) {
-                state.textContent = "Still working — wait a minute, then open the nibba Shop icon.";
+        fetch("/update/status/", { cache: "no-store" }).then(function (res) {
+            return res.json();
+        }).then(function (body) {
+            var last = body.last || "";
+            if (body.progress) paint(body.progress.pct, body.progress.label);
+            if (last.indexOf(tag + " OK") !== -1) {
+                paint(100, "Done");
+                window.location.href = "/dashboard/";
                 return;
             }
-            setTimeout(poll, 2000);
+            if (last.indexOf("FAILED") !== -1) {
+                if (bar) bar.style.background = "#B42323";
+                state.textContent = "Update failed (" + last + "). Reopen the nibba Shop icon and call support.";
+                return;
+            }
+            if (tries >= max) { exhausted(); return; }
+            setTimeout(poll, 3000);
+        }).catch(function () {
+            if (tries >= max) { exhausted(); return; }
+            setTimeout(poll, 3000);
         });
     }
-    setTimeout(poll, 10000);
+    function exhausted() {
+        state.textContent = "Still working — wait a minute, then open the nibba Shop icon.";
+    }
+    setTimeout(poll, 8000);
 })();
 </script>
 {% endblock %}

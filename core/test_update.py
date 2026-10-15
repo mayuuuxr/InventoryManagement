@@ -172,6 +172,10 @@ class OneClickStageTests(SimpleTestCase):
             self.assertIn("update-in-progress", text)
             self.assertIn("Start-Sleep -Seconds 8", text)
             self.assertIn("FAILED: server would not stop", text)
+            self.assertIn("taskkill /F /IM waitress-serve.exe", text)
+            self.assertIn("killagain", text)
+            self.assertIn("port owner", text)
+            self.assertIn("update-progress", text)
             self.assertNotIn("timeout /t", text)
 
     def test_changelog_line_stripped(self):
@@ -210,6 +214,42 @@ class ApplyUpdateViewTests(TestCase):
         self.client.force_login(self.staff)
         r = self.client.post("/update/apply/")
         self.assertEqual(r.status_code, 403)
+        self.assertEqual(self.client.get("/update/status/").status_code, 403)
+
+    def test_status_feed_reports_lock_and_last_line(self):
+        import tempfile
+        self.client.force_login(self.admin)
+        with tempfile.TemporaryDirectory() as tmp:
+            with override_settings(BASE_DIR=tmp):
+                r = self.client.get("/update/status/")
+                self.assertEqual(r.status_code, 200)
+                self.assertEqual(
+                    r.json(), {"in_flight": None, "last": "",
+                               "progress": None})
+            from core.selfupdate import _write_lock, write_progress
+            _write_lock(tmp, "v9.9.9")
+            logs = Path(tmp) / "Logs"
+            logs.mkdir(exist_ok=True)
+            (logs / "update-last-run.txt").write_text(
+                "someday v9.9.9 OK\n", encoding="utf-8")
+            write_progress(tmp, 55, "Updating database")
+            with override_settings(BASE_DIR=tmp):
+                r = self.client.get("/update/status/")
+                self.assertEqual(
+                    r.json(), {"in_flight": "v9.9.9",
+                               "last": "someday v9.9.9 OK",
+                               "progress": {"pct": 55,
+                                            "label": "Updating database"}})
+
+    def test_progress_roundtrip_and_bounds(self):
+        from core.selfupdate import read_progress, write_progress
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertIsNone(read_progress(tmp))
+            write_progress(tmp, 30, "Copying new files")
+            self.assertEqual(read_progress(tmp), (30, "Copying new files"))
+            write_progress(tmp, 999, "x")
+            self.assertEqual(read_progress(tmp)[0], 100)
 
     def test_no_update_redirects(self):
         self.client.force_login(self.admin)

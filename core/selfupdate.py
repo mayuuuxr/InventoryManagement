@@ -35,6 +35,7 @@ TAG_RE = re.compile(r"^v\d+\.\d+\.\d+$")
 
 STATUS_FILE = Path("Logs") / "update-last-run.txt"
 LOCK_FILE = Path("Logs") / "update-in-progress.txt"
+PROGRESS_FILE = Path("Logs") / "update-progress.txt"
 
 #: A lock older than this is treated as a crashed run, not a live one.
 LOCK_STALE_SECONDS = 15 * 60
@@ -200,22 +201,37 @@ cd /d "{appdir}"
 echo %date% %time% {tag} applying >> "Logs\\update-last-run.txt"
 REM Let the browser land on the updating page before the restart.
 powershell -NoProfile -Command "Start-Sleep -Seconds 8"
-REM Stop the server (Windows locks running files). Refuse to touch code
-REM if the port will not free: a half-copy under a live server is worse
-REM than no update. The old code keeps serving untouched in that case.
-powershell -NoProfile -Command "$tries = 0; while ($tries -lt 15) {{ $c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if (-not $c) {{ break }}; try {{ Stop-Process -Id $c.OwningProcess -Force -ErrorAction Stop }} catch {{ }}; Start-Sleep -Seconds 2; $tries++ }}"
-powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) {{ exit 1 }}"
-if errorlevel 1 goto stillrunning
+REM Stop the server (Windows locks running files). Kill by image name AND
+REM by port owner, so a wedged lookup of either kind cannot stall us.
+REM Refuse to touch code if the port will not free: a half-copy under a
+REM live server is worse than no update. The old code keeps serving
+REM untouched in that case. Every try is logged for diagnosis.
+powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ $n = '?'; try {{ $n = (Get-Process -Id $c.OwningProcess -ErrorAction Stop).ProcessName }} catch {{ }}; echo 'port owner: pid=' + $c.OwningProcess + ' name=' + $n >> 'Logs\\update-last-run.txt' }}"
+set TRIES=0
+:killagain
+taskkill /F /IM waitress-serve.exe >nul 2>&1
+powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ try {{ Stop-Process -Id $c.OwningProcess -Force -ErrorAction Stop }} catch {{ }}; exit 1 }}"
+if not errorlevel 1 goto killok
+set /a TRIES=%TRIES%+1
+if %TRIES% GEQ 30 goto stillrunning
+powershell -NoProfile -Command "Start-Sleep -Seconds 2"
+goto killagain
+:killok
+echo 30^|Copying new files > "Logs\\update-progress.txt"
 if exist "runtime\\python.exe" (set PY=runtime\\python.exe) else (set PY=venv\\Scripts\\python.exe)
 if exist "runtime\\Scripts\\waitress-serve.exe" (set WS=runtime\\Scripts\\waitress-serve.exe) else (set WS=venv\\Scripts\\waitress-serve.exe)
 REM Copy staged code only (protected names excluded - same list as update.bat).
 powershell -NoProfile -Command "$prot = @('.env','Backup','Logs','Data','chrome-profile','venv','runtime','.git','staticfiles','__pycache__','tunnel.log','cloudflared.exe'); Get-ChildItem '{stage}' -Recurse -File | ForEach-Object {{ $rel = $_.FullName.Substring('{stage}'.Length + 1); $parts = $rel -split '[\\\\/]'; if (($parts | Where-Object {{ $prot -contains $_ }}).Count -gt 0) {{ return }}; if ($rel -like '*.sqlite3' -or $rel -like '*.pem') {{ return }}; $dest = Join-Path '.' $rel; New-Item -ItemType Directory -Path (Split-Path $dest) -Force | Out-Null; Copy-Item $_.FullName $dest -Force }}"
 if errorlevel 1 goto copyfail
+echo 55^|Updating database > "Logs\\update-progress.txt"
 "%PY%" manage.py migrate --noinput -v 0
 if errorlevel 1 goto migratefail
+echo 75^|Finishing up > "Logs\\update-progress.txt"
 "%PY%" manage.py collectstatic --noinput -v 0
+echo 90^|Restarting the app > "Logs\\update-progress.txt"
 powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
 echo %date% %time% {tag} OK >> "Logs\\update-last-run.txt"
+echo 100^|Done > "Logs\\update-progress.txt"
 rmdir /S /Q "{stage}"
 del "Logs\\update-in-progress.txt"
 del "%~f0"
@@ -273,7 +289,9 @@ def perform_update(base_dir, tag, zip_url, tmp_root=None):
     backup_database(base)
     _write_lock(base, tag)
     try:
+        write_progress(base, 5, "Backing up your entries")
         download_release(zip_url, staged_zip)
+        write_progress(base, 12, "Downloading update")
         extract_staged(staged_zip, stage)
         return write_apply_script(base, stage, tag)
     except Exception:
@@ -307,4 +325,26 @@ def last_status(base_dir):
             encoding="utf-8").splitlines()
         return lines[-1].strip() or None
     except (OSError, IndexError):
+        return None
+
+
+def write_progress(base_dir, percent, label):
+    """Current install step for the progress bar (percent|label)."""
+    try:
+        base = Path(base_dir)
+        base.joinpath("Logs").mkdir(exist_ok=True)
+        base.joinpath(PROGRESS_FILE).write_text(
+            f"{int(percent)}|{label}\n", encoding="utf-8")
+    except OSError:
+        pass
+
+
+def read_progress(base_dir):
+    """(percent, label) or None when no update has reported progress."""
+    try:
+        text = (Path(base_dir) / PROGRESS_FILE).read_text(
+            encoding="utf-8").strip()
+        pct, _, label = text.partition("|")
+        return max(0, min(100, int(pct))), label.strip()
+    except (OSError, ValueError):
         return None

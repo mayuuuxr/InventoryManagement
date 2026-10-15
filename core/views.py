@@ -156,6 +156,33 @@ class ApplyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
         return render(request, "updating.html", {"tag": tag})
 
 
+class UpdateStatusView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """JSON progress feed for the updating page (owner only).
+
+    The page polls this instead of guessing: while the server restarts
+    the requests simply fail and polling continues; once back, the last
+    applier status line tells it whether to enter the dashboard or show
+    the failure (with the exact reason the batch recorded).
+    """
+
+    def test_func(self):
+        return is_owner(self.request.user)
+
+    def get(self, request):
+        from django.http import JsonResponse
+
+        from core.selfupdate import (
+            last_status, read_progress, update_in_progress,
+        )
+        progress = read_progress(settings.BASE_DIR)
+        return JsonResponse({
+            "in_flight": update_in_progress(settings.BASE_DIR),
+            "last": last_status(settings.BASE_DIR) or "",
+            "progress": {"pct": progress[0], "label": progress[1]}
+            if progress else None,
+        })
+
+
 class PrivacyView(TemplateView):
     """Privacy policy. Public (no login): readable before signing in."""
 
