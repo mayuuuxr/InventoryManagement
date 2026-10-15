@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Help | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Help</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl space-y-4">
+    <div>
+        <h1 class="text-charcoal">Help</h1>
+        <p class="text-sm text-muted mt-1">Signed in as <span class="font-medium text-charcoal">{{ user.username }}</span> ({% if user.is_superuser %}owner{% else %}{{ user.role }}{% endif %}).</p>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">Daily entries</h2>
+        <ul class="text-sm text-charcoal space-y-1.5 list-disc ml-5">
+            <li>Open <span class="font-medium">Purchase</span> to record stock bought, <span class="font-medium">Sale</span> to record stock sold.</li>
+            <li>Pick the material, enter date and quantity, save. A sale deducts automatically, oldest purchase first.</li>
+            <li>Balance updates by itself. You can't sell more than it shows.</li>
+        </ul>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">Sign-in and PIN</h2>
+        <ul class="text-sm text-charcoal space-y-1.5 list-disc ml-5">
+            <li>Username + 4-digit PIN from your admin.</li>
+            <li>5 wrong tries locks you for 1 hour.</li>
+            <li>Forgot PIN? Only your admin can reset it.</li>
+        </ul>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">This PC &amp; privacy</h2>
+        <ul class="text-sm text-charcoal space-y-1.5 list-disc ml-5">
+            <li>Everything runs on this PC only — no internet needed, no other device connects.</li>
+            <li>Saving needs the shop server running (the hidden window started by the nibba Shop icon).</li>
+            <li>Cookies and this-PC data: Sign-in cookie (8 hours), security cookie. No ads, no tracking, nothing shared.</li>
+        </ul>
+    </div>
+
+    {% if user.role == 'manager' %}
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">Your access</h2>
+        <ul class="text-sm text-charcoal space-y-1.5 list-disc ml-5">
+            <li>Managers have full access like the owner: entries, materials, staff logins, reports.</li>
+            <li>Everyone sees all entries and true stock balances; only edit/delete stay own-only.</li>
+            <li>Activity log (who did what) is owner-only. You won't see it.</li>
+        </ul>
+    </div>
+    {% else %}
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">Your access</h2>
+        <ul class="text-sm text-charcoal space-y-1.5 list-disc ml-5">
+            <li>You see all entries and true stock balances across the shop.</li>
+            <li>Edit or delete your own entries only; for someone else's, ask your admin.</li>
+            <li>Setup pages are owner-only.</li>
+        </ul>
+    </div>
+    {% endif %}
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">Something not working?</h2>
+        <ul class="text-sm text-charcoal space-y-1.5 list-disc ml-5">
+            <li>"Only … available" means stock just ran low. Enter a smaller qty.</li>
+            <li>Same date must have different times for repeat entries.</li>
+            <li>Anything else: tell your admin exactly what you tapped.</li>
+        </ul>
+    </div>
+
+    <div id="app-updates" class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">App updates</h2>
+        <p class="text-sm text-charcoal">This PC runs <span class="font-medium">nibba v{{ app_version }}</span>.</p>
+        {% if is_owner %}
+            {% if update and update.reason == "ok" and update.update_available %}
+            <div class="mt-2 p-3 bg-warning-bg border border-subtle rounded-md">
+                <p class="text-sm text-charcoal font-medium">Update available: {{ update.latest }} (you have {{ update.current }})</p>
+                {% if update.notes %}<p class="text-xs text-muted mt-1">{{ update.notes|truncatewords:40 }}</p>{% endif %}
+                <p class="text-xs text-charcoal mt-2">Close the server windows, then run <span class="font-medium">update.bat {{ update.latest }}</span> in the nibba folder. Your entries stay exactly as they are. The updater backs up first and never touches saved data.</p>
+            </div>
+            {% elif update and update.reason == "ok" %}
+            <p class="text-xs text-muted mt-1">Up to date (latest {{ update.latest }}).</p>
+            {% elif update and update.reason == "not-configured" %}
+            <p class="text-xs text-muted mt-1">Automatic update checks are not set up on this PC yet.</p>
+            {% else %}
+            <p class="text-xs text-muted mt-1">Could not reach the update server (offline?). Your app works fine without it.</p>
+            {% endif %}
+        {% endif %}
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5">
+        <h2 class="text-charcoal mb-2">Legal</h2>
+        <div class="flex items-center gap-5 text-sm">
+            <a href="{% url 'privacy' %}" class="text-accent hover:underline">Privacy Policy</a>
+            <a href="{% url 'terms' %}" class="text-accent hover:underline">Terms and Conditions</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+venv/
+.env
+__pycache__/
+*.pyc
+db.sqlite3
+*.sqlite3
+# one-off data backups (business data, never commit)
+backup_*.json
+db_backup_*.sqlite3
+db_pre_handover_*.sqlite3
+# business docs / local PEM keys (never commit)
+*.docx
+vapid_*.pem
+*.pem
+# collectstatic output (rebuilt on every deploy, never commit)
+staticfiles/
+# PC updater + tunnel runtime (per-machine, never commit)
+Backup/
+Logs/
+Data/
+chrome-profile/
+build/
+tunnel.log
+cloudflared.exe

@@ -1,0 +1,7466 @@
+[
+ {
+  "model": "sites.site",
+  "pk": 1,
+  "fields": {
+   "name": "Vidarbha Park - 1",
+   "location": "Devada",
+   "created_at": "2026-09-07T09:59:16.611922+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 1,
+  "fields": {
+   "name": "Aggregates & Sand",
+   "created_at": "2026-09-11T17:37:14.180724+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 2,
+  "fields": {
+   "name": "Bricks & Blocks",
+   "created_at": "2026-09-11T17:37:14.186268+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 3,
+  "fields": {
+   "name": "Cement & Concrete",
+   "created_at": "2026-09-11T17:37:14.189048+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 4,
+  "fields": {
+   "name": "Doors & Frames",
+   "created_at": "2026-09-11T17:37:14.191144+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 5,
+  "fields": {
+   "name": "Electrical",
+   "created_at": "2026-09-11T17:37:14.195368+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 6,
+  "fields": {
+   "name": "Finishing Materials",
+   "created_at": "2026-09-11T17:37:14.206529+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 7,
+  "fields": {
+   "name": "Formwork & Shuttering",
+   "created_at": "2026-09-11T17:37:14.210243+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 8,
+  "fields": {
+   "name": "Hardware & Fasteners",
+   "created_at": "2026-09-11T17:37:14.211987+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 9,
+  "fields": {
+   "name": "Housekeeping",
+   "created_at": "2026-09-11T17:37:14.219365+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 10,
+  "fields": {
+   "name": "Miscellaneous",
+   "created_at": "2026-09-11T17:37:14.220860+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 11,
+  "fields": {
+   "name": "Needs Review",
+   "created_at": "2026-09-11T17:37:14.225889+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 12,
+  "fields": {
+   "name": "Paint & Chemicals",
+   "created_at": "2026-09-11T17:37:14.228474+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 13,
+  "fields": {
+   "name": "Plumbing",
+   "created_at": "2026-09-11T17:37:14.238214+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 14,
+  "fields": {
+   "name": "Safety Materials",
+   "created_at": "2026-09-11T17:37:14.283556+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 15,
+  "fields": {
+   "name": "Site Assets",
+   "created_at": "2026-09-11T17:37:14.284729+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 16,
+  "fields": {
+   "name": "Steel & Metal Sections",
+   "created_at": "2026-09-11T17:37:14.286144+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 17,
+  "fields": {
+   "name": "Steel & Reinforcement",
+   "created_at": "2026-09-11T17:37:14.292648+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 18,
+  "fields": {
+   "name": "Tiles & Flooring",
+   "created_at": "2026-09-11T17:37:14.295586+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 19,
+  "fields": {
+   "name": "Tools & Equipment",
+   "created_at": "2026-09-11T17:37:14.299429+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 20,
+  "fields": {
+   "name": "Waterproofing",
+   "created_at": "2026-09-11T17:37:14.307693+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.category",
+  "pk": 21,
+  "fields": {
+   "name": "Wood & Carpentry",
+   "created_at": "2026-09-11T17:37:14.311742+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 1,
+  "fields": {
+   "category": 1,
+   "name": "Crushed Stone / Metal",
+   "created_at": "2026-09-11T17:37:14.181565+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 2,
+  "fields": {
+   "category": 1,
+   "name": "Fill Material",
+   "created_at": "2026-09-11T17:37:14.183690+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 3,
+  "fields": {
+   "category": 1,
+   "name": "Murum / Earth Fill",
+   "created_at": "2026-09-11T17:37:14.184192+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 4,
+  "fields": {
+   "category": 1,
+   "name": "Sand",
+   "created_at": "2026-09-11T17:37:14.184951+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 5,
+  "fields": {
+   "category": 1,
+   "name": "Stone Dust",
+   "created_at": "2026-09-11T17:37:14.185687+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 6,
+  "fields": {
+   "category": 2,
+   "name": "Flyash Bricks",
+   "created_at": "2026-09-11T17:37:14.186516+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 7,
+  "fields": {
+   "category": 2,
+   "name": "Paver Blocks",
+   "created_at": "2026-09-11T17:37:14.187396+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 8,
+  "fields": {
+   "category": 2,
+   "name": "Red Bricks",
+   "created_at": "2026-09-11T17:37:14.188326+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 9,
+  "fields": {
+   "category": 3,
+   "name": "Cement",
+   "created_at": "2026-09-11T17:37:14.189268+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 10,
+  "fields": {
+   "category": 3,
+   "name": "Cover Block",
+   "created_at": "2026-09-11T17:37:14.189748+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 11,
+  "fields": {
+   "category": 3,
+   "name": "Gypsum",
+   "created_at": "2026-09-11T17:37:14.190224+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 12,
+  "fields": {
+   "category": 3,
+   "name": "White Cement",
+   "created_at": "2026-09-11T17:37:14.190699+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 13,
+  "fields": {
+   "category": 4,
+   "name": "Door Frames (General)",
+   "created_at": "2026-09-11T17:37:14.191378+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 14,
+  "fields": {
+   "category": 4,
+   "name": "Gates",
+   "created_at": "2026-09-11T17:37:14.191932+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 15,
+  "fields": {
+   "category": 4,
+   "name": "RCC Door Frames",
+   "created_at": "2026-09-11T17:37:14.192471+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 16,
+  "fields": {
+   "category": 4,
+   "name": "Window Grills",
+   "created_at": "2026-09-11T17:37:14.193847+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 17,
+  "fields": {
+   "category": 5,
+   "name": "Accessories",
+   "created_at": "2026-09-11T17:37:14.195614+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 18,
+  "fields": {
+   "category": 5,
+   "name": "Cables & Wires",
+   "created_at": "2026-09-11T17:37:14.196115+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 19,
+  "fields": {
+   "category": 5,
+   "name": "Fans",
+   "created_at": "2026-09-11T17:37:14.199248+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 20,
+  "fields": {
+   "category": 5,
+   "name": "Lighting",
+   "created_at": "2026-09-11T17:37:14.199753+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 21,
+  "fields": {
+   "category": 5,
+   "name": "Power Backup",
+   "created_at": "2026-09-11T17:37:14.203718+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 22,
+  "fields": {
+   "category": 5,
+   "name": "Switches & Accessories",
+   "created_at": "2026-09-11T17:37:14.204484+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 23,
+  "fields": {
+   "category": 6,
+   "name": "Decorative",
+   "created_at": "2026-09-11T17:37:14.206755+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 24,
+  "fields": {
+   "category": 6,
+   "name": "Natural Stone",
+   "created_at": "2026-09-11T17:37:14.207517+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 25,
+  "fields": {
+   "category": 6,
+   "name": "Roofing Sheets",
+   "created_at": "2026-09-11T17:37:14.209516+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 26,
+  "fields": {
+   "category": 7,
+   "name": "Shuttering Accessories",
+   "created_at": "2026-09-11T17:37:14.210476+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 27,
+  "fields": {
+   "category": 7,
+   "name": "Shuttering Materials",
+   "created_at": "2026-09-11T17:37:14.210992+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 28,
+  "fields": {
+   "category": 7,
+   "name": "Shuttering Oils",
+   "created_at": "2026-09-11T17:37:14.211518+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 29,
+  "fields": {
+   "category": 8,
+   "name": "Bolts & Nuts",
+   "created_at": "2026-09-11T17:37:14.212216+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 30,
+  "fields": {
+   "category": 8,
+   "name": "Decorative Hardware",
+   "created_at": "2026-09-11T17:37:14.213242+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 31,
+  "fields": {
+   "category": 8,
+   "name": "Locks & Latches",
+   "created_at": "2026-09-11T17:37:14.213742+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 32,
+  "fields": {
+   "category": 8,
+   "name": "Miscellaneous",
+   "created_at": "2026-09-11T17:37:14.214234+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 33,
+  "fields": {
+   "category": 8,
+   "name": "Nails",
+   "created_at": "2026-09-11T17:37:14.214723+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 34,
+  "fields": {
+   "category": 8,
+   "name": "Pins & Clips",
+   "created_at": "2026-09-11T17:37:14.216817+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 35,
+  "fields": {
+   "category": 8,
+   "name": "Screws",
+   "created_at": "2026-09-11T17:37:14.217316+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 36,
+  "fields": {
+   "category": 8,
+   "name": "Wire Mesh & Jali",
+   "created_at": "2026-09-11T17:37:14.218349+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 37,
+  "fields": {
+   "category": 9,
+   "name": "Cleaning Supplies",
+   "created_at": "2026-09-11T17:37:14.219596+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 38,
+  "fields": {
+   "category": 10,
+   "name": "Containers",
+   "created_at": "2026-09-11T17:37:14.221091+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 39,
+  "fields": {
+   "category": 10,
+   "name": "Covers & Sheets",
+   "created_at": "2026-09-11T17:37:14.221856+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 40,
+  "fields": {
+   "category": 10,
+   "name": "Fuel & Gas",
+   "created_at": "2026-09-11T17:37:14.223139+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 41,
+  "fields": {
+   "category": 10,
+   "name": "Ropes & Ties",
+   "created_at": "2026-09-11T17:37:14.223637+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 42,
+  "fields": {
+   "category": 10,
+   "name": "Site Infrastructure",
+   "created_at": "2026-09-11T17:37:14.224404+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 43,
+  "fields": {
+   "category": 10,
+   "name": "Tapes",
+   "created_at": "2026-09-11T17:37:14.225427+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 44,
+  "fields": {
+   "category": 11,
+   "name": "Unknown",
+   "created_at": "2026-09-11T17:37:14.226113+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 45,
+  "fields": {
+   "category": 12,
+   "name": "Additives",
+   "created_at": "2026-09-11T17:37:14.228701+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 46,
+  "fields": {
+   "category": 12,
+   "name": "Cleaning Chemicals",
+   "created_at": "2026-09-11T17:37:14.229216+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 47,
+  "fields": {
+   "category": 12,
+   "name": "Exterior Paint",
+   "created_at": "2026-09-11T17:37:14.229718+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 48,
+  "fields": {
+   "category": 12,
+   "name": "Finishing Compounds",
+   "created_at": "2026-09-11T17:37:14.230518+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 49,
+  "fields": {
+   "category": 12,
+   "name": "Grouting",
+   "created_at": "2026-09-11T17:37:14.231008+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 50,
+  "fields": {
+   "category": 12,
+   "name": "Interior Paint",
+   "created_at": "2026-09-11T17:37:14.231502+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 51,
+  "fields": {
+   "category": 12,
+   "name": "Oil-Based Paint",
+   "created_at": "2026-09-11T17:37:14.233322+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 52,
+  "fields": {
+   "category": 12,
+   "name": "Paint (General)",
+   "created_at": "2026-09-11T17:37:14.234363+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 53,
+  "fields": {
+   "category": 12,
+   "name": "Primers",
+   "created_at": "2026-09-11T17:37:14.234878+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 54,
+  "fields": {
+   "category": 12,
+   "name": "Solvents & Thinners",
+   "created_at": "2026-09-11T17:37:14.236212+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 55,
+  "fields": {
+   "category": 12,
+   "name": "Stainers & Tinters",
+   "created_at": "2026-09-11T17:37:14.236712+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 56,
+  "fields": {
+   "category": 12,
+   "name": "Wall Putty",
+   "created_at": "2026-09-11T17:37:14.237211+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 57,
+  "fields": {
+   "category": 13,
+   "name": "Accessories",
+   "created_at": "2026-09-11T17:37:14.238447+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 58,
+  "fields": {
+   "category": 13,
+   "name": "Adhesives & Solvents",
+   "created_at": "2026-09-11T17:37:14.240014+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 59,
+  "fields": {
+   "category": 13,
+   "name": "CP Fittings",
+   "created_at": "2026-09-11T17:37:14.240954+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 60,
+  "fields": {
+   "category": 13,
+   "name": "CPVC Fittings",
+   "created_at": "2026-09-11T17:37:14.246158+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 61,
+  "fields": {
+   "category": 13,
+   "name": "CPVC Pipes",
+   "created_at": "2026-09-11T17:37:14.247914+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 62,
+  "fields": {
+   "category": 13,
+   "name": "Chambers & Covers",
+   "created_at": "2026-09-11T17:37:14.248665+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 63,
+  "fields": {
+   "category": 13,
+   "name": "PVC Fittings",
+   "created_at": "2026-09-11T17:37:14.250477+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 64,
+  "fields": {
+   "category": 13,
+   "name": "PVC Pipes",
+   "created_at": "2026-09-11T17:37:14.253273+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 65,
+  "fields": {
+   "category": 13,
+   "name": "Pipe Clamps",
+   "created_at": "2026-09-11T17:37:14.255098+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 66,
+  "fields": {
+   "category": 13,
+   "name": "Pipe Fittings (GI/Brass)",
+   "created_at": "2026-09-11T17:37:14.255589+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 67,
+  "fields": {
+   "category": 13,
+   "name": "Pumps",
+   "created_at": "2026-09-11T17:37:14.256905+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 68,
+  "fields": {
+   "category": 13,
+   "name": "RCC Pipes",
+   "created_at": "2026-09-11T17:37:14.257661+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 69,
+  "fields": {
+   "category": 13,
+   "name": "SWR Drainage",
+   "created_at": "2026-09-11T17:37:14.258942+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 70,
+  "fields": {
+   "category": 13,
+   "name": "Sanitaryware",
+   "created_at": "2026-09-11T17:37:14.265083+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 71,
+  "fields": {
+   "category": 13,
+   "name": "Septic & Drainage",
+   "created_at": "2026-09-11T17:37:14.267438+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 72,
+  "fields": {
+   "category": 13,
+   "name": "UPVC Fittings",
+   "created_at": "2026-09-11T17:37:14.267932+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 73,
+  "fields": {
+   "category": 13,
+   "name": "UPVC Pipes",
+   "created_at": "2026-09-11T17:37:14.281080+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 74,
+  "fields": {
+   "category": 13,
+   "name": "Water Tanks",
+   "created_at": "2026-09-11T17:37:14.282925+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 75,
+  "fields": {
+   "category": 14,
+   "name": "PPE",
+   "created_at": "2026-09-11T17:37:14.283805+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 76,
+  "fields": {
+   "category": 15,
+   "name": "Furniture",
+   "created_at": "2026-09-11T17:37:14.284958+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 77,
+  "fields": {
+   "category": 16,
+   "name": "Angles",
+   "created_at": "2026-09-11T17:37:14.286357+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 78,
+  "fields": {
+   "category": 16,
+   "name": "Base Plates",
+   "created_at": "2026-09-11T17:37:14.287547+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 79,
+  "fields": {
+   "category": 16,
+   "name": "Channels",
+   "created_at": "2026-09-11T17:37:14.288018+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 80,
+  "fields": {
+   "category": 16,
+   "name": "Flats & Patti",
+   "created_at": "2026-09-11T17:37:14.288734+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 81,
+  "fields": {
+   "category": 16,
+   "name": "MS Pipes",
+   "created_at": "2026-09-11T17:37:14.289960+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 82,
+  "fields": {
+   "category": 16,
+   "name": "Square Bars",
+   "created_at": "2026-09-11T17:37:14.290915+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 83,
+  "fields": {
+   "category": 16,
+   "name": "Square Pipes",
+   "created_at": "2026-09-11T17:37:14.291370+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 84,
+  "fields": {
+   "category": 17,
+   "name": "Barbed Wire",
+   "created_at": "2026-09-11T17:37:14.292867+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 85,
+  "fields": {
+   "category": 17,
+   "name": "Binding Wire",
+   "created_at": "2026-09-11T17:37:14.293343+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 86,
+  "fields": {
+   "category": 17,
+   "name": "TMT Bar",
+   "created_at": "2026-09-11T17:37:14.293817+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 87,
+  "fields": {
+   "category": 18,
+   "name": "Floor Tiles",
+   "created_at": "2026-09-11T17:37:14.295799+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 88,
+  "fields": {
+   "category": 18,
+   "name": "Grouting",
+   "created_at": "2026-09-11T17:37:14.296776+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 89,
+  "fields": {
+   "category": 18,
+   "name": "Landscaping",
+   "created_at": "2026-09-11T17:37:14.297987+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 90,
+  "fields": {
+   "category": 18,
+   "name": "Wall Tiles",
+   "created_at": "2026-09-11T17:37:14.298476+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 91,
+  "fields": {
+   "category": 19,
+   "name": "Brushes",
+   "created_at": "2026-09-11T17:37:14.299641+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 92,
+  "fields": {
+   "category": 19,
+   "name": "Containers",
+   "created_at": "2026-09-11T17:37:14.300369+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 93,
+  "fields": {
+   "category": 19,
+   "name": "Cutting Tools",
+   "created_at": "2026-09-11T17:37:14.300828+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 94,
+  "fields": {
+   "category": 19,
+   "name": "Drill Bits",
+   "created_at": "2026-09-11T17:37:14.302129+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 95,
+  "fields": {
+   "category": 19,
+   "name": "Hand Tools",
+   "created_at": "2026-09-11T17:37:14.302610+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 96,
+  "fields": {
+   "category": 19,
+   "name": "Measuring Tools",
+   "created_at": "2026-09-11T17:37:14.303333+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 97,
+  "fields": {
+   "category": 19,
+   "name": "Plastering Tools",
+   "created_at": "2026-09-11T17:37:14.304058+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 98,
+  "fields": {
+   "category": 19,
+   "name": "Power Tools",
+   "created_at": "2026-09-11T17:37:14.304538+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 99,
+  "fields": {
+   "category": 19,
+   "name": "Spare Parts",
+   "created_at": "2026-09-11T17:37:14.305750+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 100,
+  "fields": {
+   "category": 19,
+   "name": "Vibrators & Compactors",
+   "created_at": "2026-09-11T17:37:14.306228+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 101,
+  "fields": {
+   "category": 20,
+   "name": "Adhesives & Sealants",
+   "created_at": "2026-09-11T17:37:14.307904+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 102,
+  "fields": {
+   "category": 20,
+   "name": "Bonding Agents",
+   "created_at": "2026-09-11T17:37:14.309132+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 103,
+  "fields": {
+   "category": 20,
+   "name": "Crack Repair",
+   "created_at": "2026-09-11T17:37:14.309620+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 104,
+  "fields": {
+   "category": 20,
+   "name": "Tar & Bitumen",
+   "created_at": "2026-09-11T17:37:14.310088+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 105,
+  "fields": {
+   "category": 20,
+   "name": "Waterproofing Chemicals",
+   "created_at": "2026-09-11T17:37:14.310571+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 106,
+  "fields": {
+   "category": 21,
+   "name": "Plywood",
+   "created_at": "2026-09-11T17:37:14.311969+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.subcategory",
+  "pk": 107,
+  "fields": {
+   "category": 21,
+   "name": "Timber & Bamboo",
+   "created_at": "2026-09-11T17:37:14.312685+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 1,
+  "fields": {
+   "category": 1,
+   "sub_category": 1,
+   "name": "10mm Metal (Crushed Stone)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.182157+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 2,
+  "fields": {
+   "category": 1,
+   "sub_category": 1,
+   "name": "20mm Metal (Crushed Stone)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.182593+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 3,
+  "fields": {
+   "category": 1,
+   "sub_category": 1,
+   "name": "80mm Metal (Crushed Stone)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.182889+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 4,
+  "fields": {
+   "category": 1,
+   "sub_category": 1,
+   "name": "80mm White Metal (Crushed Stone)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.183169+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 5,
+  "fields": {
+   "category": 1,
+   "sub_category": 1,
+   "name": "Gray Gattu (Stone Chips)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.183444+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 6,
+  "fields": {
+   "category": 1,
+   "sub_category": 2,
+   "name": "Flyash Bharan (Fill Material)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.183954+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 7,
+  "fields": {
+   "category": 1,
+   "sub_category": 3,
+   "name": "Murum (Laterite Earth)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.184454+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 8,
+  "fields": {
+   "category": 1,
+   "sub_category": 3,
+   "name": "Soil",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.184722+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 9,
+  "fields": {
+   "category": 1,
+   "sub_category": 4,
+   "name": "Black Sand (Coarse)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.185205+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 10,
+  "fields": {
+   "category": 1,
+   "sub_category": 4,
+   "name": "White Sand",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.185460+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 11,
+  "fields": {
+   "category": 1,
+   "sub_category": 5,
+   "name": "Stone Dust (Black)",
+   "unit": "cft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.185939+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 12,
+  "fields": {
+   "category": 2,
+   "sub_category": 6,
+   "name": "4\" Flyash Brick",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.186858+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 13,
+  "fields": {
+   "category": 2,
+   "sub_category": 6,
+   "name": "6\" Flyash Brick",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.187151+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 14,
+  "fields": {
+   "category": 2,
+   "sub_category": 7,
+   "name": "60mm Paver Block",
+   "unit": "ft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.187653+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 15,
+  "fields": {
+   "category": 2,
+   "sub_category": 7,
+   "name": "80mm Paver Block",
+   "unit": "m",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.188091+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 16,
+  "fields": {
+   "category": 2,
+   "sub_category": 8,
+   "name": "4\" Red Brick",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.188587+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 17,
+  "fields": {
+   "category": 2,
+   "sub_category": 8,
+   "name": "6\" Red Brick",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.188849+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 18,
+  "fields": {
+   "category": 3,
+   "sub_category": 9,
+   "name": "Cement (OPC/PPC)",
+   "unit": "bags",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.189518+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 19,
+  "fields": {
+   "category": 3,
+   "sub_category": 10,
+   "name": "Cover Block",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.190001+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 20,
+  "fields": {
+   "category": 3,
+   "sub_category": 11,
+   "name": "Gypsum Powder",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.190477+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 21,
+  "fields": {
+   "category": 3,
+   "sub_category": 12,
+   "name": "Birla White Cement",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.190944+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 22,
+  "fields": {
+   "category": 4,
+   "sub_category": 13,
+   "name": "Door Frame",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.191670+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 23,
+  "fields": {
+   "category": 4,
+   "sub_category": 14,
+   "name": "MS Gate (Mild Steel)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.192220+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 24,
+  "fields": {
+   "category": 4,
+   "sub_category": 15,
+   "name": "RCC Door Frame",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.192745+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 25,
+  "fields": {
+   "category": 4,
+   "sub_category": 15,
+   "name": "RCC Door Frame 1000mm x 2150mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.193028+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 26,
+  "fields": {
+   "category": 4,
+   "sub_category": 15,
+   "name": "RCC Door Frame 750mm x 2150mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.193316+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 27,
+  "fields": {
+   "category": 4,
+   "sub_category": 15,
+   "name": "RCC Door Frame 900mm x 2150mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.193601+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 28,
+  "fields": {
+   "category": 4,
+   "sub_category": 16,
+   "name": "Window Grill (Bathroom)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.194091+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 29,
+  "fields": {
+   "category": 4,
+   "sub_category": 16,
+   "name": "Window Grill (Bedroom)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.194346+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 30,
+  "fields": {
+   "category": 4,
+   "sub_category": 16,
+   "name": "Window Grill (Hall)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.194601+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 31,
+  "fields": {
+   "category": 4,
+   "sub_category": 16,
+   "name": "Window Grill (Kitchen)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.194865+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 32,
+  "fields": {
+   "category": 4,
+   "sub_category": 16,
+   "name": "Window Grill (Master Bedroom)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.195143+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 33,
+  "fields": {
+   "category": 5,
+   "sub_category": 17,
+   "name": "Insulation Tape (Electrical)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.195888+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 34,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "10mm 4 Core Cable",
+   "unit": "miter",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.196365+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 35,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "16mm 4 Core Cable",
+   "unit": "miter",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.196622+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 36,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "4mm Service Cable",
+   "unit": "m",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.196902+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 37,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "4mm Single Core Cable",
+   "unit": "m",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.197166+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 38,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "6mm 3 Core Cable",
+   "unit": "m",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.197430+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 39,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "6mm 4 Core Cable",
+   "unit": "miter",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.197688+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 40,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "Single Core Cable (Cu armoured-0.5mm-Red)",
+   "unit": "mtrs",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.197961+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 41,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "Single Core Cable (Cu armoured-0.5mm-black)",
+   "unit": "mtrs",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.198219+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 42,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "Single Core Cable (Cu armoured-0.75mm-Blue)",
+   "unit": "mtrs",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.198487+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 43,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "Single Core Cable (Cu armoured-0.75mm-Red)",
+   "unit": "mtrs",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.198740+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 44,
+  "fields": {
+   "category": 5,
+   "sub_category": 18,
+   "name": "Single Core Cable (Cu armoured-0.75mm-black)",
+   "unit": "mtrs",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.199020+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 45,
+  "fields": {
+   "category": 5,
+   "sub_category": 19,
+   "name": "Ceiling Fan",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.199528+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 46,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "2-Way Light Fixture",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.200027+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 47,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "20W Light",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.200287+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 48,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "4-Way Light Fixture",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.200559+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 49,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "Gate Lamp (Outdoor)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.200819+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 50,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "Gate Lamp Stand",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.201089+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 51,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "Halogen Flood Light",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.201346+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 52,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "Halogen Flood Light 200W",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.201610+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 53,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "LED Light 12W",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.201865+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 54,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "LED Light 15W",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.202129+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 55,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "LED Light 48W",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.202399+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 56,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "LED Light 50W",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.202672+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 57,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "POP (Recessed) Light 15W",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.202930+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 58,
+  "fields": {
+   "category": 5,
+   "sub_category": 20,
+   "name": "Street Light Bracket / Bend Pipe",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.203197+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 59,
+  "fields": {
+   "category": 5,
+   "sub_category": 21,
+   "name": "Microtek Battery 150AH/12V",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.203981+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 60,
+  "fields": {
+   "category": 5,
+   "sub_category": 21,
+   "name": "Microtek Inverter SP SW 1100/12V",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.204243+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 61,
+  "fields": {
+   "category": 5,
+   "sub_category": 22,
+   "name": "30 Amp Connector",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.204735+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 62,
+  "fields": {
+   "category": 5,
+   "sub_category": 22,
+   "name": "Bulb Holder",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.205005+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 63,
+  "fields": {
+   "category": 5,
+   "sub_category": 22,
+   "name": "Circuit Breaker (MCB)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.205266+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 64,
+  "fields": {
+   "category": 5,
+   "sub_category": 22,
+   "name": "Connection Board",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.205533+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 65,
+  "fields": {
+   "category": 5,
+   "sub_category": 22,
+   "name": "Meter Box (Electric)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.205795+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 66,
+  "fields": {
+   "category": 5,
+   "sub_category": 22,
+   "name": "Power Board (Distribution)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.206066+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 67,
+  "fields": {
+   "category": 5,
+   "sub_category": 22,
+   "name": "RCCB 63A 4-Pole",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.206320+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 68,
+  "fields": {
+   "category": 6,
+   "sub_category": 23,
+   "name": "CNC Sheet Toran (Decorative)",
+   "unit": "rft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.207023+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 69,
+  "fields": {
+   "category": 6,
+   "sub_category": 23,
+   "name": "Granite Sheet / Panel",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.207281+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 70,
+  "fields": {
+   "category": 6,
+   "sub_category": 24,
+   "name": "Kadappa Stone Slab 2'x3'",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.207765+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 71,
+  "fields": {
+   "category": 6,
+   "sub_category": 24,
+   "name": "Kadappa Stone Slab 4'x1.5'",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.208217+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 72,
+  "fields": {
+   "category": 6,
+   "sub_category": 24,
+   "name": "Kadappa Stone Slab 4'x2.5'",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.208656+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 73,
+  "fields": {
+   "category": 6,
+   "sub_category": 24,
+   "name": "Kadappa Stone Slab 6'x2.5'",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.208931+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 74,
+  "fields": {
+   "category": 6,
+   "sub_category": 25,
+   "name": "Colour Coated Roofing Sheet (H 4')",
+   "unit": "ft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.209776+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 75,
+  "fields": {
+   "category": 6,
+   "sub_category": 25,
+   "name": "Indian Roofing Sheet 23\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.210044+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 76,
+  "fields": {
+   "category": 7,
+   "sub_category": 26,
+   "name": "Shikanje (Formwork Clamp/Tie)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.210745+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 77,
+  "fields": {
+   "category": 7,
+   "sub_category": 27,
+   "name": "Tin Sheet (Formwork)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.211272+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 78,
+  "fields": {
+   "category": 7,
+   "sub_category": 28,
+   "name": "Shuttering Oil (Mould Release)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.211786+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 79,
+  "fields": {
+   "category": 8,
+   "sub_category": 29,
+   "name": "Anchor Bolt",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.212484+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 80,
+  "fields": {
+   "category": 8,
+   "sub_category": 29,
+   "name": "Nut Bolt 1-1/2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.212739+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 81,
+  "fields": {
+   "category": 8,
+   "sub_category": 29,
+   "name": "Nut Bolt 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.213007+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 82,
+  "fields": {
+   "category": 8,
+   "sub_category": 30,
+   "name": "MS Ball 2\" (Gate/Railing)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.213512+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 83,
+  "fields": {
+   "category": 8,
+   "sub_category": 31,
+   "name": "Padlock 65mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.214006+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 84,
+  "fields": {
+   "category": 8,
+   "sub_category": 32,
+   "name": "Hole Pass (MS/GI)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.214496+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 85,
+  "fields": {
+   "category": 8,
+   "sub_category": 33,
+   "name": "Bombay Nails 1-1/2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.214985+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 86,
+  "fields": {
+   "category": 8,
+   "sub_category": 33,
+   "name": "Bombay Nails 2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.215245+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 87,
+  "fields": {
+   "category": 8,
+   "sub_category": 33,
+   "name": "Bombay Nails 4\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.215516+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 88,
+  "fields": {
+   "category": 8,
+   "sub_category": 33,
+   "name": "Masonry Nails 2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.215780+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 89,
+  "fields": {
+   "category": 8,
+   "sub_category": 33,
+   "name": "Nails 1-1/2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.216049+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 90,
+  "fields": {
+   "category": 8,
+   "sub_category": 33,
+   "name": "Nails 2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.216310+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 91,
+  "fields": {
+   "category": 8,
+   "sub_category": 33,
+   "name": "Nails 3\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.216582+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 92,
+  "fields": {
+   "category": 8,
+   "sub_category": 34,
+   "name": "Cotter Pin (Split Pin)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.217084+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 93,
+  "fields": {
+   "category": 8,
+   "sub_category": 35,
+   "name": "Screw 19/6",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.217583+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 94,
+  "fields": {
+   "category": 8,
+   "sub_category": 35,
+   "name": "Screw 38/6",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.217856+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 95,
+  "fields": {
+   "category": 8,
+   "sub_category": 35,
+   "name": "Screw 75/8",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.218118+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 96,
+  "fields": {
+   "category": 8,
+   "sub_category": 36,
+   "name": "Chain Link Jali (Wire Mesh Fence)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.218614+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 97,
+  "fields": {
+   "category": 8,
+   "sub_category": 36,
+   "name": "Fencing Jali (Wire Mesh)",
+   "unit": "bundle",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.218886+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 98,
+  "fields": {
+   "category": 8,
+   "sub_category": 36,
+   "name": "Fencing Jali (Wire Mesh)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.219150+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 99,
+  "fields": {
+   "category": 9,
+   "sub_category": 37,
+   "name": "Floor Mop (Pocha)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.219852+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 100,
+  "fields": {
+   "category": 9,
+   "sub_category": 37,
+   "name": "Full Zadu (Coconut Fiber Broom)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.220114+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 101,
+  "fields": {
+   "category": 9,
+   "sub_category": 37,
+   "name": "Glass Cleaner",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.220386+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 102,
+  "fields": {
+   "category": 9,
+   "sub_category": 37,
+   "name": "Kharata (Grass Broom)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.220652+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 103,
+  "fields": {
+   "category": 10,
+   "sub_category": 38,
+   "name": "Drum (Storage)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.221352+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 104,
+  "fields": {
+   "category": 10,
+   "sub_category": 38,
+   "name": "Empty Bucket",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.221621+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 105,
+  "fields": {
+   "category": 10,
+   "sub_category": 39,
+   "name": "Black Polythene Sheet (Panni)",
+   "unit": "no",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.222123+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 106,
+  "fields": {
+   "category": 10,
+   "sub_category": 39,
+   "name": "Gunny Bag (Jute Sack)",
+   "unit": "bags",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.222378+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 107,
+  "fields": {
+   "category": 10,
+   "sub_category": 39,
+   "name": "Tarpaulin Sheet (Tripal)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.222638+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 108,
+  "fields": {
+   "category": 10,
+   "sub_category": 39,
+   "name": "White Polythene Sheet (Panni)",
+   "unit": "bundle",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.222908+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 109,
+  "fields": {
+   "category": 10,
+   "sub_category": 40,
+   "name": "LPG Gas Cylinder",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.223408+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 110,
+  "fields": {
+   "category": 10,
+   "sub_category": 41,
+   "name": "Line Doori (Nylon String)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.223910+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 111,
+  "fields": {
+   "category": 10,
+   "sub_category": 41,
+   "name": "Narial Rassi (Coconut Coir Rope)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.224169+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 112,
+  "fields": {
+   "category": 10,
+   "sub_category": 42,
+   "name": "MS Portable Shade",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.224658+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 113,
+  "fields": {
+   "category": 10,
+   "sub_category": 42,
+   "name": "Storage Container",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.224924+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 114,
+  "fields": {
+   "category": 10,
+   "sub_category": 42,
+   "name": "Water Tank Stand (MS)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.225187+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 115,
+  "fields": {
+   "category": 10,
+   "sub_category": 43,
+   "name": "Brown Packing Tape",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.225681+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 116,
+  "fields": {
+   "category": 12,
+   "sub_category": 45,
+   "name": "Acrylic Chemical (Paint Additive)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.228976+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 117,
+  "fields": {
+   "category": 12,
+   "sub_category": 46,
+   "name": "White Coat Acid (Surface Cleaner)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.229484+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 118,
+  "fields": {
+   "category": 12,
+   "sub_category": 47,
+   "name": "Platina Weather Coat (Outer White)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.230020+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 119,
+  "fields": {
+   "category": 12,
+   "sub_category": 47,
+   "name": "Tarnish Gold Exterior Paint",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.230280+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 120,
+  "fields": {
+   "category": 12,
+   "sub_category": 48,
+   "name": "Chana Powder (White)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.230773+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 121,
+  "fields": {
+   "category": 12,
+   "sub_category": 49,
+   "name": "Fugga (Joint Filler / Putty)",
+   "unit": "pk",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.231264+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 122,
+  "fields": {
+   "category": 12,
+   "sub_category": 50,
+   "name": "Play Crush Interior Emulsion Paint",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.231757+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 123,
+  "fields": {
+   "category": 12,
+   "sub_category": 50,
+   "name": "Wall Compound White Paint",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.232027+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 124,
+  "fields": {
+   "category": 12,
+   "sub_category": 50,
+   "name": "Walmasta Emulsion Paint 2322",
+   "unit": "bkt",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.232291+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 125,
+  "fields": {
+   "category": 12,
+   "sub_category": 50,
+   "name": "Walmasta Emulsion Paint 2991",
+   "unit": "bkt",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.232559+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 126,
+  "fields": {
+   "category": 12,
+   "sub_category": 50,
+   "name": "Walmasta Emulsion Paint 4227",
+   "unit": "bkt",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.232815+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 127,
+  "fields": {
+   "category": 12,
+   "sub_category": 50,
+   "name": "Walmasta Emulsion Paint White (Ceiling)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.233087+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 128,
+  "fields": {
+   "category": 12,
+   "sub_category": 51,
+   "name": "Black Oil Paint",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.233587+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 129,
+  "fields": {
+   "category": 12,
+   "sub_category": 51,
+   "name": "Oil Paint (Golden)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.233851+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 130,
+  "fields": {
+   "category": 12,
+   "sub_category": 51,
+   "name": "White Oil Paint",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.234120+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 131,
+  "fields": {
+   "category": 12,
+   "sub_category": 52,
+   "name": "Paint (General Purpose)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.234643+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 132,
+  "fields": {
+   "category": 12,
+   "sub_category": 53,
+   "name": "Exterior Wall Primer",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.235153+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 133,
+  "fields": {
+   "category": 12,
+   "sub_category": 53,
+   "name": "Interior Wall Primer",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.235444+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 134,
+  "fields": {
+   "category": 12,
+   "sub_category": 53,
+   "name": "Platina Walmasta Exterior Primer",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.235711+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 135,
+  "fields": {
+   "category": 12,
+   "sub_category": 53,
+   "name": "Red Oxide Primer (Samrat)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.235983+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 136,
+  "fields": {
+   "category": 12,
+   "sub_category": 54,
+   "name": "Turpentine Oil",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.236479+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 137,
+  "fields": {
+   "category": 12,
+   "sub_category": 55,
+   "name": "Stainer Gold Tarnish",
+   "unit": "pk",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.236979+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 138,
+  "fields": {
+   "category": 12,
+   "sub_category": 56,
+   "name": "Acrylic Wall Putty",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.237481+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 139,
+  "fields": {
+   "category": 12,
+   "sub_category": 56,
+   "name": "JK Wall Putty (Interior)",
+   "unit": "bags",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.237740+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 140,
+  "fields": {
+   "category": 12,
+   "sub_category": 56,
+   "name": "Outer Wall Putty (Exterior)",
+   "unit": "bags",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.238013+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 141,
+  "fields": {
+   "category": 13,
+   "sub_category": 57,
+   "name": "Pipe Joint Compound",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.238703+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 142,
+  "fields": {
+   "category": 13,
+   "sub_category": 57,
+   "name": "Pipe Lubricant",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.238974+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 143,
+  "fields": {
+   "category": 13,
+   "sub_category": 57,
+   "name": "Plastic Tap",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.239234+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 144,
+  "fields": {
+   "category": 13,
+   "sub_category": 57,
+   "name": "Teflon Tape (Thread Seal)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.239503+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 145,
+  "fields": {
+   "category": 13,
+   "sub_category": 57,
+   "name": "Water Tank Filter",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.239768+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 146,
+  "fields": {
+   "category": 13,
+   "sub_category": 58,
+   "name": "PVC Solvent Cement",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.240273+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 147,
+  "fields": {
+   "category": 13,
+   "sub_category": 58,
+   "name": "Violite (PVC Pipe Adhesive)",
+   "unit": "ml",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.240712+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 148,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Angle Cock (CP)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.241222+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 149,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "CP Cap (Chrome Plated)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.241489+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 150,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "CP Floor Jali 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.241932+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 151,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Connection Pipe (Flexible) 18\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.242202+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 152,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Connection Pipe (Flexible) 24\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.242478+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 153,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Flush Cock 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.242740+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 154,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Flush Cock Knob",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.243008+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 155,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Flush Cock Upper Part",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.243267+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 156,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Long Body Bib Cock (CP)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.243545+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 157,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Mixer Tap (CP)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.243807+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 158,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Pillar Cock (CP)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.244088+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 159,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Seat Cock (Murga Cock)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.244362+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 160,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Short Body Bib Cock (CP)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.244641+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 161,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Shower Arm (CP)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.244916+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 162,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Shower Head",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.245194+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 163,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Two-Way Bib Cock (CP)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.245473+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 164,
+  "fields": {
+   "category": 13,
+   "sub_category": 59,
+   "name": "Waste Coupling",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.245738+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 165,
+  "fields": {
+   "category": 13,
+   "sub_category": 60,
+   "name": "CPVC Brass Elbow 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.246430+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 166,
+  "fields": {
+   "category": 13,
+   "sub_category": 60,
+   "name": "CPVC Bush 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.246695+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 167,
+  "fields": {
+   "category": 13,
+   "sub_category": 60,
+   "name": "CPVC Elbow 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.246968+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 168,
+  "fields": {
+   "category": 13,
+   "sub_category": 60,
+   "name": "CPVC Socket 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.247232+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 169,
+  "fields": {
+   "category": 13,
+   "sub_category": 60,
+   "name": "CPVC Tee 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.247505+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 170,
+  "fields": {
+   "category": 13,
+   "sub_category": 61,
+   "name": "CPVC Pipe 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.248170+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 171,
+  "fields": {
+   "category": 13,
+   "sub_category": 61,
+   "name": "CPVC Pipe 3/4\"",
+   "unit": "ft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.248438+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 172,
+  "fields": {
+   "category": 13,
+   "sub_category": 62,
+   "name": "Chamber Cover (FRP) 2'x2'",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.248928+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 173,
+  "fields": {
+   "category": 13,
+   "sub_category": 62,
+   "name": "Chamber Cover 18\"x18\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.249184+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 174,
+  "fields": {
+   "category": 13,
+   "sub_category": 62,
+   "name": "Chamber Cover 2'x2'",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.249453+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 175,
+  "fields": {
+   "category": 13,
+   "sub_category": 62,
+   "name": "Plasto Chamber (Prefab)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.249712+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 176,
+  "fields": {
+   "category": 13,
+   "sub_category": 62,
+   "name": "Round Chamber Riser",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.249980+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 177,
+  "fields": {
+   "category": 13,
+   "sub_category": 62,
+   "name": "Round Manhole Chamber",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.250238+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 178,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC Clamp 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.250741+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 179,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC Clamp 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.251015+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 180,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC Elbow 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.251451+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 181,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC End Cap 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.251710+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 182,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC FTA (Female Threaded Adapter) 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.251979+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 183,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC Offset 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.252244+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 184,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC Shoe Bend 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.252516+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 185,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC Socket 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.252774+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 186,
+  "fields": {
+   "category": 13,
+   "sub_category": 63,
+   "name": "PVC Tee 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.253044+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 187,
+  "fields": {
+   "category": 13,
+   "sub_category": 64,
+   "name": "Curing Pipe 3/4\"x4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.253539+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 188,
+  "fields": {
+   "category": 13,
+   "sub_category": 64,
+   "name": "PVC Pipe 1-1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.253797+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 189,
+  "fields": {
+   "category": 13,
+   "sub_category": 64,
+   "name": "PVC Pipe 1-1/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.254068+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 190,
+  "fields": {
+   "category": 13,
+   "sub_category": 64,
+   "name": "PVC Pipe 110mm",
+   "unit": "no",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.254331+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 191,
+  "fields": {
+   "category": 13,
+   "sub_category": 64,
+   "name": "PVC Pipe 4\" (6 kg)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.254597+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 192,
+  "fields": {
+   "category": 13,
+   "sub_category": 64,
+   "name": "PVC Pipe 40mm (6 kg)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.254859+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 193,
+  "fields": {
+   "category": 13,
+   "sub_category": 65,
+   "name": "Plastic Clamp 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.255355+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 194,
+  "fields": {
+   "category": 13,
+   "sub_category": 66,
+   "name": "Brass FTA 1-1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.255860+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 195,
+  "fields": {
+   "category": 13,
+   "sub_category": 66,
+   "name": "Brass MTA 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.256133+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 196,
+  "fields": {
+   "category": 13,
+   "sub_category": 66,
+   "name": "Extension Nipple 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.256399+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 197,
+  "fields": {
+   "category": 13,
+   "sub_category": 66,
+   "name": "Extension Nipple 1-1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.256668+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 198,
+  "fields": {
+   "category": 13,
+   "sub_category": 67,
+   "name": "1 HP Water Pump (Falcon)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.257161+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 199,
+  "fields": {
+   "category": 13,
+   "sub_category": 67,
+   "name": "5 HP Borewell Water Pump",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.257432+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 200,
+  "fields": {
+   "category": 13,
+   "sub_category": 68,
+   "name": "RCC Hume Pipe 300mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.257926+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 201,
+  "fields": {
+   "category": 13,
+   "sub_category": 68,
+   "name": "RCC Hume Pipe 450mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.258183+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 202,
+  "fields": {
+   "category": 13,
+   "sub_category": 68,
+   "name": "RCC Hume Pipe 600mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.258448+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 203,
+  "fields": {
+   "category": 13,
+   "sub_category": 68,
+   "name": "RCC Pipe Collar 450mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.258705+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 204,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Bend 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.259196+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 205,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Bend 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.259459+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 206,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Clamp 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.259721+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 207,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Clamp 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.259998+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 208,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Collar 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.260263+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 209,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Collar 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.260536+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 210,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Cowl 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.260985+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 211,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Cowl 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.261271+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 212,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Door Bend 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.261719+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 213,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Door Tee 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.261996+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 214,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR End Cap 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.262259+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 215,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Fitting 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.262529+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 216,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Nahani Trap 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.262790+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 217,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Offset 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.263060+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 218,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Pipe 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.263327+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 219,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Pipe 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.263603+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 220,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Shoe Bend 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.263867+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 221,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Shoe Bend 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.264306+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 222,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Tee 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.264577+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 223,
+  "fields": {
+   "category": 13,
+   "sub_category": 69,
+   "name": "SWR Tee 4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.264841+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 224,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "Commode (White)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.265340+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 225,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "Commode Cover / Seat",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.265603+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 226,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "Flushing Cistern (White)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.265866+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 227,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "Kitchen Sink (Stainless Steel) 24\"x18\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.266128+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 228,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "P-Trap",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.266396+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 229,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "Vetra / Bidet Spray",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.266667+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 230,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "Wash Basin (Half Round) 12\"x18\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.266934+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 231,
+  "fields": {
+   "category": 13,
+   "sub_category": 70,
+   "name": "Wash Basin (Square) 12\"x16\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.267198+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 232,
+  "fields": {
+   "category": 13,
+   "sub_category": 71,
+   "name": "Bio Septic Tank 1000 Ltr",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.267696+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 233,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "Half Turn Valve (UPVC) 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.268188+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 234,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "Step-Over Bend",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.268458+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 235,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "Step-Over Bend 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.268719+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 236,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Ball Valve 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.268989+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 237,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Ball Valve 1-1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.269250+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 238,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Ball Valve 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.269519+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 239,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Brass Elbow 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.269778+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 240,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Brass Elbow 3/4\" x 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.270216+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 241,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Brass FTA (Female Threaded Adapter) 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.270490+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 242,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Brass FTA (Female Threaded Adapter) 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.270748+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 243,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Brass MTA (Male Threaded Adapter) 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.271017+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 244,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Brass Tee 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.271277+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 245,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Bush",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.271544+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 246,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Bush 1\" x 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.271806+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 247,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Bush 1-1/2\" x 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.272081+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 248,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Bush 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.272344+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 249,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Clamp 1-1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.272609+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 250,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Elbow 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.272874+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 251,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Elbow 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.273137+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 252,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Elbow 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.273582+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 253,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC End Cap 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.273844+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 254,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC End Cap 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.274108+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 255,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC End Plug 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.274372+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 256,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC FTA (Female Threaded Adapter) 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.274634+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 257,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC FTA (Female Threaded Adapter) 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.274901+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 258,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Offset 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.275357+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 259,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Plain Bend 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.275802+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 260,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Reducer 1\" x 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.276083+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 261,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Reducer 1-1/2\" x 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.276352+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 262,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Reducer 1-1/2\" x 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.276620+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 263,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Socket 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.276891+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 264,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Socket 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.277389+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 265,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Tank Nipple 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.278043+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 266,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Tank Nipple 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.278325+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 267,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Tee 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.279028+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 268,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Tee 1\" x 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.279405+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 269,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Tee 1-1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.279709+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 270,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Tee 1-1/2\" x 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.279982+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 271,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Tee 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.280250+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 272,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Union 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.280518+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 273,
+  "fields": {
+   "category": 13,
+   "sub_category": 72,
+   "name": "UPVC Union 1-1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.280770+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 274,
+  "fields": {
+   "category": 13,
+   "sub_category": 73,
+   "name": "UPVC Pipe 1\"",
+   "unit": "no",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.281336+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 275,
+  "fields": {
+   "category": 13,
+   "sub_category": 73,
+   "name": "UPVC Pipe 1\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.281586+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 276,
+  "fields": {
+   "category": 13,
+   "sub_category": 73,
+   "name": "UPVC Pipe 1/2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.281839+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 277,
+  "fields": {
+   "category": 13,
+   "sub_category": 73,
+   "name": "UPVC Pipe 1/2\"",
+   "unit": "ft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.282252+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 278,
+  "fields": {
+   "category": 13,
+   "sub_category": 73,
+   "name": "UPVC Pipe 3/4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.282692+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 279,
+  "fields": {
+   "category": 13,
+   "sub_category": 74,
+   "name": "Water Tank 6-Layer 1000 Ltr",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.283183+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 280,
+  "fields": {
+   "category": 14,
+   "sub_category": 75,
+   "name": "Gum Boots (Safety)",
+   "unit": "pairs",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.284049+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 281,
+  "fields": {
+   "category": 14,
+   "sub_category": 75,
+   "name": "Hand Gloves (Safety)",
+   "unit": "pairs",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.284294+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 282,
+  "fields": {
+   "category": 14,
+   "sub_category": 75,
+   "name": "Safety Helmet Set",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.284541+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 283,
+  "fields": {
+   "category": 15,
+   "sub_category": 76,
+   "name": "Almirah (MS / Steel)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.285199+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 284,
+  "fields": {
+   "category": 15,
+   "sub_category": 76,
+   "name": "Almirah (Plywood)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.285454+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 285,
+  "fields": {
+   "category": 15,
+   "sub_category": 76,
+   "name": "Diwan (Day Bed)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.285698+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 286,
+  "fields": {
+   "category": 15,
+   "sub_category": 76,
+   "name": "Sofa",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.285948+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 287,
+  "fields": {
+   "category": 16,
+   "sub_category": 77,
+   "name": "MS Angle 25x3mm",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.286599+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 288,
+  "fields": {
+   "category": 16,
+   "sub_category": 77,
+   "name": "MS Angle 25x5mm",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.286842+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 289,
+  "fields": {
+   "category": 16,
+   "sub_category": 77,
+   "name": "MS Angle 32x5mm",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.287085+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 290,
+  "fields": {
+   "category": 16,
+   "sub_category": 77,
+   "name": "MS Angle 35x5mm",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.287328+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 291,
+  "fields": {
+   "category": 16,
+   "sub_category": 78,
+   "name": "MS Base Plate",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.287787+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 292,
+  "fields": {
+   "category": 16,
+   "sub_category": 79,
+   "name": "C-Channel 2\"x4\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.288259+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 293,
+  "fields": {
+   "category": 16,
+   "sub_category": 79,
+   "name": "C-Channel 3\"x1.5\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.288507+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 294,
+  "fields": {
+   "category": 16,
+   "sub_category": 80,
+   "name": "MS Column Patti (Formwork Strip)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.288988+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 295,
+  "fields": {
+   "category": 16,
+   "sub_category": 80,
+   "name": "MS Column Patti (Formwork Strip)",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.289231+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 296,
+  "fields": {
+   "category": 16,
+   "sub_category": 80,
+   "name": "MS Flat Patti 25x5mm",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.289474+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 297,
+  "fields": {
+   "category": 16,
+   "sub_category": 80,
+   "name": "MS Patti 25x5mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.289729+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 298,
+  "fields": {
+   "category": 16,
+   "sub_category": 81,
+   "name": "D-Pipe (MS)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.290199+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 299,
+  "fields": {
+   "category": 16,
+   "sub_category": 81,
+   "name": "MS Pipe 2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.290440+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 300,
+  "fields": {
+   "category": 16,
+   "sub_category": 81,
+   "name": "MS Pipe 2\"x2\"",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.290688+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 301,
+  "fields": {
+   "category": 16,
+   "sub_category": 82,
+   "name": "MS Square Bar 8mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.291157+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 302,
+  "fields": {
+   "category": 16,
+   "sub_category": 83,
+   "name": "MS Square Pipe 1.5\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.291617+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 303,
+  "fields": {
+   "category": 16,
+   "sub_category": 83,
+   "name": "MS Square Pipe 2\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.292039+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 304,
+  "fields": {
+   "category": 16,
+   "sub_category": 83,
+   "name": "MS Square Pipe 3\"",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.292452+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 305,
+  "fields": {
+   "category": 17,
+   "sub_category": 84,
+   "name": "Barbed Wire",
+   "unit": "bundle",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.293115+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 306,
+  "fields": {
+   "category": 17,
+   "sub_category": 85,
+   "name": "Binding Wire (GI)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.293592+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 307,
+  "fields": {
+   "category": 17,
+   "sub_category": 86,
+   "name": "TMT Bar 08MM",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.294090+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 308,
+  "fields": {
+   "category": 17,
+   "sub_category": 86,
+   "name": "TMT Bar 10MM",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.294352+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 309,
+  "fields": {
+   "category": 17,
+   "sub_category": 86,
+   "name": "TMT Bar 10mm",
+   "unit": "bundle",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.294619+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 310,
+  "fields": {
+   "category": 17,
+   "sub_category": 86,
+   "name": "TMT Bar 12MM",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.294873+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 311,
+  "fields": {
+   "category": 17,
+   "sub_category": 86,
+   "name": "TMT Bar 12mm",
+   "unit": "bundle",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.295126+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 312,
+  "fields": {
+   "category": 17,
+   "sub_category": 86,
+   "name": "TMT Bar 8mm",
+   "unit": "bundle",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.295382+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 313,
+  "fields": {
+   "category": 18,
+   "sub_category": 87,
+   "name": "Bathroom Floor Tiles",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.296050+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 314,
+  "fields": {
+   "category": 18,
+   "sub_category": 87,
+   "name": "Floor Tiles 32\"x32\"",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.296305+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 315,
+  "fields": {
+   "category": 18,
+   "sub_category": 87,
+   "name": "Parking Tiles",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.296560+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 316,
+  "fields": {
+   "category": 18,
+   "sub_category": 88,
+   "name": "Joint Filler (Ivory)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.297027+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 317,
+  "fields": {
+   "category": 18,
+   "sub_category": 88,
+   "name": "Joint Filler (White)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.297271+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 318,
+  "fields": {
+   "category": 18,
+   "sub_category": 88,
+   "name": "Tile Grout Powder (Black)",
+   "unit": "pk",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.297531+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 319,
+  "fields": {
+   "category": 18,
+   "sub_category": 88,
+   "name": "Tile Grout Powder (White)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.297771+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 320,
+  "fields": {
+   "category": 18,
+   "sub_category": 89,
+   "name": "Artificial Green Lawn",
+   "unit": "sqft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.298242+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 321,
+  "fields": {
+   "category": 18,
+   "sub_category": 90,
+   "name": "Bathroom Highlighter Tiles",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.298732+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 322,
+  "fields": {
+   "category": 18,
+   "sub_category": 90,
+   "name": "Bathroom Wall Tiles (Light)",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.298974+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 323,
+  "fields": {
+   "category": 18,
+   "sub_category": 90,
+   "name": "Kitchen Wall Tiles (Light)",
+   "unit": "box",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.299226+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 324,
+  "fields": {
+   "category": 19,
+   "sub_category": 91,
+   "name": "4\" Paint Brush",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.299879+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 325,
+  "fields": {
+   "category": 19,
+   "sub_category": 91,
+   "name": "Tar Application Brush",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.300135+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 326,
+  "fields": {
+   "category": 19,
+   "sub_category": 92,
+   "name": "Rubber Container (Construction)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.300615+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 327,
+  "fields": {
+   "category": 19,
+   "sub_category": 93,
+   "name": "4\" Cutter (Angle Grinder)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.301075+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 328,
+  "fields": {
+   "category": 19,
+   "sub_category": 93,
+   "name": "5\" Wood Cutting Wheel (Grinder Disc)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.301504+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 329,
+  "fields": {
+   "category": 19,
+   "sub_category": 93,
+   "name": "Cutter Blade 4\" (Ply/Metal)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.301748+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 330,
+  "fields": {
+   "category": 19,
+   "sub_category": 94,
+   "name": "Concrete Drill Bit 6mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.302385+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 331,
+  "fields": {
+   "category": 19,
+   "sub_category": 95,
+   "name": "Channi (Construction Sieve)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.302851+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 332,
+  "fields": {
+   "category": 19,
+   "sub_category": 95,
+   "name": "Tar Ghasni (Rubbing Tool)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.303106+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 333,
+  "fields": {
+   "category": 19,
+   "sub_category": 96,
+   "name": "Level Pipe (Water Level)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.303580+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 334,
+  "fields": {
+   "category": 19,
+   "sub_category": 96,
+   "name": "Steel Measurement Tape 30m",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.303824+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 335,
+  "fields": {
+   "category": 19,
+   "sub_category": 97,
+   "name": "8\" Putty Knife",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.304311+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 336,
+  "fields": {
+   "category": 19,
+   "sub_category": 98,
+   "name": "Angle Grinder",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.304777+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 337,
+  "fields": {
+   "category": 19,
+   "sub_category": 98,
+   "name": "Drill Machine",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.305030+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 338,
+  "fields": {
+   "category": 19,
+   "sub_category": 98,
+   "name": "Grass Cutting Machine",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.305282+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 339,
+  "fields": {
+   "category": 19,
+   "sub_category": 98,
+   "name": "Welding Machine",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.305537+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 340,
+  "fields": {
+   "category": 19,
+   "sub_category": 99,
+   "name": "Machine Armature (Motor Part)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.305994+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 341,
+  "fields": {
+   "category": 19,
+   "sub_category": 100,
+   "name": "Diesel Needle Vibrator 30mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.306490+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 342,
+  "fields": {
+   "category": 19,
+   "sub_category": 100,
+   "name": "Diesel Needle Vibrator 60mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.306741+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 343,
+  "fields": {
+   "category": 19,
+   "sub_category": 100,
+   "name": "Electric Needle Vibrator",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.307002+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 344,
+  "fields": {
+   "category": 19,
+   "sub_category": 100,
+   "name": "Needle Vibrator 50mm",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.307248+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 345,
+  "fields": {
+   "category": 19,
+   "sub_category": 100,
+   "name": "Plate Vibrator (Compactor)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.307508+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 346,
+  "fields": {
+   "category": 20,
+   "sub_category": 101,
+   "name": "Araldite (Epoxy Adhesive)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.308152+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 347,
+  "fields": {
+   "category": 20,
+   "sub_category": 101,
+   "name": "Epoxy Adhesive",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.308416+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 348,
+  "fields": {
+   "category": 20,
+   "sub_category": 101,
+   "name": "M-Seal (White Epoxy Compound)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.308660+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 349,
+  "fields": {
+   "category": 20,
+   "sub_category": 101,
+   "name": "M-Seal (White Epoxy Compound)",
+   "unit": "ml",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.308906+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 350,
+  "fields": {
+   "category": 20,
+   "sub_category": 102,
+   "name": "Nitobond Chemical (Bonding Agent)",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.309399+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 351,
+  "fields": {
+   "category": 20,
+   "sub_category": 103,
+   "name": "Crack Seal Compound",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.309862+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 352,
+  "fields": {
+   "category": 20,
+   "sub_category": 104,
+   "name": "GI Tar (Bitumen/Coal Tar)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.310341+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 353,
+  "fields": {
+   "category": 20,
+   "sub_category": 105,
+   "name": "DeWalt PV50 Pro Chemical",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.310849+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 354,
+  "fields": {
+   "category": 20,
+   "sub_category": 105,
+   "name": "Fosroc Hydroproof Chemical",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.311109+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 355,
+  "fields": {
+   "category": 20,
+   "sub_category": 105,
+   "name": "Master CRPE M81 Chemical",
+   "unit": "L",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.311551+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 356,
+  "fields": {
+   "category": 21,
+   "sub_category": 106,
+   "name": "Plywood Sheet 4'x8'",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.312211+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 357,
+  "fields": {
+   "category": 21,
+   "sub_category": 106,
+   "name": "Wooden Plyboard (Biason 8mm)",
+   "unit": "sqft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.312458+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 358,
+  "fields": {
+   "category": 21,
+   "sub_category": 107,
+   "name": "Balli (Wooden Scaffold Pole)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.312949+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 359,
+  "fields": {
+   "category": 21,
+   "sub_category": 107,
+   "name": "Bamboo Tatve (Bamboo Mat)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.313200+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 360,
+  "fields": {
+   "category": 21,
+   "sub_category": 107,
+   "name": "Batten 8 ft (Wooden Strip)",
+   "unit": "nos",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.313461+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 361,
+  "fields": {
+   "category": 21,
+   "sub_category": 107,
+   "name": "Challi Bamboo (Bamboo Poles)",
+   "unit": "bundle",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.313712+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 362,
+  "fields": {
+   "category": 21,
+   "sub_category": 107,
+   "name": "Laffa (Wooden Plank)",
+   "unit": "kg",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.313970+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ },
+ {
+  "model": "materials.material",
+  "pk": 363,
+  "fields": {
+   "category": 21,
+   "sub_category": 107,
+   "name": "Rafter (Wooden Beam)",
+   "unit": "rft",
+   "reorder_point": 10,
+   "created_at": "2026-09-11T17:37:14.314211+00:00",
+   "created_by": null,
+   "is_deleted": false,
+   "deleted_by": null,
+   "deleted_at": null
+  }
+ }
+]

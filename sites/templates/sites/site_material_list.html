@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+
+{% block title %}{{ site.name }} | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">{{ site.name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {# Page header #}
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+            <h1 class="text-charcoal">{{ site.name }}</h1>
+            <p class="text-sm text-muted mt-1 flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+                {{ site.location }}
+            </p>
+        </div>
+        {% if can_edit %}
+        <a href="{% url 'materials:create' %}?next={% url 'sites:detail' site.id %}"
+           class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors duration-150">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add New Material
+        </a>
+        {% endif %}
+    </div>
+
+    {# Search bar: live filters as you type, no enter needed. The form is a #}
+    {# no-JS fallback (server filters on ?q=); JS intercepts submit instead. #}
+    <form method="get" id="material-search-form" class="relative" autocomplete="off">
+        <i data-lucide="search" class="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+        <input type="text" name="q" id="material-search" value="{{ q }}"
+               placeholder="Type to search materials..."
+               autocomplete="off"
+               class="w-full pl-9 pr-9 py-2 bg-surface border border-subtle rounded-md text-sm
+                      text-charcoal placeholder:text-muted
+                      focus:outline-none focus:border-accent focus:border-accent focus:ring-2 focus:ring-accent/20">
+        <button type="button" id="material-search-clear" title="Clear search"
+                class="hidden absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 items-center justify-center rounded-md text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+            <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+        </button>
+    </form>
+
+    {# Live-search results (JS renders ranked matches here from the index #}
+    {# below, across the whole catalog | not just this page). Hidden until #}
+    {# you type. Tapping a row opens that material directly. #}
+    <div id="search-results" class="hidden space-y-2"></div>
+
+    {# Materials grouped: Category -> SubCategory -> variants, loose first #}
+    {% if category_groups %}
+    <div class="space-y-3" id="paged-groups">
+        {% for group in category_groups %}
+        <details class="group bg-surface border border-subtle rounded-lg overflow-hidden" data-cat-block data-name="{{ group.category.name|escape }}" {% if q %}open{% endif %}>
+            <summary class="flex items-center justify-between gap-3 cursor-pointer px-4 py-3.5 md:px-5 hover:bg-gray-50 transition-colors select-none">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <i data-lucide="folder" class="w-4 h-4 text-muted group-open:text-accent transition-colors flex-shrink-0"></i>
+                    <h2 class="text-charcoal truncate">{{ group.category.name }}</h2>
+                    <span class="text-xs text-muted flex-shrink-0">{{ group.total }} material{{ group.total|pluralize }}</span>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0">
+                {% if is_admin %}
+                <form method="post" action="{% url 'materials:category_delete' group.category.id %}"
+                      class="hidden md:inline" onclick="event.stopPropagation();" onsubmit="return confirm('Delete category {{ group.category.name|escapejs }}? Blocked while it still holds materials.');">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" title="Delete category"
+                            class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                <form method="post" action="{% url 'materials:category_delete' group.category.id %}"
+                      class="inline md:hidden" onclick="event.stopPropagation();" onsubmit="return confirm('Delete category {{ group.category.name|escapejs }}? Blocked while it still holds materials.');">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{{ request.path }}">
+                    <button type="submit" title="Delete category"
+                            class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </form>
+                {% endif %}
+                </div>
+            </summary>
+            <div class="border-t border-subtle divide-y divide-subtle">
+                {% for row in group.loose %}
+                {% include "sites/_material_row.html" with row=row %}
+                {% endfor %}
+                {% for sub in group.subs %}
+                <details class="group/sub" data-sub-block data-name="{{ sub.sub.name|escape }}" {% if q %}open{% endif %}>
+                    <summary class="flex items-center justify-between gap-3 cursor-pointer pl-4 pr-4 py-3 md:pl-5 md:pr-5 md:py-2.5 hover:bg-gray-50 transition-colors select-none">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <i data-lucide="layers" class="w-3.5 h-3.5 text-muted group-open/sub:text-accent transition-colors flex-shrink-0"></i>
+                            <span class="text-sm font-medium text-charcoal truncate">{{ sub.sub.name }}</span>
+                            <span class="text-xs text-muted flex-shrink-0">{{ sub.rows|length }} variant{{ sub.rows|length|pluralize }}</span>
+                        </div>
+                        <div class="flex items-center gap-1 flex-shrink-0">
+                        {% if is_admin %}
+                        <form method="post" action="{% url 'materials:subcategory_delete' sub.sub.id %}"
+                              class="hidden md:inline" onclick="event.stopPropagation();" onsubmit="return confirm('Delete sub-category {{ sub.sub.name|escapejs }}? Blocked while materials still use it.');">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button type="submit" title="Delete sub-category"
+                                    class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                        <form method="post" action="{% url 'materials:subcategory_delete' sub.sub.id %}"
+                              class="inline md:hidden" onclick="event.stopPropagation();" onsubmit="return confirm('Delete sub-category {{ sub.sub.name|escapejs }}? Blocked while materials still use it.');">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{{ request.path }}">
+                            <button type="submit" title="Delete sub-category"
+                                    class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                        {% endif %}
+                        </div>
+                    </summary>
+                    <div class="border-t border-subtle divide-y divide-subtle bg-gray-50/40">
+                        {% for row in sub.rows %}
+                        {% include "sites/_material_row.html" with row=row indent=True %}
+                        {% endfor %}
+                    </div>
+                </details>
+                {% endfor %}
+            </div>
+        </details>
+        {% endfor %}
+    </div>
+    {% if is_paged and page_obj.paginator.num_pages > 1 %}
+    <nav id="pagination-nav" class="flex items-center justify-between gap-3 pt-1">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}"
+           class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+            ← Prev
+        </a>
+        {% else %}
+        <span class="inline-flex items-center px-4 py-2 min-h-[44px] text-sm text-muted opacity-50">← Prev</span>
+        {% endif %}
+        <span class="text-xs text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}"
+           class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+            Next →
+        </a>
+        {% else %}
+        <span class="inline-flex items-center px-4 py-2 min-h-[44px] text-sm text-muted opacity-50">Next →</span>
+        {% endif %}
+    </nav>
+    {% endif %}
+    {% else %}
+    <div class="bg-surface border border-subtle rounded-lg p-12 text-center">
+        <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center mx-auto mb-3">
+            <i data-lucide="package-open" class="w-6 h-6 text-muted"></i>
+        </div>
+        {% if q %}
+        <h3 class="text-[15px] font-semibold text-charcoal mb-1">No materials match "{{ q }}"</h3>
+        <p class="text-sm text-muted mb-5">Try a different search term.</p>
+        <a href="{% url 'sites:detail' site.id %}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+            <i data-lucide="x" class="w-4 h-4"></i>
+            Clear search
+        </a>
+        {% else %}
+        <h3 class="text-[15px] font-semibold text-charcoal mb-1">No materials in the catalog yet</h3>
+        <p class="text-sm text-muted mb-5">Add materials to start tracking stock in the shop.</p>
+        {% if can_edit %}
+        <a href="{% url 'materials:create' %}?next={% url 'sites:detail' site.id %}"
+           class="hidden md:inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add New Material
+        </a>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% endif %}
+    {# Full-catalog index for the live search above (JSON, not rows). Sits #}
+    {# outside the if/else so search keeps working on empty result pages. #}
+    {{ mat_index|json_script:"mat-index" }}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    var form = document.getElementById('material-search-form');
+    var input = document.getElementById('material-search');
+    var clearBtn = document.getElementById('material-search-clear');
+    var results = document.getElementById('search-results');
+    var paged = document.getElementById('paged-groups');
+    var pagenav = document.getElementById('pagination-nav');
+    var indexTag = document.getElementById('mat-index');
+    if (!form || !input || !results || !indexTag) return;
+
+    // Whole-catalog index from JSON: the page only renders one slice of
+    // categories now, but searching here covers all 400+ materials.
+    var items = [];
+    try {
+        items = JSON.parse(indexTag.textContent) || [];
+    } catch (e) { items = []; }
+    items.forEach(function (it) { it.low = (it.name || '').toLowerCase(); });
+    if (!items.length) return;
+
+    var currentList = [];
+    var activeIdx = -1;
+
+    // Prefetch the likely next screen: same-origin GETs the browser caches,
+    // so tapping a result row opens instantly. The top result is prefetched
+    // as soon as it appears (it is also the Enter default, hence the
+    // highest-intent target); the rest prefetch on hover/focus/touch.
+    var prefetched = {};
+    function prefetch(url) {
+        if (!url || url.charAt(0) !== '/' || prefetched[url]) return;
+        prefetched[url] = true;
+        var l = document.createElement('link');
+        l.rel = 'prefetch';
+        l.href = url;
+        document.head.appendChild(l);
+    }
+
+    // Rank: name starts-with > word starts-with > name contains > category only.
+    function score(it, q) {
+        if (it.low.indexOf(q) === 0) return 0;
+        var words = it.low.split(/[^a-z0-9]+/);
+        for (var i = 0; i < words.length; i++) {
+            if (words[i].indexOf(q) === 0) return 1;
+        }
+        if (it.low.indexOf(q) !== -1) return 2;
+        if ((it.sub + ' ' + it.cat).toLowerCase().indexOf(q) !== -1) return 3;
+        return -1;
+    }
+
+    function esc(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function paintActive() {
+        results.querySelectorAll('[data-idx]').forEach(function (b) {
+            var on = parseInt(b.getAttribute('data-idx'), 10) === activeIdx;
+            b.classList.toggle('bg-accent/10', on);
+            b.classList.toggle('border-accent', on);
+        });
+    }
+
+    function render() {
+        var q = input.value.trim().toLowerCase();
+        clearBtn.style.display = input.value ? 'inline-flex' : 'none';
+        if (!q) {
+            results.classList.add('hidden');
+            results.innerHTML = '';
+            if (paged) paged.classList.remove('hidden');
+            if (pagenav) pagenav.classList.remove('hidden');
+            currentList = [];
+            activeIdx = -1;
+            return;
+        }
+        var scored = [];
+        items.forEach(function (it) {
+            var s = score(it, q);
+            if (s !== -1) scored.push({ it: it, s: s });
+        });
+        scored.sort(function (a, b) {
+            return (a.s - b.s) || (a.it.name < b.it.name ? -1 : 1);
+        });
+
+        // Results show name matches only, so "sand" doesn't surface the
+        // whole "Aggregates & Sand" category. If nothing matches by name,
+        // fall back to category matches (e.g. typing "plumbing").
+        var hasNameHit = scored.some(function (r) { return r.s <= 2; });
+        currentList = scored
+            .filter(function (r) { return !hasNameHit || r.s <= 2; })
+            .map(function (r) { return r.it; });
+        activeIdx = currentList.length ? 0 : -1;
+        if (paged) paged.classList.add('hidden');
+        if (pagenav) pagenav.classList.add('hidden');
+        if (!currentList.length) {
+            results.innerHTML = '<div class="bg-surface border border-subtle rounded-lg px-4 py-6 text-center text-sm text-muted">No matches. Try a different term.</div>';
+        } else {
+            var head = '<div class="text-xs text-muted px-1">' + currentList.length +
+                ' match' + (currentList.length === 1 ? '' : 'es') + ' | tap to open</div>';
+            results.innerHTML = head + currentList.map(function (it, i) {
+                var where = it.sub ? it.sub + ' · ' + it.cat : it.cat;
+                return '<a href="' + esc(it.url) + '" data-mat-row data-idx="' + i + '" ' +
+                    'class="flex items-center justify-between gap-3 px-4 py-3 min-h-[48px] bg-surface border border-subtle rounded-lg hover:bg-gray-50 transition-colors">' +
+                    '<span class="min-w-0"><span class="block text-sm font-medium text-charcoal truncate">' + esc(it.name) + '</span>' +
+                    '<span class="block text-xs text-muted truncate">' + esc(where) + '</span></span>' +
+                    '<span class="text-xs text-muted flex-shrink-0">' + esc(it.bal) + '</span></a>';
+            }).join('');
+        }
+        results.classList.remove('hidden');
+        paintActive();
+        if (currentList.length) prefetch(currentList[0].url);
+    }
+
+    function goToActive() {
+        if (activeIdx >= 0 && currentList[activeIdx]) {
+            window.location.href = currentList[activeIdx].url;
+            return true;
+        }
+        return false;
+    }
+
+    input.addEventListener('input', render);
+    input.addEventListener('focus', function () {
+        if (input.value.trim()) render();
+    });
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+            if (!currentList.length) return;
+            e.preventDefault();
+            var d = e.key === 'ArrowDown' ? 1 : -1;
+            activeIdx = (activeIdx + d + currentList.length) % currentList.length;
+            paintActive();
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            goToActive(); // else: keep the live filter as-is, no reload
+        } else if (e.key === 'Escape') {
+            input.value = '';
+            render();
+        }
+    });
+    form.addEventListener('submit', function (e) {
+        e.preventDefault(); // never reload: search is live
+        goToActive();
+    });
+    // Rows are plain links (tap navigates natively). Hover/focus only
+    // prefetches + highlights for the keyboard flow.
+    results.addEventListener('mousemove', function (e) {
+        var b = e.target.closest('[data-idx]');
+        if (b) {
+            activeIdx = parseInt(b.getAttribute('data-idx'), 10);
+            paintActive();
+            prefetch(currentList[activeIdx].url);
+        }
+    });
+    results.addEventListener('focusin', function (e) {
+        var b = e.target.closest ? e.target.closest('[data-idx]') : null;
+        if (b) prefetch(currentList[parseInt(b.getAttribute('data-idx'), 10)].url);
+    });
+    // Touch staff never hover: start the fetch on first touch of a row so
+    // the detail page is already cached when the tap completes.
+    document.addEventListener('touchstart', function (e) {
+        var a = e.target.closest ? e.target.closest('[data-mat-row]') : null;
+        if (a) prefetch(a.getAttribute('href'));
+    }, { passive: true });
+    clearBtn.addEventListener('click', function () {
+        input.value = '';
+        render();
+        input.focus();
+    });
+
+    // If the page loaded with ?q= (bookmark/shared link), filter immediately.
+    if (input.value.trim()) render();
+})();
+</script>
+{% endblock %}

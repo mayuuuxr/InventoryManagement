@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load quantities %}
+
+{% block title %}Dashboard | nibba{% endblock %}
+
+{% block content %}
+<div class="space-y-5">
+    <div>
+        <h1 class="text-charcoal">Dashboard</h1>
+        <p class="text-sm text-muted mt-1">{{ today|date:"l, F j, Y" }} · live stock.</p>
+    </div>
+
+    {# Stat cards: each links to its list page #}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <a href="{% url 'dashboard' %}" class="bg-surface border border-subtle rounded-xl p-4 md:p-5 hover:border-accent transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="package" class="w-5 h-5 text-accent"></i>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-2xl font-bold text-charcoal leading-none">{{ materials_count }}</p>
+                    <p class="text-xs text-muted mt-1">Materials</p>
+                </div>
+            </div>
+        </a>
+        <a href="{% url 'dashboard_low' %}" class="bg-surface border border-subtle rounded-xl p-4 md:p-5 hover:border-accent transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-warning-bg flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-warning-fg"></i>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-2xl font-bold text-charcoal leading-none">{{ low_count }}</p>
+                    <p class="text-xs text-muted mt-1">Low stock</p>
+                </div>
+            </div>
+        </a>
+        <a href="{% url 'dashboard_out' %}" class="bg-surface border border-subtle rounded-xl p-4 md:p-5 hover:border-accent transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-danger-bg flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="x-circle" class="w-5 h-5 text-danger-fg"></i>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-2xl font-bold text-charcoal leading-none">{{ out_count }}</p>
+                    <p class="text-xs text-muted mt-1">Out of stock</p>
+                </div>
+            </div>
+        </a>
+        <a href="{% url 'entries:orders' %}" class="bg-surface border border-subtle rounded-xl p-4 md:p-5 hover:border-accent transition-colors">
+            <div class="flex items-center gap-3">
+                <span class="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="arrow-right-left" class="w-5 h-5 text-accent"></i>
+                </span>
+                <div class="min-w-0">
+                    <p class="text-2xl font-bold text-charcoal leading-none">{{ today_inward|add:today_outward }}</p>
+                    <p class="text-xs text-muted mt-1">Entries today ({{ today_inward }} in · {{ today_outward }} out)</p>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    {# Stock card with tabs #}
+    <div class="bg-surface border border-subtle rounded-xl p-4 md:p-6">
+        <h2 class="text-white text-lg font-semibold">
+            {% if tab == "low" %}Low Stock{% elif tab == "out" %}Out of Stock{% else %}Stock Summary{% endif %}
+        </h2>
+        <div class="flex items-center gap-6 mt-3 text-sm border-b border-subtle">
+            <a href="{% url 'dashboard' %}" class="pb-2 -mb-px transition-colors {% if tab == "all" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">All Stock</a>
+            <a href="{% url 'dashboard_low' %}" class="pb-2 -mb-px transition-colors {% if tab == "low" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Low Stock{% if low_count %} ({{ low_count }}){% endif %}</a>
+            <a href="{% url 'dashboard_out' %}" class="pb-2 -mb-px transition-colors {% if tab == "out" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Out of Stock{% if out_count %} ({{ out_count }}){% endif %}</a>
+        </div>
+        {% if rows %}
+        <div class="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+            <table class="w-full text-sm mt-2">
+                <thead>
+                    <tr class="text-left text-muted text-xs uppercase tracking-wide">
+                        <th class="font-medium py-3 pr-4">S No</th>
+                        <th class="font-medium py-3 pr-4">Material</th>
+                        <th class="font-medium py-3 pr-4">Unit</th>
+                        <th class="font-medium py-3 pr-4 text-right">Balance</th>
+                        <th class="font-medium py-3 pr-4 text-right">Reorder At</th>
+                        <th class="font-medium py-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-subtle">
+                    {% for r in rows %}
+                    <tr>
+                        <td class="py-3.5 pr-4 text-muted">{{ forloop.counter }}</td>
+                        <td class="py-3.5 pr-4 text-charcoal font-medium">{% if single_site %}<a href="{% url 'entries:detail' single_site_id r.material.id %}" class="hover:text-accent transition-colors">{{ r.material.display_name }}</a>{% else %}{{ r.material.display_name }}{% endif %}</td>
+                        <td class="py-3.5 pr-4 text-muted">{{ r.material.unit }}</td>
+                        <td class="py-3.5 pr-4 text-right text-charcoal font-semibold">{{ r.balance|whole }}</td>
+                        <td class="py-3.5 pr-4 text-right text-muted">{{ r.reorder|whole }}</td>
+                        <td class="py-3.5 font-medium
+                            {% if r.status == "out" %}text-red-500
+                            {% elif r.status == "low" %}text-accent
+                            {% else %}text-green-500{% endif %}">
+                            {% if r.status == "out" %}Out of Stock
+                            {% elif r.status == "low" %}Low Stock
+                            {% else %}OK{% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="py-12 text-center">
+            <i data-lucide="check-circle" class="w-10 h-10 text-green-500 mx-auto mb-3"></i>
+            <h3 class="text-[15px] font-semibold text-charcoal mb-1">
+                {% if tab == "low" %}No low-stock materials{% elif tab == "out" %}Nothing out of stock{% else %}No materials yet{% endif %}
+            </h3>
+            <p class="text-sm text-muted">
+                {% if tab == "all" %}Add your first material to start tracking stock.
+                {% else %}All stocked up. Restocked items reappear here if they dip again.{% endif %}
+            </p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

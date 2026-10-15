@@ -1,0 +1,117 @@
+{% extends "accounts/base.html" %}
+
+{% block title %}Sign in | nibba{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-4rem)] min-h-[calc(100dvh-4rem)] flex overflow-y-auto">
+    <div class="m-auto w-full max-w-sm py-6 md:py-8">
+        {# Brand mark + title #}
+        <div class="flex flex-col items-center mb-6 md:mb-8">
+            <div class="w-14 h-14 rounded-2xl bg-accent flex items-center justify-center mb-3 shadow-soft">
+                <i data-lucide="package" class="w-7 h-7 text-white"></i>
+            </div>
+            <h1 class="text-charcoal font-black">nibba</h1>
+            <p class="text-sm text-muted mt-1">Shop stock register. Sign in to continue.</p>
+        </div>
+
+        {# Landed here from a protected page (session expired or deep link) #}
+        {% if next %}
+        <div class="mb-4 flex items-start gap-2 p-3 bg-warning-bg border border-subtle rounded-md">
+            <i data-lucide="info" class="w-4 h-4 text-warning-fg flex-shrink-0 mt-0.5"></i>
+            <p class="text-sm text-charcoal">Please sign in again to continue.</p>
+        </div>
+        {% endif %}
+
+        {% if locked_out %}
+        <div class="mb-4 p-4 bg-danger-bg/40 border border-subtle rounded-md">
+            <div class="flex items-start gap-2">
+                <i data-lucide="lock" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"></i>
+                <div class="min-w-0">
+                    <p class="text-sm font-medium text-charcoal">Login locked for 1 hour</p>
+                    <p class="text-xs text-muted mt-0.5">5 baar galat PIN, baaki ID se login chalega.</p>
+                    <p class="text-sm font-semibold text-charcoal mt-1.5">
+                        Try again in <span id="lockout-timer" data-until="{{ lockout_until_ms }}">--:--</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function () {
+            var el = document.getElementById("lockout-timer");
+            if (!el) return;
+            var until = parseInt(el.getAttribute("data-until"), 10);
+            function pad(n) { return (n < 10 ? "0" : "") + n; }
+            function tick() {
+                var left = Math.max(0, until - Date.now());
+                var m = Math.floor(left / 60000);
+                var s = Math.floor((left % 60000) / 1000);
+                el.textContent = pad(m) + ":" + pad(s);
+                if (left <= 0) {
+                    var note = document.getElementById("lockout-done");
+                    if (note) note.classList.remove("hidden");
+                    el.textContent = "00:00";
+                    return;
+                }
+                setTimeout(tick, 1000);
+            }
+            tick();
+        })();
+        </script>
+        {% endif %}
+
+        {# Login card #}
+        <div class="bg-surface border border-subtle rounded-xl p-6 shadow-soft">
+            {% if form.non_field_errors %}
+            <div class="mb-4 flex items-start gap-2 p-3 bg-danger-bg/40 border border-subtle rounded-md">
+                <i data-lucide="x-circle" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"></i>
+                <div class="text-sm text-charcoal space-y-1">
+                    {% for err in form.non_field_errors %}
+                    <p>{{ err }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+
+                <div>
+                    <label for="id_username" class="block text-xs font-medium text-muted mb-1.5">Username</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ form.username.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <label for="id_password" class="block text-xs font-medium text-muted mb-1.5">Password</label>
+                    <div class="relative" data-pw-wrap>
+                        {{ form.password }}
+                        <button type="button" data-pw-toggle aria-label="Show password"
+                                class="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-charcoal hover:bg-gray-50 transition-colors">
+                            <span data-pw-show><i data-lucide="eye" class="w-4 h-4"></i></span>
+                            <span data-pw-hide class="hidden"><i data-lucide="eye-off" class="w-4 h-4"></i></span>
+                        </button>
+                    </div>
+                    {% if form.password.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ form.password.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <button type="submit" id="login-submit"
+                        class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-[48px] bg-accent text-white text-base font-bold rounded-xl hover:bg-accent-hover transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
+                    <i data-lucide="log-in" class="w-5 h-5"></i>
+                    Sign in
+                </button>
+                {% if locked_out %}
+                <p id="lockout-done" class="hidden mt-2 text-xs text-center text-muted">Lock khatam. Ab try karo.</p>
+                {% endif %}
+            </form>
+        </div>
+
+        <p class="text-center text-xs text-muted mt-6">Internal tool. Authorized access only.</p>
+        <p class="text-center text-xs text-muted mt-2">Use the username and 4-digit PIN from your admin. Forgot your PIN? Ask your admin to reset it.</p>
+    </div>
+</div>
+{% endblock %}

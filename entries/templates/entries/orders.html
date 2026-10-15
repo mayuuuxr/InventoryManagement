@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+{% load quantities %}
+
+{% block title %}Orders | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Orders</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="bg-surface border border-subtle rounded-xl p-4 md:p-6">
+    <h1 class="text-charcoal text-lg font-semibold">Order History</h1>
+    <div class="flex flex-wrap items-center justify-between gap-3 mt-3">
+        <div class="flex items-center gap-6 text-sm border-b border-subtle">
+            <a href="?tab=all{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="pb-2 -mb-px transition-colors {% if tab == "all" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">All Orders</a>
+            <a href="?tab=inward{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="pb-2 -mb-px transition-colors {% if tab == "inward" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Inward ({{ inward_count }})</a>
+            <a href="?tab=outward{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="pb-2 -mb-px transition-colors {% if tab == "outward" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Outward ({{ outward_count }})</a>
+        </div>
+        <form method="get" class="flex items-center gap-2 text-sm">
+            <input type="hidden" name="tab" value="{{ tab }}">
+            <label class="inline-flex items-center gap-1.5 px-3 py-2 bg-surface border border-subtle rounded-lg text-charcoal">
+                <i data-lucide="calendar" class="w-4 h-4 text-muted"></i>
+                <input type="date" name="date_from" value="{{ date_from }}" class="bg-transparent text-sm text-charcoal focus:outline-none">
+            </label>
+            <span class="text-muted text-xs">To</span>
+            <label class="inline-flex items-center gap-1.5 px-3 py-2 bg-surface border border-subtle rounded-lg text-charcoal">
+                <i data-lucide="calendar" class="w-4 h-4 text-muted"></i>
+                <input type="date" name="date_to" value="{{ date_to }}" class="bg-transparent text-sm text-charcoal focus:outline-none">
+            </label>
+            <button type="submit" class="px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors">Filter</button>
+            {% if date_from or date_to %}
+            <a href="?tab={{ tab }}" class="inline-flex items-center gap-1 px-3 py-2 text-sm text-muted hover:text-charcoal border border-subtle rounded-lg transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                Reset
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if page.object_list %}
+    <div class="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+        <table class="w-full text-sm mt-2">
+            <thead>
+                <tr class="text-left text-muted text-xs uppercase tracking-wide">
+                    <th class="font-medium py-3 pr-4">S No</th>
+                    <th class="font-medium py-3 pr-4">Order ID</th>
+                    <th class="font-medium py-3 pr-4">Material</th>
+                    <th class="font-medium py-3 pr-4 text-right">Quantity</th>
+                    <th class="font-medium py-3 pr-4">Customer / Supplier</th>
+                    {% if not single_site %}<th class="font-medium py-3 pr-4">Site</th>{% endif %}
+                    <th class="font-medium py-3 pr-4">Date</th>
+                    <th class="font-medium py-3">Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-subtle">
+                {% for r in page.object_list %}
+                <tr>
+                    <td class="py-3.5 pr-4 text-muted">{{ start_index|add:forloop.counter0 }}</td>
+                    <td class="py-3.5 pr-4">
+                        <a href="{% url 'entries:detail' r.entry.site_id r.entry.material_id %}" class="text-charcoal hover:text-accent transition-colors font-medium">{{ r.ref }}</a>
+                    </td>
+                    <td class="py-3.5 pr-4 text-charcoal">{{ r.entry.material.display_name }}</td>
+                    <td class="py-3.5 pr-4 text-right text-charcoal">{{ r.entry.qty|whole }} {{ r.entry.material.unit }}</td>
+                    {% if r.kind == "inward" %}<td class="py-3.5 pr-4 text-charcoal">{{ r.entry.received_from }}</td>{% elif r.entry.customer %}<td class="py-3.5 pr-4 text-charcoal">{{ r.entry.customer }}</td>{% else %}<td class="py-3.5 pr-4 text-muted">Not recorded</td>{% endif %}
+                    {% if not single_site %}<td class="py-3.5 pr-4 text-muted">{{ r.entry.site.name }}</td>{% endif %}
+                    <td class="py-3.5 pr-4 text-muted">{{ r.entry.date|date:"d-m-Y" }}</td>
+                    <td class="py-3.5 font-medium {% if r.kind == "inward" %}text-green-500{% else %}text-accent{% endif %}">
+                        {% if r.kind == "inward" %}Stock In{% else %}Stock Out{% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if page.paginator.num_pages > 1 %}
+    <div class="flex items-center justify-center gap-2 mt-5 text-sm">
+        {% if page.has_previous %}
+        <a href="?tab={{ tab }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&page={{ page.previous_page_number }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-subtle text-muted hover:text-charcoal hover:border-accent transition-colors" aria-label="Previous page">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </a>
+        {% endif %}
+        {% for n in page.paginator.page_range %}
+            {% if n == page.number %}
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-accent text-white font-medium">{{ n }}</span>
+            {% elif n <= 3 or n == page.paginator.num_pages or n >= page.number|add:"-1" and n <= page.number|add:"1" %}
+            <a href="?tab={{ tab }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&page={{ n }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg text-muted hover:text-charcoal transition-colors">{{ n }}</a>
+            {% elif n == 4 and page.number > 5 or n == page.paginator.num_pages|add:"-1" and page.number < page.paginator.num_pages|add:"-2" %}
+            <span class="text-muted">…</span>
+            {% endif %}
+        {% endfor %}
+        {% if page.has_next %}
+        <a href="?tab={{ tab }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}&page={{ page.next_page_number }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-subtle text-muted hover:text-charcoal hover:border-accent transition-colors" aria-label="Next page">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <div class="py-12 text-center">
+        <i data-lucide="package-open" class="w-10 h-10 text-muted mx-auto mb-3"></i>
+        <h3 class="text-[15px] font-semibold text-charcoal mb-1">No orders found</h3>
+        <p class="text-sm text-muted">Try a different tab or date range.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

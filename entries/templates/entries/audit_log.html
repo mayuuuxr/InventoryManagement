@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Activity Log | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Activity Log</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+            <h1 class="text-charcoal">Activity Log</h1>
+            <p class="text-sm text-muted mt-1">Pick a staff member to see their timeline.</p>
+        </div>
+        <a href="{% url 'entries:audit_log_all' %}"
+           class="inline-flex items-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+            <i data-lucide="scroll-text" class="w-4 h-4"></i>
+            Full day-wise log
+        </a>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg overflow-hidden">
+        <div class="p-4 md:p-6">
+            {% if members %}
+            <div class="divide-y divide-subtle border border-subtle rounded-lg overflow-hidden">
+                {% for m in members %}
+                <a href="{% url 'entries:staff_timeline' m.user.id %}"
+                   class="flex items-center gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors">
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-accent/10 text-accent text-sm font-semibold flex-shrink-0">
+                        {{ m.user.username|slice:":2"|upper }}
+                    </span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-medium text-charcoal truncate">
+                            {{ m.user.username }}
+                            <span class="ml-1 text-xs font-normal {% if m.user.role == 'manager' %}text-accent{% else %}text-muted{% endif %}">· {{ m.user.get_role_display }}</span>
+                        </span>
+                        <span class="block text-xs text-muted mt-0.5">
+                            {% if m.count %}
+                            {{ m.count }} activit{{ m.count|pluralize:"y,ies" }} · Last active {{ m.last|date:"M j, Y" }} · {{ m.last|time:"g:i A" }}
+                            {% else %}
+                            No activity yet
+                            {% endif %}
+                        </span>
+                        <span class="block text-xs text-muted mt-0.5">
+                            {% if m.user.last_login %}Last login {{ m.user.last_login|date:"M j, Y" }} · {{ m.user.last_login|time:"g:i A" }}{% else %}Never logged in{% endif %}
+                        </span>
+                    </span>
+                    <i data-lucide="chevron-right" class="w-4 h-4 text-muted flex-shrink-0"></i>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+                <i data-lucide="users" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+                <p class="text-sm text-muted">No staff members yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

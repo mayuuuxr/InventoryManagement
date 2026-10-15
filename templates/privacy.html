@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Privacy Policy | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Privacy Policy</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl space-y-4">
+    <div>
+        <h1 class="text-charcoal">Privacy Policy</h1>
+        <p class="text-sm text-muted mt-1">Last updated: {% now "F j, Y" %}. Plain words, no legal fog.</p>
+    </div>
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5 space-y-3 text-sm text-charcoal">
+        <div>
+            <h2 class="text-charcoal mb-1">Where your data lives</h2>
+            <p>Everything you enter stays on this shop PC, in a single database file. Nothing is uploaded to any cloud, and there is no account on any outside server.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">What is stored</h2>
+            <p>Usernames and PINs (stored hashed, never as plain text), materials, inward and outward entries, and an activity log of who changed what. That is all.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">What is never collected</h2>
+            <p>No ads, no trackers, no analytics, no location, no contacts. The app makes no network calls at all except an optional 2-second update check, and only when the owner opens it.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">On this device</h2>
+            <p>Your browser keeps a sign-in cookie (8 hours), a security cookie, and dismissal ticks for alerts. Clearing browser data signs you out. Nothing leaves the machine.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">Backups</h2>
+            <p>The app copies the database to a Backup folder on every start. Copy that folder to a pen drive monthly. Whoever holds the pen drive holds the data, so keep it safe.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">Your responsibility</h2>
+            <p>Keep PINs private, lock the PC when away, and delete staff logins when staff leave. Questions: ask your shop owner.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

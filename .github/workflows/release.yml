@@ -1,0 +1,40 @@
+name: release
+# Tag a release: git tag v1.1.0 && git push origin v1.1.0
+# Builds nibba-v1.1.0.zip containing CODE ONLY (never DB/env/venv/Backup)
+# and attaches it to the GitHub Release. Clients update via update.bat.
+on:
+  push:
+    tags:
+      - "v*"
+jobs:
+  package:
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify VERSION matches tag
+        shell: pwsh
+        run: |
+          $tag = $env:GITHUB_REF_NAME.TrimStart('v')
+          $ver = (Get-Content VERSION).Trim()
+          if ($ver -ne $tag) { throw "VERSION ($ver) != tag ($tag). Update VERSION first." }
+      - name: Build code-only zip
+        shell: pwsh
+        run: |
+          $excl = @('venv','runtime','.git','.gitignore','staticfiles','Backup','Logs','Data','chrome-profile','build','__pycache__','.github',
+                     'db.sqlite3','tunnel.log','cloudflared.exe','.env','.env.example','e2e',
+                     'INSTALL.bat','run_all.bat','run.bat','tunnel_env.py','BUILD-PORTABLE.bat','BUILD-INSTALLER.bat','nibba.iss',
+                     'Procfile','seed_catalog.json','UPDATE-MODEL.md','requirements.txt')
+          New-Item -ItemType Directory -Path pkg | Out-Null
+          Get-ChildItem -Force | Where-Object { $excl -notcontains $_.Name } | ForEach-Object {
+            if ($_.Extension -in '.sqlite3','.pem') { return }
+            Copy-Item $_.FullName pkg\ -Recurse -Force
+          }
+          Get-ChildItem pkg -Recurse -Include *.sqlite3,*.pem,.env -File | Remove-Item -Force
+          Compress-Archive -Path pkg\* -DestinationPath "nibba-$env:GITHUB_REF_NAME.zip" -Force
+      - name: Attach to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: nibba-*.zip
+          generate_release_notes: true

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Delete {{ object.name }} | {{ site.name }} | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <a href="{% url 'sites:detail' site.id %}" class="hover:text-charcoal transition-colors">{{ site.name }}</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Delete sub-location</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl">
+    <div class="mb-6">
+        <h1 class="text-charcoal">Delete sub-location?</h1>
+        <p class="text-sm text-muted mt-1">
+            "{{ object.name }}" at {{ site.name }} will be permanently removed.
+            Sub-locations with outward entries or allocations cannot be deleted.
+        </p>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-6">
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                <button type="submit"
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    Delete permanently
+                </button>
+                <a href="{{ back_url }}"
+                   class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

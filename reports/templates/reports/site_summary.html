@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% load quantities %}
+
+{% block title %}Stock Summary | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <a href="{% url 'reports:landing' %}" class="hover:text-charcoal transition-colors">Reports</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Stock Summary</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-charcoal">Stock Summary</h1>
+        <p class="text-sm text-muted mt-1">Current balance of every material in the shop.</p>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-6">
+        <form method="get" data-auto-filter class="flex flex-col sm:flex-row sm:items-end gap-3">
+            {% if sites|length > 1 %}
+            <div>
+                <label for="site" class="block text-xs font-medium text-muted mb-1.5">Site</label>
+                <select name="site" id="site"
+                        class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                    <option value="">Select a site</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if selected_site and s.id == selected_site.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% else %}
+            {# Single shop: no picker | the only site applies automatically. #}
+            {% if sites.0 %}<input type="hidden" name="site" value="{{ sites.0.id }}">{% endif %}
+            {% endif %}
+            <button type="submit"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                Show Summary
+            </button>
+            {% if selected_site %}
+            <a href="{% url 'reports:site_summary_export' %}?site={{ selected_site.id }}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download as Excel
+            </a>
+            <a href="{% url 'reports:site_summary_export_pdf' %}?site={{ selected_site.id }}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                Download as PDF
+            </a>
+            {% endif %}
+        </form>
+        <script>
+        (function () {
+            // Auto-apply: picking a site loads its summary immediately. The
+            // Show button stays in the markup as a no-JS fallback and is
+            // hidden here when JS runs.
+            var form = document.querySelector("[data-auto-filter]");
+            if (!form) return;
+            var submit = form.querySelector('[type="submit"]');
+            if (submit) submit.style.display = "none";
+            form.querySelectorAll("select").forEach(function (sel) {
+                sel.addEventListener("change", function () { form.submit(); });
+            });
+        })();
+        </script>
+    </div>
+
+    {% if selected_site %}
+    <div class="bg-surface border border-subtle rounded-lg overflow-hidden">
+        <div class="p-4 md:p-6">
+            <h2 class="text-charcoal mb-1">{{ selected_site.name }}</h2>
+            <p class="text-xs text-muted mb-4">Balances update automatically as entries are added, edited, or deleted.</p>
+            {% if has_entries %}
+            <div class="hidden md:block border border-subtle rounded-lg overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                        <tr>
+                            <th class="text-left font-medium px-4 py-3">Material</th>
+                            <th class="text-left font-medium px-4 py-3">Unit</th>
+                            <th class="text-right font-medium px-4 py-3">Current Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-subtle">
+                        {% for group in category_groups %}
+                        <tr class="bg-gray-50">
+                            <td colspan="3" class="px-4 py-2 text-xs font-semibold text-charcoal uppercase tracking-wide">{{ group.category.name }}</td>
+                        </tr>
+                        {% for row in group.loose %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-charcoal">{{ row.material.display_name }}</td>
+                            <td class="px-4 py-3 text-muted">{{ row.material.unit }}</td>
+                            <td class="px-4 py-3 text-right text-charcoal font-medium whitespace-nowrap">
+                                {{ row.balance|whole }} {{ row.material.unit }}
+                                {% if row.balance <= row.material.reorder_point %}
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-warning-bg text-warning-fg">Low</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% for sub in group.subs %}
+                        <tr>
+                            <td colspan="3" class="px-4 py-1.5 text-xs font-medium text-muted">{{ sub.sub.name }}</td>
+                        </tr>
+                        {% for row in sub.rows %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-charcoal">{{ row.material.display_name }}</td>
+                            <td class="px-4 py-3 text-muted">{{ row.material.unit }}</td>
+                            <td class="px-4 py-3 text-right text-charcoal font-medium whitespace-nowrap">
+                                {{ row.balance|whole }} {{ row.material.unit }}
+                                {% if row.balance <= row.material.reorder_point %}
+                                <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-warning-bg text-warning-fg">Low</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        {% endfor %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {# Mobile cards (desktop uses the table above) #}
+            <div class="md:hidden space-y-4">
+                {% for group in category_groups %}
+                <div>
+                    <div class="text-xs font-semibold text-charcoal uppercase tracking-wide mb-1.5">{{ group.category.name }}</div>
+                    <div class="divide-y divide-subtle border border-subtle rounded-lg overflow-hidden">
+                        {% for row in group.loose %}
+                        <div class="p-3.5 bg-surface">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="text-sm font-medium text-charcoal min-w-0">{{ row.material.display_name }}</div>
+                                <div class="text-sm font-semibold text-charcoal whitespace-nowrap flex-shrink-0">{{ row.balance|whole }} {{ row.material.unit }}</div>
+                            </div>
+                            {% if row.balance <= row.material.reorder_point %}
+                            <span class="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-warning-bg text-warning-fg">Low</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% for sub in group.subs %}
+                        {% for row in sub.rows %}
+                        <div class="p-3.5 bg-surface">
+                            <div class="text-xs text-muted mb-0.5">{{ sub.sub.name }}</div>
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="text-sm font-medium text-charcoal min-w-0">{{ row.material.display_name }}</div>
+                                <div class="text-sm font-semibold text-charcoal whitespace-nowrap flex-shrink-0">{{ row.balance|whole }} {{ row.material.unit }}</div>
+                            </div>
+                            {% if row.balance <= row.material.reorder_point %}
+                            <span class="mt-1.5 inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-warning-bg text-warning-fg">Low</span>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+                <i data-lucide="inbox" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+                <p class="text-sm text-muted">No stock data yet for this site.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

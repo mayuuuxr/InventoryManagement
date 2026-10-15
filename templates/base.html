@@ -1,0 +1,413 @@
+{% load static quantities %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}nibba{% endblock %}</title>
+    <meta name="description" content="nibba: offline shop stock register with inward, outward, live balances, low-stock alerts and reports.">
+
+    {# --- PWA: installable home-screen app (manifest + worker + icons) --- #}
+    <link rel="manifest" href="{% url 'pwa_manifest' %}">
+    <meta name="theme-color" content="#0B3D91">
+    <link rel="apple-touch-icon" href="{% url 'pwa_icon' 'apple-touch-icon.png' %}">
+    {# --- Favicon: browser tab icon (same house mark as the app icon) --- #}
+    <link rel="icon" type="image/png" sizes="192x192" href="{% url 'pwa_icon' 'icon-192.png' %}">
+    <link rel="icon" type="image/png" sizes="512x512" href="{% url 'pwa_icon' 'icon-512.png' %}">
+    <link rel="shortcut icon" href="{% url 'pwa_icon' 'icon-192.png' %}">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="nibba">
+
+    {# --- Poppins font, vendored for offline use (static/vendor/) --- #}
+    <link rel="stylesheet" href="{% static 'vendor/poppins.css' %}">
+
+    {# Ocean Breeze tokens, FROZEN Oct 2026 (DESIGN-PC.md 3). No pills, no gradients, no emojis. #}
+    <script src="{% static 'vendor/tailwind.js' %}"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: { sans: ['Poppins', 'system-ui', 'sans-serif'] },
+            colors: {
+              'frame':     '#D4E9FA',
+              'app':       '#E8F6FF',
+              'surface':   '#FFFFFF',
+              'charcoal':  '#0F2440',
+              'muted':     '#5C738A',
+              'subtle':    '#C9E2F2',
+              'accent':        '#0B3D91',
+              'accent-hover':  '#082E6E',
+              'tang':          '#3BA7F2',
+              'tang-hover':    '#2B8FD9',
+              'success':   { bg: '#D9F2E2', fg: '#1B7A3D' },
+              'warning':   { bg: '#FEF3C7', fg: '#92400E' },
+              'danger':    { bg: '#FEE2E2', fg: '#B42323' },
+            },
+            borderRadius: { 'md': '8px', 'lg': '12px', 'xl': '16px' },
+            boxShadow: {
+              'soft': '0 2px 12px rgba(11,61,145,.08)',
+              'lift': '0 8px 24px rgba(11,61,145,.14)',
+            },
+          },
+        },
+      }
+    </script>
+
+    <style>
+      /* Smooth page changes WITHOUT delaying content: only the OLD page
+         fades out (120ms); the new page | including its LCP element
+         (headings, balances, tables) | paints immediately with zero entrance
+         animation, fade-in, or stagger. Unsupported browsers ignore this and
+         navigate instantly. Opacity-only = compositor-cheap on phones. */
+      @view-transition {
+        navigation: auto;
+      }
+      ::view-transition-old(root) { animation: page-out 120ms ease both; }
+      ::view-transition-new(root) { animation: none; }
+      @keyframes page-out { to { opacity: 0; } }
+      @media (prefers-reduced-motion: reduce) {
+        ::view-transition-old(root) { animation: none; }
+      }
+      html { background: #D4E9FA; } /* = frame token: match body so any paint gap never flashes */
+      body { font-family: 'Poppins', system-ui, sans-serif; font-size: 14px; color: #0F2440; }
+      h1 { font-size: 22px; font-weight: 700; }
+      h2 { font-size: 17px; font-weight: 600; }
+      h3 { font-size: 15px; font-weight: 600; }
+      /* Mobile only (desktop untouched): 16px stops iOS auto-zoom on focus,
+         44px min-height gives proper touch targets on all form controls. */
+      @media (max-width: 767px) {
+        input:not([type="checkbox"]):not([type="radio"]),
+        select, textarea { font-size: 16px; min-height: 44px; }
+        /* iOS Safari forces content-box on native date/time pickers, so their
+           padding gets ADDED to width:100% and they overflow the card
+           (WebKit bug 301648, still open on iOS 26). Subtracting the exact
+           padding+border (px-3 = 24px + 1px border each side = 26px) makes
+           their outer edge land exactly where border-box siblings sit:
+           equal to Quantity/Received From at any screen width. */
+        input[type="date"], input[type="time"] { width: calc(100% - 26px) !important; }
+      }
+      /* Password visibility toggle: room for the eye button so typed text
+         never slides underneath it. Applies at all sizes. */
+      div[data-pw-wrap] > input { padding-right: 2.75rem; }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-frame min-h-screen dash">
+<div class="flex min-h-screen md:p-3 md:gap-3">
+    {% if user.is_authenticated %}
+    {# ============ Sidebar (ocean rail, profile, nav, logout) ============ #}
+    <div id="sidebar-overlay" class="hidden fixed inset-0 bg-black/60 z-30 md:hidden"></div>
+    <aside id="dash-sidebar" class="fixed md:static z-40 inset-y-0 left-0 w-64 flex-shrink-0 bg-accent md:rounded-2xl flex flex-col px-5 py-6 -translate-x-full md:translate-x-0 transition-transform duration-200">
+        <a href="{% url 'dashboard' %}" class="flex flex-col items-center text-center rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60" aria-label="nibba home">
+            <span class="w-20 h-20 rounded-full border-2 border-white/60 flex items-center justify-center text-3xl font-semibold text-white bg-white/10">
+                {{ user.username|first|upper }}
+            </span>
+            <p class="mt-3 text-white font-semibold text-[15px]">nibba</p>
+            <p class="text-white/60 text-xs mt-0.5">{% if user.is_superuser %}owner{% else %}{{ user.username }} · {{ user.role }}{% endif %}</p>
+        </a>
+        {% with vn=request.resolver_match.view_name %}
+        <nav class="mt-8 space-y-1.5 text-[14px]">
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'dashboard' or vn == 'dashboard_low' or vn == 'dashboard_out' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="layout-dashboard" class="w-[18px] h-[18px]"></i>
+                Dashboard
+            </a>
+            <a href="{% url 'reports:site_summary' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'reports:site_summary' or vn == 'reports:site_summary_export' or vn == 'reports:site_summary_export_pdf' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="archive" class="w-[18px] h-[18px]"></i>
+                Inventory
+            </a>
+            <a href="{% url 'entries:orders' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'entries:orders' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="layers" class="w-[18px] h-[18px]"></i>
+                Orders
+            </a>
+            <a href="{% url 'entries:purchase_add' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'entries:purchase_add' or vn == 'entries:sale_add' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="plus-circle" class="w-[18px] h-[18px]"></i>
+                New Entry
+            </a>
+            <a href="{% url 'reports:landing' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn|slice:':8' == 'reports:' and vn != 'reports:site_summary' and vn != 'reports:site_summary_export' and vn != 'reports:site_summary_export_pdf' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i>
+                Reporting
+            </a>
+            <a href="{% url 'help' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'help' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="wrench" class="w-[18px] h-[18px]"></i>
+                Support
+            </a>
+            {% if user.is_admin_role %}
+            <a href="{% url 'accounts:staff_list' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn|slice:':9' == 'accounts:' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="settings" class="w-[18px] h-[18px]"></i>
+                Settings
+            </a>
+            <a href="{% url 'help' %}#app-updates" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors text-white/85 hover:bg-white/10">
+                <i data-lucide="refresh-cw" class="w-[18px] h-[18px]"></i>
+                Updates
+            </a>
+            {% endif %}
+        </nav>
+        {% endwith %}
+        <div class="mt-auto pt-6">
+            <form method="post" action="{% url 'accounts:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="flex items-center gap-3 px-4 py-2.5 text-[14px] text-white/85 hover:text-white transition-colors">
+                    <i data-lucide="power" class="w-[18px] h-[18px]"></i>
+                    Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+    {% endif %}
+
+    {# ============ Right column: white topbar + pale ocean content ============ #}
+    <div class="flex-1 min-w-0 flex flex-col md:rounded-2xl overflow-hidden">
+        {% if user.is_authenticated %}
+        <div class="bg-surface border-b border-subtle flex items-center gap-3 px-4 md:px-6 h-16 flex-shrink-0">
+            <button type="button" id="nav-toggle" aria-label="Menu" aria-expanded="false"
+                    class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl text-muted hover:text-charcoal hover:bg-gray-50 transition-colors flex-shrink-0">
+                <i data-lucide="menu" class="w-5 h-5"></i>
+            </button>
+            <div class="flex-1 flex justify-center min-w-0">
+                <div class="relative w-full max-w-xl">
+                    <input type="search" id="dash-search" placeholder="Search"
+                           class="w-full bg-transparent border border-subtle rounded-xl pl-5 pr-12 py-2 text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent">
+                    <span class="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-accent">
+                        <i data-lucide="search" class="w-4 h-4 text-white"></i>
+                    </span>
+                </div>
+            </div>
+            <div class="flex items-center flex-shrink-0">
+                {# Notification bell | latest purchases/sales, links to ledger #}
+                <div class="relative">
+                    <button type="button" id="notif-toggle" aria-label="Notifications" aria-expanded="false" aria-haspopup="true"
+                            class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl text-muted hover:text-charcoal hover:bg-gray-50 transition-colors">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                    </button>
+                    <div id="notif-panel"
+                         class="hidden absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] bg-surface border border-subtle rounded-lg shadow-lift z-50 overflow-hidden">
+                        <div class="px-4 py-3 border-b border-subtle flex items-center justify-between gap-2">
+                            <span class="text-sm font-semibold text-charcoal">Notifications</span>
+                            {% if recent_notifications %}
+                            <span class="text-xs text-muted">latest {{ recent_notifications|length }}</span>
+                            {% endif %}
+                        </div>
+                        {% if recent_notifications %}
+                        <div class="divide-y divide-subtle max-h-80 overflow-y-auto">
+                            {% for n in recent_notifications %}
+                            <a href="{% url 'entries:detail' n.site_id n.material_id %}"
+                               class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-colors">
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-md flex-shrink-0
+                                    {% if n.kind == 'in' %}bg-success-bg text-success-fg{% else %}bg-accent/10 text-accent{% endif %}">
+                                    <i data-lucide="{% if n.kind == 'in' %}arrow-down-to-line{% else %}arrow-up-from-line{% endif %}" class="w-4 h-4"></i>
+                                </span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block text-sm font-medium text-charcoal truncate">{{ n.title }} · {{ n.material_name }}</span>
+                                    <span class="block text-xs text-muted truncate">{{ n.qty|whole }} {{ n.unit }}{% if n.sub %} · {{ n.sub }}{% endif %} · {{ n.when|date:"d M, H:i" }}</span>
+                                </span>
+                            </a>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'entries:orders' %}"
+                           class="block px-4 py-2.5 text-center text-sm font-medium text-accent hover:bg-gray-50 border-t border-subtle transition-colors">
+                            View orders
+                        </a>
+                        {% else %}
+                        <div class="px-4 py-6 text-center">
+                            <i data-lucide="bell" class="w-6 h-6 text-muted mx-auto mb-2"></i>
+                            <p class="text-sm text-charcoal font-medium">No entries yet</p>
+                            <p class="text-xs text-muted mt-1">Purchases and sales will appear here.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function () {
+            var btn = document.getElementById("nav-toggle");
+            var bar = document.getElementById("dash-sidebar");
+            var veil = document.getElementById("sidebar-overlay");
+            function closeBar() {
+                if (!bar) return;
+                bar.classList.add("-translate-x-full");
+                if (btn) btn.setAttribute("aria-expanded", "false");
+                if (veil) veil.classList.add("hidden");
+            }
+            function openBar() {
+                if (!bar) return;
+                bar.classList.remove("-translate-x-full");
+                if (btn) btn.setAttribute("aria-expanded", "true");
+                if (veil) veil.classList.remove("hidden");
+            }
+            if (btn && bar) {
+                btn.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    if (bar.classList.contains("-translate-x-full")) openBar();
+                    else closeBar();
+                });
+            }
+            if (veil) veil.addEventListener("click", closeBar);
+            document.addEventListener("keydown", function (e) {
+                if (e.key === "Escape") closeBar();
+            });
+            var bell = document.getElementById("notif-toggle");
+            var panel = document.getElementById("notif-panel");
+            if (bell && panel) {
+                bell.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    var hidden = panel.classList.toggle("hidden");
+                    bell.setAttribute("aria-expanded", hidden ? "false" : "true");
+                });
+                document.addEventListener("click", function (e) {
+                    if (!panel.classList.contains("hidden") && !panel.contains(e.target)) {
+                        panel.classList.add("hidden");
+                        bell.setAttribute("aria-expanded", "false");
+                    }
+                });
+            }
+            // Topbar search: client-side filter of the page's tables.
+            // Never navigates | on a no-match table everything hides except
+            // the header, and clearing restores all rows.
+            var q = document.getElementById("dash-search");
+            if (q) {
+                q.addEventListener("input", function () {
+                    var needle = q.value.toLowerCase().trim();
+                    document.querySelectorAll("main table tbody tr").forEach(function (row) {
+                        row.style.display = (!needle || row.textContent.toLowerCase().indexOf(needle) !== -1) ? "" : "none";
+                    });
+                });
+            }
+        })();
+        </script>
+        {# No badge, no seen-state: the panel always lists the latest entries. #}
+        {% endif %}
+
+        {# Offline banner below: hidden unless actually offline. #}
+        <div id="offline-banner" class="hidden" role="status" aria-live="polite">
+            <div class="px-4 md:px-6 pt-3">
+                <div class="flex items-center gap-2 px-4 py-2.5 bg-warning-bg border border-subtle rounded-lg">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 text-warning-fg flex-shrink-0"></i>
+                    <p class="text-sm text-charcoal">No signal. You can keep viewing, but saving an entry needs network. Your typed form stays until you save.</p>
+                </div>
+            </div>
+        </div>
+        <script>
+        (function () {
+            var bar = document.getElementById("offline-banner");
+            if (!bar) return;
+            function paint() {
+                bar.classList.toggle("hidden", navigator.onLine !== false);
+            }
+            window.addEventListener("online", paint);
+            window.addEventListener("offline", paint);
+            paint();
+        })();
+        </script>
+
+        <main class="flex-1 bg-app px-4 py-6 md:px-8 md:py-8 min-w-0">
+            <div class="max-w-7xl mx-auto w-full">
+            {# Breadcrumb | pages override block breadcrumb to render their trail #}
+            {% block breadcrumb %}{% endblock %}
+
+            {% if messages %}
+            <div class="mb-4 space-y-2">
+                {% for message in messages %}
+                <div class="flex items-center gap-2 px-4 py-3 bg-surface border border-subtle rounded-lg">
+                    <i data-lucide="
+                        {% if message.tags == 'error' %}x-circle
+                        {% elif message.tags == 'success' %}check-circle
+                        {% else %}info{% endif %}"
+                        class="w-4 h-4
+                        {% if message.tags == 'error' %}text-red-500
+                        {% elif message.tags == 'success' %}text-green-500
+                        {% else %}text-blue-500{% endif %}">
+                    </i>
+                    <span class="text-sm text-charcoal">{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+            </div>
+            <p class="max-w-7xl mx-auto w-full px-4 md:px-8 pb-6 text-xs text-muted/60">© {% now "Y" %} nibba</p>
+        </main>
+    </div>
+</div>
+
+    <script src="{% static 'vendor/lucide.min.js' %}"></script>
+    <script>lucide.createIcons();</script>
+    <script>
+    // Password show/hide toggles (login, staff add/reset). One delegated
+    // listener covers every password field independently | each button only
+    // ever touches the input inside its own [data-pw-wrap] container.
+    document.addEventListener("click", function (e) {
+        var btn = e.target.closest ? e.target.closest("[data-pw-toggle]") : null;
+        if (!btn) return;
+        var wrap = btn.closest("[data-pw-wrap]");
+        var input = wrap && wrap.querySelector("input");
+        if (!input) return;
+        var show = input.type === "password";
+        input.type = show ? "text" : "password";
+        input.focus();
+        btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
+        var on = btn.querySelector("[data-pw-show]");
+        var off = btn.querySelector("[data-pw-hide]");
+        if (on) on.classList.toggle("hidden", show);
+        if (off) off.classList.toggle("hidden", !show);
+    });
+    </script>
+    <script>
+    // Double-submit guard: on slow site networks staff tap Save twice and
+    // create duplicate entries. The first submit wins | its buttons lock in
+    // a "Saving…" state so the second tap only acknowledges work already in
+    // flight instead of starting it again. POST-only (GET filter forms are
+    // idempotent); cancelled confirm() dialogs never reach this handler, and
+    // a failed server validation re-renders fresh buttons, so nothing sticks.
+    document.addEventListener("submit", function (e) {
+        var form = e.target;
+        if (!form || !form.method || form.method.toLowerCase() !== "post") return;
+        if (form.dataset.submitted) {
+            e.preventDefault();
+            return;
+        }
+        form.dataset.submitted = "1";
+        var btn = (e.submitter && form.contains(e.submitter))
+            ? e.submitter
+            : form.querySelector('[type="submit"]');
+        form.querySelectorAll('[type="submit"]').forEach(function (b) {
+            b.disabled = true;
+            b.setAttribute("aria-disabled", "true");
+            b.classList.add("opacity-70", "cursor-wait");
+        });
+        if (btn) {
+            var label = btn.childNodes[btn.childNodes.length - 1];
+            if (label && label.nodeType === 3 && label.textContent.trim()) {
+                label.textContent = " Saving… ";
+            }
+        }
+    });
+    </script>
+    <script>
+    // PWA service worker: offline-tolerant shell + installability. Registers
+    // only in secure contexts (https/localhost) | plain http skips silently.
+    // Registration waits for page load so it never contends with a form
+    // submit; updates apply on next launch via skipWaiting in sw.js.
+    if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+        window.addEventListener('load', function () {
+            navigator.serviceWorker.register('/sw.js').catch(function () {});
+        });
+    }
+    // Logout wipes the offline page cache: cached navigations are full HTML
+    // with the signed-in member's balances, and the cache is per-device, not
+    // per-user. Without this, a shared phone could offline-serve the previous
+    // member's pages after logout. Fire-and-forget | submit never waits.
+    document.addEventListener("submit", function (e) {
+        var form = e.target;
+        if (!form || !form.action || form.action.indexOf("/logout/") === -1) return;
+        try {
+            if ('caches' in window) caches.delete('nibba-shell-v1').catch(function () {});
+        } catch (err) {}
+    });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

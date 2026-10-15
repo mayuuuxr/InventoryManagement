@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Members | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Manage Staff</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div class="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+            <h1 class="text-charcoal">Manage Members</h1>
+            <p class="text-sm text-muted mt-1">Member logins for data entry. Admin-only page.</p>
+        </div>
+        <a href="{% url 'accounts:staff_add' %}"
+           class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Add New Member
+        </a>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg overflow-hidden">
+        <div class="p-4 md:p-6">
+            {% if staff_members %}
+            <div class="hidden md:block border border-subtle rounded-lg overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                        <tr>
+                            <th class="text-left font-medium px-4 py-3">Username</th>
+                            <th class="text-left font-medium px-4 py-3">Role</th>
+                            <th class="text-left font-medium px-4 py-3">Status</th>
+                            <th class="text-left font-medium px-4 py-3">Date Joined</th>
+                            <th class="text-left font-medium px-4 py-3">Last Login</th>
+                            <th class="px-4 py-3"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-subtle">
+                        {% for member in staff_members %}
+                        <tr class="hover:bg-gray-50 {% if not member.is_active %}opacity-60{% endif %}">
+                            <td class="px-4 py-3 text-charcoal font-medium">{{ member.username }}</td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium
+                                    {% if member.role == 'manager' %}bg-accent/10 text-accent
+                                    {% else %}bg-gray-100 text-muted{% endif %}">
+                                    {{ member.get_role_display }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                {% if member.is_active %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-success-bg text-success-fg">
+                                    Active
+                                </span>
+                                {% else %}
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-muted">
+                                    Inactive
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 py-3 text-muted whitespace-nowrap">{{ member.date_joined|date:"M j, Y" }} <span class="text-muted">·</span> <span class="text-muted">{{ member.date_joined|time:"g:i A" }}</span></td>
+                            <td class="px-4 py-3 text-muted whitespace-nowrap">
+                                {% if member.last_login %}{{ member.last_login|date:"M j, Y" }} <span class="text-muted">·</span> <span class="text-muted">{{ member.last_login|time:"g:i A" }}</span>{% else %}Never{% endif %}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                <div class="flex items-center justify-end gap-1">
+                                    <a href="{% url 'accounts:staff_edit' member.id %}"
+                                       title="Edit staff"
+                                       class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                                    </a>
+                                    <a href="{% url 'accounts:staff_reset' member.id %}"
+                                       title="Reset PIN"
+                                       class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                        <i data-lucide="key-round" class="w-4 h-4"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'accounts:staff_delete' member.id %}"
+                                          class="inline" onsubmit="return confirm('Delete {{ member.username }}? Their past entries will be kept.');">
+                                        {% csrf_token %}
+                                        <button type="submit" title="Delete member (entries are kept)"
+                                                class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {# Mobile cards (desktop uses the table above) #}
+            <div class="md:hidden divide-y divide-subtle border border-subtle rounded-lg overflow-hidden">
+                {% for member in staff_members %}
+                <div class="p-4 space-y-2 bg-surface {% if not member.is_active %}opacity-60{% endif %}">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="text-sm font-medium text-charcoal truncate">{{ member.username }} <span class="text-xs font-normal {% if member.role == 'manager' %}text-accent{% else %}text-muted{% endif %}">· {{ member.get_role_display }}</span></div>
+                        {% if member.is_active %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-success-bg text-success-fg flex-shrink-0">Active</span>
+                        {% else %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-muted flex-shrink-0">Inactive</span>
+                        {% endif %}
+                    </div>
+                    <div class="text-xs text-muted">Joined: {{ member.date_joined|date:"M j, Y" }} · Last login: {% if member.last_login %}{{ member.last_login|date:"M j, Y" }}{% else %}Never{% endif %}</div>
+                    <div class="flex items-center gap-1">
+                        <a href="{% url 'accounts:staff_edit' member.id %}"
+                           title="Edit staff"
+                           class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </a>
+                        <a href="{% url 'accounts:staff_reset' member.id %}"
+                           title="Reset PIN"
+                           class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                            <i data-lucide="key-round" class="w-4 h-4"></i>
+                        </a>
+                        <form method="post" action="{% url 'accounts:staff_delete' member.id %}"
+                              class="inline" onsubmit="return confirm('Delete {{ member.username }}? Their past entries will be kept.');">
+                            {% csrf_token %}
+                            <button type="submit" title="Delete member (entries are kept)"
+                                    class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+                <i data-lucide="users" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+                <p class="text-sm text-muted mb-4">No member accounts yet.</p>
+                <a href="{% url 'accounts:staff_add' %}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add the first member account
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

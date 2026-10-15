@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% load quantities %}
+
+{% block title %}Monthly Report | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <a href="{% url 'reports:landing' %}" class="hover:text-charcoal transition-colors">Reports</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Monthly Report</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-charcoal">Monthly Report</h1>
+        <p class="text-sm text-muted mt-1">
+            {% if date_from %}Showing {{ period_label }}.{% else %}All activity in the selected month.{% endif %}
+        </p>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-6">
+        <form method="get" data-auto-filter class="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div>
+                <label for="from" class="block text-xs font-medium text-muted mb-1.5">From (optional)</label>
+                <input type="date" name="from" id="from" value="{{ date_from }}"
+                       class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+            <div>
+                <label for="to" class="block text-xs font-medium text-muted mb-1.5">To (optional)</label>
+                <input type="date" name="to" id="to" value="{{ date_to }}"
+                       class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+            <div>
+                <label for="month" class="block text-xs font-medium text-muted mb-1.5">Month</label>
+                <select name="month" id="month"
+                        class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                    {% for num, name in months %}
+                    <option value="{{ num }}" {% if num == selected_month %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label for="year" class="block text-xs font-medium text-muted mb-1.5">Year</label>
+                <select name="year" id="year"
+                        class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                    {% for y in years %}
+                    <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>{{ y }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% if sites|length > 1 %}
+            <div>
+                <label for="site" class="block text-xs font-medium text-muted mb-1.5">Site (optional)</label>
+                <select name="site" id="site"
+                        class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                    <option value="">All stock</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if selected_site and s.id == selected_site.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <button type="submit"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                Show Report
+            </button>
+            {% if date_from or date_to %}
+            <a href="{% url 'reports:monthly' %}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-4 py-2 min-h-[44px] md:min-h-0 text-sm text-muted hover:text-charcoal border border-subtle rounded-xl transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                Reset
+            </a>
+            {% endif %}
+            <a href="{% url 'reports:monthly_export' %}?month={{ selected_month }}&year={{ selected_year }}{% if selected_site %}&site={{ selected_site.id }}{% endif %}{% if date_from %}&from={{ date_from }}&to={{ date_to }}{% endif %}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download as Excel
+            </a>
+            <a href="{% url 'reports:monthly_export_pdf' %}?month={{ selected_month }}&year={{ selected_year }}{% if selected_site %}&site={{ selected_site.id }}{% endif %}{% if date_from %}&from={{ date_from }}&to={{ date_to }}{% endif %}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                Download as PDF
+            </a>
+            <p class="w-full text-xs text-muted">Tip: From + To bharo to woh span dikhega (month ignore hoga). Khali chhodo to month wala hisaab.</p>
+        </form>
+        <script>
+        (function () {
+            // Auto-apply: changing month, year, site or dates reloads the
+            // report immediately. The Show button stays as a no-JS fallback
+            // and is hidden here when JS runs.
+            var form = document.querySelector("[data-auto-filter]");
+            if (!form) return;
+            var submit = form.querySelector('[type="submit"]');
+            if (submit) submit.style.display = "none";
+            form.querySelectorAll("select").forEach(function (sel) {
+                sel.addEventListener("change", function () { form.submit(); });
+            });
+            form.querySelectorAll('input[type="date"]').forEach(function (el) {
+                el.addEventListener("change", function () {
+                    // Both dates filled (or both cleared) -> apply at once.
+                    // One-sided submit would wipe the half-filled range.
+                    var f = form.querySelector('input[name="from"]');
+                    var t = form.querySelector('input[name="to"]');
+                    if (!f || !t) { form.submit(); return; }
+                    if ((f.value && t.value) || (!f.value && !t.value)) {
+                        form.submit();
+                    }
+                });
+            });
+        })();
+        </script>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg overflow-hidden">
+        <div class="p-4 md:p-6 space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="bg-surface border border-subtle rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="arrow-down-to-line" class="w-4 h-4 text-muted"></i>
+                        <span class="text-xs font-medium text-muted uppercase tracking-wide">Inward Entries</span>
+                    </div>
+                    <div class="text-2xl font-semibold text-charcoal mb-1">{{ inward_count }}</div>
+                    <div class="text-sm text-muted">
+                        {% for row in inward_by_unit %}{{ row.total|whole }} {{ row.material__unit }}{% if not forloop.last %}, {% endif %}{% empty %}0{% endfor %}
+                    </div>
+                </div>
+                <div class="bg-surface border border-subtle rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="arrow-up-from-line" class="w-4 h-4 text-muted"></i>
+                        <span class="text-xs font-medium text-muted uppercase tracking-wide">Outward Entries</span>
+                    </div>
+                    <div class="text-2xl font-semibold text-charcoal mb-1">{{ outward_count }}</div>
+                    <div class="text-sm text-muted">
+                        {% for row in outward_by_unit %}{{ row.total|whole }} {{ row.material__unit }}{% if not forloop.last %}, {% endif %}{% empty %}0{% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            {% if has_entries %}
+            <div>
+                <h2 class="text-charcoal mb-3">Entries</h2>
+                <div class="hidden md:block border border-subtle rounded-lg overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                            <tr>
+                                <th class="text-left font-medium px-4 py-3">Date</th>
+                                <th class="text-left font-medium px-4 py-3">Time</th>
+                                <th class="text-left font-medium px-4 py-3">Type</th>
+                                <th class="text-left font-medium px-4 py-3">Material</th>
+                                <th class="text-right font-medium px-4 py-3">Qty</th>
+                                <th class="text-left font-medium px-4 py-3">Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-subtle">
+                            {% for kind, e in entries %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-charcoal whitespace-nowrap">{{ e.date|date:"M j, Y" }}</td>
+                                <td class="px-4 py-3 text-muted whitespace-nowrap">{{ e.time|time:"g:i A" }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">
+                                    {% if kind == 'in' %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-success-bg text-success-fg">
+                                        <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i>
+                                        Inward
+                                    </span>
+                                    {% else %}
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-danger-bg text-danger-fg">
+                                        <i data-lucide="arrow-up-from-line" class="w-3 h-3"></i>
+                                        Outward
+                                    </span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-3 text-charcoal">{{ e.material.display_name }}</td>
+                                <td class="px-4 py-3 text-right text-charcoal font-medium whitespace-nowrap">{{ e.qty|whole }} {{ e.material.unit }}</td>
+                                <td class="px-4 py-3 text-muted">{% if kind == 'in' %}{{ e.received_from }}{% else %}{% if e.sub_location %}{{ e.sub_location.name }}{% else %}Not set{% endif %}{% endif %}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if entries_page and entries_page.paginator.num_pages > 1 %}
+                <div class="flex items-center justify-center gap-2 mt-5 text-sm">
+                    {% if entries_page.has_previous %}
+                    <a href="?month={{ selected_month }}&year={{ selected_year }}{% if selected_site %}&site={{ selected_site.id }}{% endif %}{% if date_from %}&from={{ date_from }}&to={{ date_to }}{% endif %}&page={{ entries_page.previous_page_number }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-subtle text-muted hover:text-charcoal hover:border-accent transition-colors" aria-label="Previous page">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </a>
+                    {% endif %}
+                    <span class="text-muted">Page {{ entries_page.number }} of {{ entries_page.paginator.num_pages }}</span>
+                    {% if entries_page.has_next %}
+                    <a href="?month={{ selected_month }}&year={{ selected_year }}{% if selected_site %}&site={{ selected_site.id }}{% endif %}{% if date_from %}&from={{ date_from }}&to={{ date_to }}{% endif %}&page={{ entries_page.next_page_number }}" class="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-subtle text-muted hover:text-charcoal hover:border-accent transition-colors" aria-label="Next page">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </a>
+                    {% endif %}
+                </div>
+                {% endif %}
+                {# Mobile cards (desktop uses the table above) #}
+                <div class="md:hidden divide-y divide-subtle border border-subtle rounded-lg overflow-hidden">
+                    {% for kind, e in entries %}
+                    <div class="p-4 space-y-1.5 bg-surface">
+                        <div class="flex items-center justify-between gap-2">
+                            {% if kind == 'in' %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-success-bg text-success-fg">
+                                <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i>
+                                Inward
+                            </span>
+                            {% else %}
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-danger-bg text-danger-fg">
+                                <i data-lucide="arrow-up-from-line" class="w-3 h-3"></i>
+                                Outward
+                            </span>
+                            {% endif %}
+                            <div class="text-sm font-semibold text-charcoal whitespace-nowrap">{{ e.qty|whole }} {{ e.material.unit }}</div>
+                        </div>
+                        <div class="text-sm font-medium text-charcoal">{{ e.material.display_name }}</div>
+                        <div class="text-xs text-muted">{{ e.date|date:"M j, Y" }} · {{ e.time|time:"g:i A" }}</div>
+                        <div class="text-xs text-muted">{% if kind == 'in' %}From: {{ e.received_from }}{% else %}Used at: {% if e.sub_location %}{{ e.sub_location.name }}{% else %}Not set{% endif %}{% endif %}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+                <i data-lucide="calendar-x" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+                <p class="text-sm text-muted">No entries {% if date_from %}in {{ period_label }}{% else %}in this month{% endif %} for the selected scope.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

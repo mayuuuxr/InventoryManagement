@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Reports | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Reports</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-charcoal">Reports</h1>
+        <p class="text-sm text-muted mt-1">View-only summaries. No editing from here.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <a href="{% url 'reports:site_summary' %}"
+           class="block bg-surface border border-subtle rounded-lg p-6 hover:bg-gray-50 transition-colors">
+            <i data-lucide="building-2" class="w-6 h-6 text-accent mb-3"></i>
+            <h2 class="text-charcoal mb-1">Stock Summary</h2>
+            <p class="text-sm text-muted">Current balance of every material in the shop.</p>
+        </a>
+        <a href="{% url 'reports:material_consumption' %}"
+           class="block bg-surface border border-subtle rounded-lg p-6 hover:bg-gray-50 transition-colors">
+            <i data-lucide="package" class="w-6 h-6 text-accent mb-3"></i>
+            <h2 class="text-charcoal mb-1">Material-wise Consumption</h2>
+            <p class="text-sm text-muted">How much of a material was used, and where.</p>
+        </a>
+        <a href="{% url 'reports:monthly' %}"
+           class="block bg-surface border border-subtle rounded-lg p-6 hover:bg-gray-50 transition-colors">
+            <i data-lucide="calendar-days" class="w-6 h-6 text-accent mb-3"></i>
+            <h2 class="text-charcoal mb-1">Monthly Report</h2>
+            <p class="text-sm text-muted">All activity in a selected month, with totals.</p>
+        </a>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5 flex items-start gap-3">
+        <i data-lucide="folder-open" class="w-5 h-5 text-accent flex-shrink-0 mt-0.5"></i>
+        <div class="text-sm">
+            <p class="text-charcoal font-medium">Monthly Excel files on this PC</p>
+            <p class="text-muted mt-1">Every start saves this month's sales and purchases as Excel into the Data folder (Data/YYYY-MM/sales.xlsx and purchases.xlsx), with per-material totals. Open and work on them directly.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

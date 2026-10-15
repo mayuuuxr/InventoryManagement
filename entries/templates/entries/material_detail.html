@@ -1,0 +1,681 @@
+{% extends "base.html" %}
+{% load quantities %}
+
+{% block title %}{{ material.display_name }} | {{ site.name }} | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-xs md:text-sm text-muted mb-3 md:mb-4 whitespace-nowrap overflow-x-auto">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors flex-shrink-0">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5 flex-shrink-0"></i>
+    <a href="{% url 'sites:detail' site.id %}" class="hover:text-charcoal transition-colors truncate min-w-0 max-w-[120px] sm:max-w-[160px] md:max-w-none">{{ site.name }}</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5 flex-shrink-0"></i>
+    <span class="text-charcoal font-medium flex-shrink-0">{{ material.display_name }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    {# Page header #}
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+            <h1 class="text-charcoal">{{ material.display_name }}</h1>
+            <p class="text-sm text-muted mt-1 flex items-center gap-1.5">
+                <i data-lucide="package" class="w-3.5 h-3.5"></i>
+                {{ material.category.name }} · per {{ material.unit }}
+                <span class="mx-1">·</span>
+                <i data-lucide="building-2" class="w-3.5 h-3.5"></i>
+                {{ site.name }}
+            </p>
+        </div>
+    </div>
+
+    {# Tabs #}
+    <div class="bg-surface border border-subtle rounded-lg overflow-hidden">
+        <div class="flex border-b border-subtle">
+            <a href="?tab=inward"
+               class="flex-1 inline-flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-3 text-sm font-medium transition-colors
+                      {% if active_tab == 'inward' %}text-accent border-b-2 border-accent -mb-px bg-accent/5{% else %}text-muted hover:text-charcoal{% endif %}">
+                <i data-lucide="arrow-down-to-line" class="w-4 h-4"></i>
+                Inward
+            </a>
+            <a href="?tab=outward"
+               class="flex-1 inline-flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-3 text-sm font-medium transition-colors
+                      {% if active_tab == 'outward' %}text-accent border-b-2 border-accent -mb-px bg-accent/5{% else %}text-muted hover:text-charcoal{% endif %}">
+                <i data-lucide="arrow-up-from-line" class="w-4 h-4"></i>
+                Outward
+            </a>
+            <a href="?tab=balance{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if show_all %}&all=1{% endif %}"
+               class="flex-1 inline-flex items-center justify-center gap-1 md:gap-2 px-2 md:px-4 py-3 text-sm font-medium transition-colors
+                      {% if active_tab == 'balance' %}text-accent border-b-2 border-accent -mb-px bg-accent/5{% else %}text-muted hover:text-charcoal{% endif %}">
+                <i data-lucide="scale" class="w-4 h-4"></i>
+                Balance
+            </a>
+        </div>
+
+        <div class="p-4 md:p-6">
+            {% if active_tab == 'balance' %}
+            {# Date range filter | Balance tab only, always open (owner #}
+            {# decision: no collapsing toggle; today's entries show #}
+            {# immediately and the picker stays visible for other days). #}
+            <form method="get" id="date-filter-form" class="mb-4 bg-gray-50 border border-subtle rounded-lg p-2.5 md:px-3 md:py-3">
+                <input type="hidden" name="tab" value="{{ active_tab }}">
+                <div class="flex flex-col sm:flex-row sm:items-end gap-2 sm:gap-3">
+                    <div class="flex-1 grid grid-cols-2 gap-2">
+                        <div>
+                            <label for="id_date_from" class="flex items-center gap-1 text-xs font-medium text-muted mb-1">From date
+                                <i data-lucide="info" class="w-3.5 h-3.5" title="Tip: set both dates the same to view a single day. Type YYYY-MM-DD or pick from the calendar."></i>
+                            </label>
+                            <div class="relative" data-range-picker>
+                                <input type="text" id="id_date_from" name="date_from" value="{{ date_from|default:'' }}"
+                                       placeholder="YYYY-MM-DD" inputmode="numeric" autocomplete="off"
+                                       class="w-full pr-10 px-3 py-2 min-h-[44px] md:min-h-0 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                                <button type="button" data-cal-btn aria-label="Open calendar"
+                                        class="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                    <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                                </button>
+                                <div data-cal-panel
+                                     class="hidden absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] bg-surface border border-subtle rounded-lg shadow-lg z-50 p-3">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <button type="button" data-prev-m
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                        </button>
+                                        <span data-month-label class="text-sm font-semibold text-charcoal"></span>
+                                        <button type="button" data-next-m
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1 mb-1">
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Su</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Mo</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Tu</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">We</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Th</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Fr</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Sa</span>
+                                    </div>
+                                    <div data-cal-grid class="grid grid-cols-7 gap-1"></div>
+                                    <div class="mt-2 flex items-center justify-between">
+                                        <button type="button" data-today
+                                                class="text-xs font-medium text-accent hover:underline py-1">Today</button>
+                                        <button type="button" data-clear
+                                                class="text-xs font-medium text-muted hover:text-charcoal py-1">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="id_date_to" class="block text-xs font-medium text-muted mb-1">To date</label>
+                            <div class="relative" data-range-picker>
+                                <input type="text" id="id_date_to" name="date_to" value="{{ date_to|default:'' }}"
+                                       placeholder="YYYY-MM-DD" inputmode="numeric" autocomplete="off"
+                                       class="w-full pr-10 px-3 py-2 min-h-[44px] md:min-h-0 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                                <button type="button" data-cal-btn aria-label="Open calendar"
+                                        class="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                    <i data-lucide="calendar-days" class="w-4 h-4"></i>
+                                </button>
+                                <div data-cal-panel
+                                     class="hidden absolute left-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] bg-surface border border-subtle rounded-lg shadow-lg z-50 p-3">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <button type="button" data-prev-m
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                                        </button>
+                                        <span data-month-label class="text-sm font-semibold text-charcoal"></span>
+                                        <button type="button" data-next-m
+                                                class="inline-flex items-center justify-center w-8 h-8 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <div class="grid grid-cols-7 gap-1 mb-1">
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Su</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Mo</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Tu</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">We</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Th</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Fr</span>
+                                        <span class="text-center text-[11px] font-medium text-muted py-1">Sa</span>
+                                    </div>
+                                    <div data-cal-grid class="grid grid-cols-7 gap-1"></div>
+                                    <div class="mt-2 flex items-center justify-between">
+                                        <button type="button" data-today
+                                                class="text-xs font-medium text-accent hover:underline py-1">Today</button>
+                                        <button type="button" data-clear
+                                                class="text-xs font-medium text-muted hover:text-charcoal py-1">Clear</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 justify-end flex-shrink-0">
+                        <button type="submit"
+                                class="inline-flex items-center justify-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                            <i data-lucide="calendar-search" class="w-4 h-4"></i>
+                            Show
+                        </button>
+                        {# No Show-all button (owner decision): the date boxes #}
+                        {# alone pick any range; empty boxes + Show = today. #}
+                    </div>
+                </div>
+            </form>
+            {# Mobile toggle removed (owner decision): the filter form is #}
+            {# always visible so entries show with zero extra taps. #}
+            <script>
+            (function () {
+                function pad(n) { return (n < 10 ? "0" : "") + n; }
+                function iso(y, m, d) { return y + "-" + pad(m + 1) + "-" + pad(d); }
+                function parseISO(s) {
+                    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec((s || "").trim());
+                    if (!m) return null;
+                    var y = +m[1], mo = +m[2] - 1, d = +m[3];
+                    var dt = new Date(Date.UTC(y, mo, d));
+                    if (dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo || dt.getUTCDate() !== d) return null;
+                    return { y: y, m: mo, d: d };
+                }
+                var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+                document.querySelectorAll("[data-range-picker]").forEach(function (root) {
+                    var input = root.querySelector("input");
+                    var btn = root.querySelector("[data-cal-btn]");
+                    var panel = root.querySelector("[data-cal-panel]");
+                    var grid = root.querySelector("[data-cal-grid]");
+                    var label = root.querySelector("[data-month-label]");
+                    var form = root.closest("form");
+                    var now = new Date();
+                    var todayISO = now.getFullYear() + "-" + pad(now.getMonth() + 1) + "-" + pad(now.getDate());
+                    var start = parseISO(input.value) || { y: now.getFullYear(), m: now.getMonth(), d: now.getDate() };
+                    var view = { y: start.y, m: start.m };
+                    function submit() { if (form) form.submit(); }
+                    function render() {
+                        label.textContent = MONTHS[view.m] + " " + view.y;
+                        grid.innerHTML = "";
+                        var first = new Date(Date.UTC(view.y, view.m, 1)).getUTCDay();
+                        var days = new Date(Date.UTC(view.y, view.m + 1, 0)).getUTCDate();
+                        var cur = parseISO(input.value);
+                        var curISO = cur ? iso(cur.y, cur.m, cur.d) : "";
+                        for (var i = 0; i < first; i++) grid.appendChild(document.createElement("span"));
+                        for (var d = 1; d <= days; d++) {
+                            (function (day) {
+                                var cell = iso(view.y, view.m, day);
+                                var b = document.createElement("button");
+                                b.type = "button";
+                                b.textContent = day;
+                                if (cell === curISO) {
+                                    b.className = "inline-flex items-center justify-center h-9 rounded-md text-sm font-semibold bg-accent text-white";
+                                } else if (cell === todayISO) {
+                                    b.className = "inline-flex items-center justify-center h-9 rounded-md text-sm font-medium text-accent ring-2 ring-accent/40 hover:bg-accent/5";
+                                } else {
+                                    b.className = "inline-flex items-center justify-center h-9 rounded-md text-sm text-charcoal hover:bg-gray-100";
+                                }
+                                b.addEventListener("click", function () { input.value = cell; submit(); });
+                                grid.appendChild(b);
+                            })(d);
+                        }
+                    }
+                    root.querySelector("[data-prev-m]").addEventListener("click", function () {
+                        view = view.m === 0 ? { y: view.y - 1, m: 11 } : { y: view.y, m: view.m - 1 };
+                        render();
+                    });
+                    root.querySelector("[data-next-m]").addEventListener("click", function () {
+                        view = view.m === 11 ? { y: view.y + 1, m: 0 } : { y: view.y, m: view.m + 1 };
+                        render();
+                    });
+                    root.querySelector("[data-today]").addEventListener("click", function () {
+                        input.value = todayISO; submit();
+                    });
+                    root.querySelector("[data-clear]").addEventListener("click", function () {
+                        input.value = ""; submit();
+                    });
+                    function close() { panel.classList.add("hidden"); }
+                    btn.addEventListener("click", function (e) {
+                        e.stopPropagation();
+                        var willOpen = panel.classList.contains("hidden");
+                        document.querySelectorAll("[data-cal-panel]").forEach(function (p) { p.classList.add("hidden"); });
+                        if (willOpen) {
+                            var v = parseISO(input.value);
+                            if (v) view = { y: v.y, m: v.m };
+                            render();
+                            panel.classList.remove("hidden");
+                        }
+                    });
+                    document.addEventListener("click", function (e) {
+                        if (!panel.classList.contains("hidden") && !panel.contains(e.target)) close();
+                    });
+                    document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+                    render();
+                });
+            })();
+            </script>
+            {% if date_from or date_to %}
+            <p class="text-xs text-muted -mt-1 mb-4">
+                Showing entries{% if date_from %} from <span class="font-medium text-charcoal">{{ date_from }}</span>{% endif %}{% if date_to %} to <span class="font-medium text-charcoal">{{ date_to }}</span>{% endif %}
+                · totals below are for this range only.
+            </p>
+            {% endif %}
+            {% endif %}
+            {# INWARD TAB #}
+            {% if active_tab == 'inward' %}
+            {# Quick-action shortcut: only right after an inward save #}
+            {% if show_outward_shortcut %}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 px-4 py-3 bg-accent/5 border border-subtle rounded-lg">
+                <p class="text-sm text-charcoal">Inward entry saved. Is this material being used already?</p>
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3 sm:flex-shrink-0">
+                    {% if can_edit %}
+                    <a href="{% url 'entries:outward_add' site.id material.id %}"
+                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-accent text-sm font-medium rounded-xl border border-accent hover:bg-accent/5 transition-colors">
+                        <i data-lucide="arrow-up-from-line" class="w-4 h-4"></i>
+                        Add Outward Entry Now
+                    </a>
+                    {% endif %}
+                    <a href="?tab=inward" class="text-sm text-muted hover:text-charcoal transition-colors text-center min-h-[44px] sm:min-h-0 inline-flex items-center justify-center">Done</a>
+                </div>
+            </div>
+            {% endif %}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-charcoal">Inward Entries</h2>
+                    <p class="text-xs text-muted mt-0.5">Total: {{ total_inward|whole }} {{ unit }}</p>
+                </div>
+                {% if can_edit %}
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                    {% if last_inward %}
+                    <a href="{% url 'entries:inward_add' site.id material.id %}?repeat={{ last_inward.id }}"
+                        title="Pre-fill from last entry ({{ last_inward.qty|whole }} {{ unit }} from {{ last_inward.received_from }})"
+                        class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                        <i data-lucide="repeat" class="w-4 h-4"></i>
+                         Repeat last ({{ last_inward.qty|whole }} {{ unit }})
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'entries:inward_add' site.id material.id %}"
+                       class="w-auto inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Add Inward Entry
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if inward_entries %}
+            <div class="hidden md:block border border-subtle rounded-lg overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                        <tr>
+                            <th class="text-left font-medium px-4 py-3">Date</th>
+                            <th class="text-left font-medium px-4 py-3">Time</th>
+                            <th class="text-right font-medium px-4 py-3">Qty</th>
+                            <th class="text-left font-medium px-4 py-3">Received From</th>
+                            <th class="px-4 py-3"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-subtle">
+                        {% for e in inward_entries %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-charcoal">{{ e.date|date:"M j, Y" }}</td>
+                            <td class="px-4 py-3 text-muted">{{ e.time|time:"g:i A" }}</td>
+                            <td class="px-4 py-3 text-right text-charcoal font-medium">{{ e.qty|whole }} {{ unit }}</td>
+                            <td class="px-4 py-3 text-muted">
+                                {{ e.received_from }}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                {% if e.can_edit_row %}
+                                <div class="flex items-center justify-end gap-1">
+                                    <a href="{% url 'entries:inward_edit' site.id material.id e.id %}"
+                                       title="Edit entry"
+                                       class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'entries:inward_delete' site.id material.id e.id %}"
+                                          class="inline" onsubmit="return confirm('Are you sure you want to delete this inward entry?');">
+                                        {% csrf_token %}
+                                        <button type="submit" title="Delete entry"
+                                                class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {# Mobile cards (desktop uses the table above) #}
+            <div class="md:hidden divide-y divide-subtle border border-subtle rounded-lg overflow-hidden">
+                {% for e in inward_entries %}
+                <div class="p-4 space-y-2 bg-surface">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-sm font-medium text-charcoal">{{ e.date|date:"M j, Y" }} <span class="text-muted font-normal">· {{ e.time|time:"g:i A" }}</span></div>
+                            <div class="text-xs text-muted mt-0.5">From: {{ e.received_from }}</div>
+                        </div>
+                        <div class="text-sm font-semibold text-charcoal whitespace-nowrap flex-shrink-0">{{ e.qty|whole }} {{ unit }}</div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        {% if e.can_edit_row %}
+                        <div class="flex items-center gap-1 ml-auto">
+                            <a href="{% url 'entries:inward_edit' site.id material.id e.id %}"
+                               title="Edit entry"
+                               class="inline-flex items-center justify-center w-9 h-9 md:w-7 md:h-7 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </a>
+                            <form method="post" action="{% url 'entries:inward_delete' site.id material.id e.id %}"
+                                  class="inline" onsubmit="return confirm('Are you sure you want to delete this inward entry?');">
+                                {% csrf_token %}
+                                <button type="submit" title="Delete entry"
+                                        class="inline-flex items-center justify-center w-9 h-9 md:w-7 md:h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if inward_page and inward_page.paginator.num_pages > 1 %}
+            <div class="flex items-center justify-between gap-3 mt-4">
+                <p class="text-xs text-muted">Showing {{ inward_page.start_index }}-{{ inward_page.end_index }} of {{ inward_page.paginator.count }}</p>
+                <div class="flex items-center gap-2">
+                    {% if inward_page.has_previous %}
+                    <a href="?tab=inward&ipage={{ inward_page.previous_page_number }}"
+                       class="inline-flex items-center gap-1 px-3 py-2 bg-surface text-charcoal text-xs font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                        <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                        Prev
+                    </a>
+                    {% endif %}
+                    <span class="text-xs text-muted whitespace-nowrap">Page {{ inward_page.number }} of {{ inward_page.paginator.num_pages }}</span>
+                    {% if inward_page.has_next %}
+                    <a href="?tab=inward&ipage={{ inward_page.next_page_number }}"
+                       class="inline-flex items-center gap-1 px-3 py-2 bg-surface text-charcoal text-xs font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                        Next
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+                <i data-lucide="inbox" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+                <p class="text-sm text-muted mb-4">No inward entries yet for this material in the shop.</p>
+                {% if can_edit %}
+                <a href="{% url 'entries:inward_add' site.id material.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add the first inward entry
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {# OUTWARD TAB #}
+            {% elif active_tab == 'outward' %}
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <div>
+                    <h2 class="text-charcoal">Outward Entries</h2>
+                    <p class="text-xs text-muted mt-0.5">Total: {{ total_outward|whole }} {{ unit }}</p>
+                </div>
+                {% if can_edit %}
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                    {% if last_outward %}
+                    <a href="{% url 'entries:outward_add' site.id material.id %}?repeat={{ last_outward.id }}"
+                        title="Pre-fill from last entry ({{ last_outward.qty|whole }} {{ unit }}{% if last_outward.sub_location %} at {{ last_outward.sub_location.name }}{% endif %})"
+                        class="hidden md:inline-flex items-center justify-center gap-2 px-4 py-2 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                        <i data-lucide="repeat" class="w-4 h-4"></i>
+                         Repeat last ({{ last_outward.qty|whole }} {{ unit }})
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'entries:outward_add' site.id material.id %}"
+                       class="w-auto inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                        <i data-lucide="plus" class="w-4 h-4"></i>
+                        Add Outward Entry
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+
+            {% if outward_entries %}
+            <div class="hidden md:block border border-subtle rounded-lg overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                        <tr>
+                            <th class="text-left font-medium px-4 py-3">Date</th>
+                            <th class="text-left font-medium px-4 py-3">Time</th>
+                            <th class="text-right font-medium px-4 py-3">Quantity</th>
+                            <th class="text-left font-medium px-4 py-3">Used At</th>
+                            <th class="px-4 py-3"><span class="sr-only">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-subtle">
+                        {% for e in outward_entries %}
+                        <tr class="hover:bg-gray-50">
+                            <td class="px-4 py-3 text-charcoal whitespace-nowrap">{{ e.date|date:"M j, Y" }}</td>
+                            <td class="px-4 py-3 text-muted whitespace-nowrap">{{ e.time|time:"g:i A" }}</td>
+                            <td class="px-4 py-3 text-right text-charcoal font-medium whitespace-nowrap">{{ e.qty|whole }} {{ unit }}</td>
+                            <td class="px-4 py-3 text-charcoal">
+                                {% if e.sub_location %}{{ e.sub_location.name }}{% else %}<span class="text-muted">-</span>{% endif %}
+                                {% if e.inward_entry %}<span class="block text-xs text-muted font-normal">from {{ e.inward_entry.date|date:"M j, Y" }}</span>{% endif %}
+                            </td>
+                            <td class="px-4 py-3 whitespace-nowrap">
+                                {% if e.can_edit_row %}
+                                <div class="flex items-center justify-end gap-1">
+                                    <a href="{% url 'entries:outward_edit' site.id material.id e.id %}"
+                                       title="Edit entry"
+                                       class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                                        <i data-lucide="pencil" class="w-4 h-4"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'entries:outward_delete' site.id material.id e.id %}"
+                                          class="inline" onsubmit="return confirm('Are you sure you want to delete this outward entry?');">
+                                        {% csrf_token %}
+                                        <button type="submit" title="Delete entry"
+                                                class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {# Mobile cards (desktop uses the table above) #}
+            <div class="md:hidden divide-y divide-subtle border border-subtle rounded-lg overflow-hidden">
+                {% for e in outward_entries %}
+                <div class="p-4 space-y-2 bg-surface">
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-sm font-medium text-charcoal">{{ e.date|date:"M j, Y" }} <span class="text-muted font-normal">· {{ e.time|time:"g:i A" }}</span></div>
+                            <div class="text-xs text-muted mt-0.5 flex items-center gap-2">
+                                <span>Used at: {% if e.sub_location %}{{ e.sub_location.name }}{% else %}Not set{% endif %}{% if e.inward_entry %} · from {{ e.inward_entry.date|date:"M j, Y" }}{% endif %}</span>
+                            </div>
+                        </div>
+                        <div class="text-sm font-semibold text-charcoal whitespace-nowrap flex-shrink-0">{{ e.qty|whole }} {{ unit }}</div>
+                    </div>
+                    {% if e.can_edit_row %}
+                    <div class="flex items-center justify-end gap-1">
+                        <a href="{% url 'entries:outward_edit' site.id material.id e.id %}"
+                           title="Edit entry"
+                           class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        </a>
+                        <form method="post" action="{% url 'entries:outward_delete' site.id material.id e.id %}"
+                              class="inline" onsubmit="return confirm('Are you sure you want to delete this outward entry?');">
+                            {% csrf_token %}
+                            <button type="submit" title="Delete entry"
+                                    class="inline-flex items-center justify-center w-9 h-9 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% if outward_page and outward_page.paginator.num_pages > 1 %}
+            <div class="flex items-center justify-between gap-3 mt-4">
+                <p class="text-xs text-muted">Showing {{ outward_page.start_index }}-{{ outward_page.end_index }} of {{ outward_page.paginator.count }}</p>
+                <div class="flex items-center gap-2">
+                    {% if outward_page.has_previous %}
+                    <a href="?tab=outward&opage={{ outward_page.previous_page_number }}"
+                       class="inline-flex items-center gap-1 px-3 py-2 bg-surface text-charcoal text-xs font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                        <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                        Prev
+                    </a>
+                    {% endif %}
+                    <span class="text-xs text-muted whitespace-nowrap">Page {{ outward_page.number }} of {{ outward_page.paginator.num_pages }}</span>
+                    {% if outward_page.has_next %}
+                    <a href="?tab=outward&opage={{ outward_page.next_page_number }}"
+                       class="inline-flex items-center gap-1 px-3 py-2 bg-surface text-charcoal text-xs font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                        Next
+                        <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            {% else %}
+            <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+                <i data-lucide="inbox" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+                <p class="text-sm text-muted mb-4">No outward entries yet for this material in the shop.</p>
+                {% if can_edit %}
+                <a href="{% url 'entries:outward_add' site.id material.id %}"
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    Add the first outward entry
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {# BALANCE TAB #}
+            {% else %}
+            <div class="space-y-4 md:space-y-6">
+                {# Big number #}
+                <div class="bg-surface border border-subtle rounded-lg p-4 md:p-8 text-center">
+                    <div class="text-xs font-medium text-muted uppercase tracking-wide mb-2">Current Balance</div>
+                    <div class="text-4xl md:text-5xl font-bold {% if balance < 0 %}text-red-600{% elif balance == 0 %}text-muted{% else %}text-charcoal{% endif %}">
+                        {{ balance|whole }}
+                    </div>
+                    <div class="text-sm text-muted mt-2">{{ unit }} at {{ site.name }}</div>
+                </div>
+
+                {# Inward / Outward summary #}
+                <div class="grid grid-cols-2 gap-3 md:gap-4">
+                    <div class="bg-surface border border-subtle rounded-lg p-3 md:p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="arrow-down-to-line" class="w-4 h-4 text-muted"></i>
+                            <span class="text-xs font-medium text-muted uppercase tracking-wide whitespace-nowrap">Total Inward</span>
+                        </div>
+                        <div class="text-xl md:text-2xl font-semibold text-charcoal whitespace-nowrap">{{ total_inward|whole }} <span class="text-sm text-muted font-normal">{{ unit }}</span></div>
+                    </div>
+                    <div class="bg-surface border border-subtle rounded-lg p-3 md:p-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i data-lucide="arrow-up-from-line" class="w-4 h-4 text-muted"></i>
+                            <span class="text-xs font-medium text-muted uppercase tracking-wide whitespace-nowrap">Total Outward</span>
+                        </div>
+                        <div class="text-xl md:text-2xl font-semibold text-charcoal whitespace-nowrap">{{ total_outward|whole }} <span class="text-sm text-muted font-normal">{{ unit }}</span></div>
+                    </div>
+                </div>
+
+                {# Recent changes #}
+                <div>
+                    <h2 class="text-charcoal mb-3">Recent activity</h2>
+                    {% if recent_changes %}
+                    <div class="border border-subtle rounded-lg overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                                <tr>
+                                    <th class="text-left font-medium px-4 py-3">Date</th>
+                                    <th class="text-left font-medium px-4 py-3">Type</th>
+                                    <th class="text-right font-medium px-4 py-3">Qty</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-subtle">
+                                {% for d, t, kind, qty in recent_changes %}
+                                <tr>
+                                    <td class="px-4 py-3 text-charcoal">{{ d|date:"M j, Y" }} <span class="text-muted">·</span> <span class="text-muted">{{ t|time:"g:i A" }}</span></td>
+                                    <td class="px-4 py-3">
+                                        {% if kind == 'in' %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-success-bg text-success-fg">
+                                            <i data-lucide="arrow-down-to-line" class="w-3 h-3"></i>
+                                            Inward
+                                        </span>
+                                        {% else %}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-danger-bg text-danger-fg">
+                                            <i data-lucide="arrow-up-from-line" class="w-3 h-3"></i>
+                                            Outward
+                                        </span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 py-3 text-right text-charcoal font-medium whitespace-nowrap">{{ qty|whole }} {{ unit }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if recent_truncated %}
+                    <p class="text-xs text-muted mt-3">Showing latest 2,000 changes. Narrow the date filter to see older ones.</p>
+                    {% endif %}
+                    {% if recent_page and recent_page.paginator.num_pages > 1 %}
+                    <div class="flex items-center justify-between gap-3 mt-4">
+                        <p class="text-xs text-muted">Showing {{ recent_page.start_index }}-{{ recent_page.end_index }} of {{ recent_page.paginator.count }}</p>
+                        <div class="flex items-center gap-2">
+                            {% if recent_page.has_previous %}
+                            <a href="?tab=balance&bpage={{ recent_page.previous_page_number }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if show_all %}&all=1{% endif %}"
+                               class="inline-flex items-center gap-1 px-3 py-2 bg-surface text-charcoal text-xs font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+                                Prev
+                            </a>
+                            {% endif %}
+                            <span class="text-xs text-muted whitespace-nowrap">Page {{ recent_page.number }} of {{ recent_page.paginator.num_pages }}</span>
+                            {% if recent_page.has_next %}
+                            <a href="?tab=balance&bpage={{ recent_page.next_page_number }}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if show_all %}&all=1{% endif %}"
+                               class="inline-flex items-center gap-1 px-3 py-2 bg-surface text-charcoal text-xs font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                                Next
+                                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="border border-subtle border-dashed rounded-lg p-6 text-center">
+                        <p class="text-sm text-muted">No activity yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            <div aria-hidden="true" class="md:hidden" style="height: calc(env(safe-area-inset-bottom, 0px) + 24px);"></div>
+    </div>
+</div>
+{% if show_save_modal %}
+<div id="save-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Entry saved">
+    <div class="absolute inset-0 bg-charcoal/40"></div>
+    <div class="relative w-full max-w-sm bg-surface border border-subtle rounded-lg p-6 text-center">
+        <div class="mx-auto mb-3 inline-flex items-center justify-center w-12 h-12 rounded-full bg-success-bg">
+            <i data-lucide="check-circle" class="w-6 h-6 text-success-fg"></i>
+        </div>
+        <h2 class="text-charcoal mb-1">Entry added successfully</h2>
+        <p class="text-sm text-muted mb-5">Your entry has been recorded.</p>
+        <button type="button" id="save-modal-ok"
+                class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+            OK
+        </button>
+    </div>
+</div>
+<script>
+(function () {
+    var modal = document.getElementById("save-modal");
+    var ok = document.getElementById("save-modal-ok");
+    if (!modal || !ok) return;
+    ok.addEventListener("click", function () {
+        modal.classList.add("hidden");
+    });
+})();
+</script>
+{% endif %}
+{% endblock %}

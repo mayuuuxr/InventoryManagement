@@ -1,0 +1,39 @@
+{# Single material row. Expects: site, row ({material, balance}), indent (optional bool). #}
+{% load quantities %}
+<a href="{% url 'entries:detail' site.id row.material.id %}"
+   data-mat-row
+   data-name="{{ row.material.display_name|escape }}"
+   data-cat="{{ group.category.name|default:''|escape }}"
+   data-sub="{{ sub.sub.name|default:''|escape }}"
+   data-bal="{{ row.balance|whole }} {{ row.material.unit|escape }}"
+   class="flex items-center justify-between {% if indent %}pl-5 pr-4 md:pl-8 md:pr-5{% else %}px-4 md:px-5{% endif %} py-3.5 min-h-[64px] hover:bg-gray-50 transition-colors group/row">
+    <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl {% if row.balance <= 0 %}bg-danger-bg{% else %}bg-accent/10{% endif %} group-hover/row:bg-accent flex items-center justify-center flex-shrink-0 transition-colors">
+            <i data-lucide="package" class="w-5 h-5 {% if row.balance <= 0 %}text-danger-fg{% else %}text-accent{% endif %} group-hover/row:text-white transition-colors"></i>
+        </div>
+        <div class="min-w-0">
+            <div class="text-[15px] font-bold text-charcoal truncate">{{ row.material.display_name }}</div>
+            <div class="text-xs text-muted">per {{ row.material.unit }} · current balance</div>
+        </div>
+    </div>
+    <div class="flex items-center gap-2 flex-shrink-0">
+        <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="px-2.5 py-1 rounded-md text-sm font-bold whitespace-nowrap
+                {% if row.balance <= 0 %}bg-danger-bg text-danger-fg{% elif row.balance == 0 %}bg-gray-100 text-muted{% else %}bg-success-bg text-success-fg{% endif %}">
+                {{ row.balance|whole }} {{ row.material.unit }}
+            </span>
+        </div>
+        {% if is_admin %}
+        <form method="post" action="{% url 'materials:delete' row.material.id %}"
+              class="inline" onsubmit="return confirm('Delete material {{ row.material.display_name|escapejs }}? Its entries stay in the database.');">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.path }}">
+            <button type="submit" title="Delete material"
+                    class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-muted hover:text-red-600 hover:bg-gray-100 transition-colors">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+        </form>
+        {% endif %}
+        <i data-lucide="chevron-right" class="w-4 h-4 text-muted"></i>
+    </div>
+</a>

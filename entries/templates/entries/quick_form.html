@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">{{ page_title }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-xl space-y-4">
+    <div>
+        <h1 class="text-charcoal">New Entry</h1>
+        <p class="text-sm text-muted mt-1">{{ page_sub }}</p>
+    </div>
+    <div class="bg-surface border border-subtle rounded-xl p-4 md:p-6">
+        <div class="flex items-center gap-6 text-sm border-b border-subtle mb-4">
+            <a href="{% url 'entries:purchase_add' %}" class="pb-2 -mb-px transition-colors {% if kind == "purchase" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Purchase</a>
+            <a href="{% url 'entries:sale_add' %}" class="pb-2 -mb-px transition-colors {% if kind == "sale" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Sale</a>
+        </div>
+        <form method="post" class="space-y-4">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="flex items-start gap-2 p-3 bg-danger-bg/40 border border-subtle rounded-md">
+                <i data-lucide="x-circle" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"></i>
+                <p class="text-sm text-charcoal">{{ form.non_field_errors.0 }}</p>
+            </div>
+            {% endif %}
+            {% for field in form.visible_fields %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">{{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}</label>
+                {{ field }}
+                {% if field.errors %}<p class="mt-1 text-xs text-red-600">{{ field.errors.0 }}</p>{% endif %}
+                {% if field.name == "material" %}
+                <p class="mt-1 text-xs text-muted"><a href="{% url 'materials:create' %}" class="text-accent hover:underline">Or add a new product first</a></p>
+                {% endif %}
+            </div>
+            {% endfor %}
+            <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[52px] bg-accent text-white text-base font-bold rounded-xl hover:bg-accent-hover transition-colors duration-150">
+                <i data-lucide="check" class="w-5 h-5"></i>
+                {{ submit_label }}
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

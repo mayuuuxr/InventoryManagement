@@ -1,0 +1,19 @@
+name: e2e
+on:
+  pull_request: {}
+jobs:
+  playwright:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - uses: actions/setup-node@v4
+        with: { node-version: '20' }
+      - run: python -m venv venv
+      - run: venv\Scripts\pip install -r requirements-pc.txt
+      - run: venv\Scripts\python manage.py migrate
+      - run: cd e2e; npm ci; npx playwright install chromium
+      - run: cd e2e; npm run test:e2e:ci
+        env:
+          BASE_URL: http://127.0.0.1:8000

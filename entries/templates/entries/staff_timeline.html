@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}{{ member.username }} | Timeline | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <a href="{% url 'entries:audit_log' %}" class="hover:text-charcoal transition-colors">Activity Log</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">{{ member.username }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-2xl">
+    <div class="flex items-center gap-3 flex-wrap">
+        <span class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10 text-accent text-base font-semibold flex-shrink-0">
+            {{ member.username|slice:":2"|upper }}
+        </span>
+        <div class="min-w-0">
+            <h1 class="text-charcoal">{{ member.username }}</h1>
+            <p class="text-sm text-muted mt-0.5">
+                {{ member.get_role_display }} · {{ page_obj.paginator.count }} activit{{ page_obj.paginator.count|pluralize:"y,ies" }}{% if log_date %} on {{ log_date|date:"M j, Y" }}{% endif %} · newest first
+            </p>
+        </div>
+        {# Day picker beside the name: jump to one day, or back to all dates. #}
+        <div id="log-date-picker" data-selected="{{ picker_iso }}" data-today="{{ today_iso }}"
+             class="relative w-full sm:w-auto sm:ml-auto">
+            <button type="button" id="log-date-btn" aria-haspopup="true" aria-expanded="false"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 h-10 rounded-xl bg-surface border border-subtle text-sm font-medium text-charcoal hover:bg-gray-50 transition-colors">
+                <i data-lucide="calendar-days" class="w-4 h-4 text-accent"></i>
+                {% if log_date %}{{ log_date|date:"M j, Y" }}{% else %}All dates{% endif %}
+                <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-muted"></i>
+            </button>
+            <div id="log-date-panel"
+                 class="hidden absolute left-0 sm:left-auto sm:right-0 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] bg-surface border border-subtle rounded-lg shadow-lg z-50 p-3">
+                <div class="flex items-center justify-between mb-2">
+                    <button type="button" id="log-date-prev-m"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                        <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                    </button>
+                    <span id="log-date-month" class="text-sm font-semibold text-charcoal"></span>
+                    <button type="button" id="log-date-next-m"
+                            class="inline-flex items-center justify-center w-8 h-8 rounded-xl text-muted hover:text-charcoal hover:bg-gray-100 transition-colors">
+                        <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-7 gap-1 mb-1">
+                    <span class="text-center text-[11px] font-medium text-muted py-1">Su</span>
+                    <span class="text-center text-[11px] font-medium text-muted py-1">Mo</span>
+                    <span class="text-center text-[11px] font-medium text-muted py-1">Tu</span>
+                    <span class="text-center text-[11px] font-medium text-muted py-1">We</span>
+                    <span class="text-center text-[11px] font-medium text-muted py-1">Th</span>
+                    <span class="text-center text-[11px] font-medium text-muted py-1">Fr</span>
+                    <span class="text-center text-[11px] font-medium text-muted py-1">Sa</span>
+                </div>
+                <div id="log-date-grid" class="grid grid-cols-7 gap-1"></div>
+                <div class="mt-2 flex items-center justify-between">
+                    <a href="./" class="text-xs font-medium text-muted hover:text-charcoal py-1">All dates</a>
+                    <a href="?date={{ today_iso }}"
+                       class="text-xs font-medium text-accent hover:underline py-1">Jump to today</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-wrap items-center gap-2">
+        <a href="?date={{ prev_date_iso }}" title="Previous day"
+           class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-surface border border-subtle text-charcoal hover:bg-gray-50 transition-colors">
+            <i data-lucide="chevron-left" class="w-4 h-4"></i>
+        </a>
+        {% if is_today %}
+        <span title="Already viewing today"
+              class="inline-flex items-center justify-center w-10 h-10 rounded-md bg-surface border border-subtle text-muted/40 cursor-not-allowed">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </span>
+        {% else %}
+        <a href="?date={{ next_date_iso }}" title="Next day"
+           class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-surface border border-subtle text-charcoal hover:bg-gray-50 transition-colors">
+            <i data-lucide="chevron-right" class="w-4 h-4"></i>
+        </a>
+        {% endif %}
+        <a href="?date={{ today_iso }}"
+           class="inline-flex items-center h-10 px-4 rounded-xl text-sm font-medium transition-colors {% if log_date_iso == today_iso %}bg-accent text-white{% else %}bg-surface border border-subtle text-charcoal hover:bg-gray-50{% endif %}">
+            Today
+        </a>
+        <a href="?date={{ yesterday_iso }}"
+           class="inline-flex items-center h-10 px-4 rounded-xl text-sm font-medium transition-colors {% if log_date_iso == yesterday_iso %}bg-accent text-white{% else %}bg-surface border border-subtle text-charcoal hover:bg-gray-50{% endif %}">
+            Yesterday
+        </a>
+        {% if log_date %}
+        <a href="./"
+           class="inline-flex items-center h-10 px-4 rounded-xl text-sm font-medium bg-surface border border-subtle text-charcoal hover:bg-gray-50 transition-colors">
+            All dates
+        </a>
+        {% endif %}
+    </div>
+    <script>
+    (function () {
+        var root = document.getElementById("log-date-picker");
+        if (!root) return;
+        var btn = document.getElementById("log-date-btn");
+        var panel = document.getElementById("log-date-panel");
+        var grid = document.getElementById("log-date-grid");
+        var label = document.getElementById("log-date-month");
+        var prevM = document.getElementById("log-date-prev-m");
+        var nextM = document.getElementById("log-date-next-m");
+        function parts(s) { var a = s.split("-"); return { y: +a[0], m: +a[1] - 1, d: +a[2] }; }
+        function pad(n) { return (n < 10 ? "0" : "") + n; }
+        function iso(y, m, d) { return y + "-" + pad(m + 1) + "-" + pad(d); }
+        var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        var sel = root.getAttribute("data-selected");
+        var today = root.getAttribute("data-today");
+        var s = parts(sel), t = parts(today);
+        var view = { y: s.y, m: s.m };
+        function monthKey(y, m) { return y * 12 + m; }
+        function render() {
+            label.textContent = MONTHS[view.m] + " " + view.y;
+            nextM.disabled = monthKey(view.y, view.m) >= monthKey(t.y, t.m);
+            nextM.classList.toggle("opacity-30", nextM.disabled);
+            nextM.classList.toggle("cursor-not-allowed", nextM.disabled);
+            grid.innerHTML = "";
+            var first = new Date(Date.UTC(view.y, view.m, 1)).getUTCDay();
+            var days = new Date(Date.UTC(view.y, view.m + 1, 0)).getUTCDate();
+            for (var i = 0; i < first; i++) {
+                grid.appendChild(document.createElement("span"));
+            }
+            for (var d = 1; d <= days; d++) {
+                var cur = iso(view.y, view.m, d);
+                if (cur > today) {
+                    var off = document.createElement("span");
+                    off.textContent = d;
+                    off.className = "inline-flex items-center justify-center h-9 rounded-md text-sm text-muted/30 cursor-not-allowed";
+                    grid.appendChild(off);
+                } else {
+                    var a = document.createElement("a");
+                    a.textContent = d;
+                    a.href = "?date=" + cur;
+                    if (cur === sel) {
+                        a.className = "inline-flex items-center justify-center h-9 rounded-md text-sm font-semibold bg-accent text-white";
+                    } else if (cur === today) {
+                        a.className = "inline-flex items-center justify-center h-9 rounded-md text-sm font-medium text-accent ring-2 ring-accent/40 hover:bg-accent/5";
+                    } else {
+                        a.className = "inline-flex items-center justify-center h-9 rounded-md text-sm text-charcoal hover:bg-gray-100";
+                    }
+                    grid.appendChild(a);
+                }
+            }
+        }
+        prevM.addEventListener("click", function () {
+            view = view.m === 0 ? { y: view.y - 1, m: 11 } : { y: view.y, m: view.m - 1 };
+            render();
+        });
+        nextM.addEventListener("click", function () {
+            if (monthKey(view.y, view.m) >= monthKey(t.y, t.m)) return;
+            view = view.m === 11 ? { y: view.y + 1, m: 0 } : { y: view.y, m: view.m + 1 };
+            render();
+        });
+        function close() { panel.classList.add("hidden"); btn.setAttribute("aria-expanded", "false"); }
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            var hidden = panel.classList.toggle("hidden");
+            btn.setAttribute("aria-expanded", hidden ? "false" : "true");
+        });
+        document.addEventListener("click", function (e) {
+            if (!panel.classList.contains("hidden") && !panel.contains(e.target)) close();
+        });
+        document.addEventListener("keydown", function (e) { if (e.key === "Escape") close(); });
+        render();
+    })();
+    </script>
+
+    {% if logs %}
+    <div class="relative pl-11">
+        {# Vertical rail connecting every event, Flipkart-tracking style #}
+        <div class="absolute left-[15px] top-3 bottom-3 w-0.5 bg-subtle rounded-full"></div>
+        {% for log in logs %}
+        <div class="relative pb-5 last:pb-0">
+            {% if log.action == 'create' %}
+            <span class="absolute -left-11 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-success-bg text-success-fg ring-4 ring-app flex-shrink-0">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+            </span>
+            {% elif log.action == 'edit' %}
+            <span class="absolute -left-11 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent/10 text-accent ring-4 ring-app flex-shrink-0">
+                <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
+            </span>
+            {% elif log.action == 'login' %}
+            <span class="absolute -left-11 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-muted ring-4 ring-app flex-shrink-0">
+                <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+            </span>
+            {% elif log.action == 'export' %}
+            <span class="absolute -left-11 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-accent/10 text-accent ring-4 ring-app flex-shrink-0">
+                <i data-lucide="download" class="w-3.5 h-3.5"></i>
+            </span>
+            {% else %}
+            <span class="absolute -left-11 top-0 inline-flex items-center justify-center w-8 h-8 rounded-full bg-danger-bg text-danger-fg ring-4 ring-app flex-shrink-0">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </span>
+            {% endif %}
+            <div class="bg-surface border border-subtle rounded-lg p-4">
+                <div class="flex items-center gap-2 flex-wrap">
+                    {% if forloop.first %}
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-accent text-white">Latest</span>
+                    {% endif %}
+                    <span class="text-xs text-muted">{{ log.timestamp|date:"M j, Y" }} · {{ log.timestamp|time:"g:i A" }}</span>
+                </div>
+                <p class="mt-1.5 text-sm font-medium text-charcoal">
+                    {% if log.action == 'create' %}Created {{ log.entry_type }}
+                    {% elif log.action == 'edit' %}Edited {{ log.entry_type }}
+                    {% elif log.action == 'login' %}Logged in
+                    {% elif log.action == 'export' %}Exported report
+                    {% else %}Deleted {{ log.entry_type }}{% endif %}
+                </p>
+                <p class="mt-0.5 text-sm text-muted">{{ log.entry_summary }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+        <i data-lucide="history" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+        {% if log_date %}
+        <p class="text-sm text-muted">No activity for {{ member.username }} on {{ log_date|date:"M j, Y" }}.</p>
+        {% else %}
+        <p class="text-sm text-muted">No activity recorded for {{ member.username }} yet.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

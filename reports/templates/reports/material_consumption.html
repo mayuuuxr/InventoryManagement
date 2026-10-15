@@ -1,0 +1,328 @@
+{% extends "base.html" %}
+{% load quantities %}
+
+{% block title %}Material-wise Consumption | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <a href="{% url 'reports:landing' %}" class="hover:text-charcoal transition-colors">Reports</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Material-wise Consumption</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+    <div>
+        <h1 class="text-charcoal">Material-wise Consumption</h1>
+        <p class="text-sm text-muted mt-1">How much of a material was used, and where it was used.</p>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-6">
+        <form method="get" data-auto-filter class="flex flex-col sm:flex-row sm:items-end gap-3">
+            <div id="material-search-wrap">
+                <label for="material-search" class="block text-xs font-medium text-muted mb-1.5">Material</label>
+                <div class="relative">
+                <input type="text" id="material-search" autocomplete="off" role="combobox"
+                       aria-expanded="false" aria-controls="material-suggestions" aria-autocomplete="list"
+                       placeholder="Type to search materials…"
+                       value="{% if selected_material %}{{ selected_material.display_name }}{% endif %}"
+                       class="w-full sm:w-64 min-w-0 min-h-[44px] md:min-h-0 pr-9 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                <input type="hidden" name="material" id="material"
+                       value="{% if selected_material %}{{ selected_material.id }}{% endif %}">
+                <button type="button" id="material-clear" aria-label="Clear material"
+                         class="{% if not selected_material %}hidden{% endif %} absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 inline-flex items-center justify-center rounded-md text-muted hover:text-charcoal hover:bg-gray-100">
+                    <i data-lucide="x" class="w-4 h-4 pointer-events-none"></i>
+                </button>
+                <ul id="material-suggestions" role="listbox" aria-label="Matching materials"
+                    class="hidden absolute z-20 left-0 right-0 sm:right-auto sm:w-72 mt-1 max-h-60 overflow-y-auto bg-surface border border-subtle rounded-md shadow-lg py-1"></ul>
+                </div>
+            </div>
+            {% if sites|length > 1 %}
+            <div>
+                <label for="site" class="block text-xs font-medium text-muted mb-1.5">Site (optional)</label>
+                <select name="site" id="site"
+                        class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                    <option value="">All stock</option>
+                    {% for s in sites %}
+                    <option value="{{ s.id }}" {% if selected_site and s.id == selected_site.id %}selected{% endif %}>{{ s.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            {% endif %}
+            <div>
+                <label for="from" class="block text-xs font-medium text-muted mb-1.5">From (optional)</label>
+                <input type="date" name="from" id="from" value="{{ date_from }}"
+                       class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+            <div>
+                <label for="to" class="block text-xs font-medium text-muted mb-1.5">To (optional)</label>
+                <input type="date" name="to" id="to" value="{{ date_to }}"
+                       class="w-full sm:w-auto min-w-0 px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+            <button type="submit"
+                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                Show Consumption
+            </button>
+            {% if date_from or date_to %}
+            <a href="{% url 'reports:material_consumption' %}{% if selected_material %}?material={{ selected_material.id }}{% endif %}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-1 px-4 py-2 min-h-[44px] md:min-h-0 text-sm text-muted hover:text-charcoal border border-subtle rounded-xl transition-colors">
+                <i data-lucide="x" class="w-4 h-4"></i>
+                Reset
+            </a>
+            {% endif %}
+            {% if selected_material %}
+            <a href="{% url 'reports:material_consumption_export' %}?material={{ selected_material.id }}{% if selected_site %}&site={{ selected_site.id }}{% endif %}{% if date_from %}&from={{ date_from }}&to={{ date_to }}{% endif %}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Download as Excel
+            </a>
+            <a href="{% url 'reports:material_consumption_export_pdf' %}?material={{ selected_material.id }}{% if selected_site %}&site={{ selected_site.id }}{% endif %}{% if date_from %}&from={{ date_from }}&to={{ date_to }}{% endif %}"
+               class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                <i data-lucide="file-text" class="w-4 h-4"></i>
+                Download as PDF
+            </a>
+            {% endif %}
+        </form>
+        <script>
+        var MATERIAL_OPTIONS = [
+            {% for group in category_groups %}{% for row in group.loose %}{ id: {{ row.material.id }}, name: "{{ row.material.display_name|escapejs }}", sub: "", cat: "{{ group.category.name|escapejs }}" },
+            {% endfor %}{% for sub in group.subs %}{% for row in sub.rows %}{ id: {{ row.material.id }}, name: "{{ row.material.display_name|escapejs }}", sub: "{{ sub.sub.name|escapejs }}", cat: "{{ group.category.name|escapejs }}" },
+            {% endfor %}{% endfor %}{% endfor %}
+        ];
+        </script>
+        <script>
+        (function () {
+            // Searchable material picker: type-to-filter (case-insensitive
+            // "contains" on name + category), pick a suggestion to fill the
+            // hidden material-ID field, then auto-submit like before. The
+            // Show button stays as a no-JS fallback and is hidden when JS
+            // runs. Site dropdown keeps its old change-to-submit behavior.
+            var form = document.querySelector("[data-auto-filter]");
+            if (!form) return;
+            var submit = form.querySelector('[type="submit"]');
+            if (submit) submit.style.display = "none";
+            var siteSel = form.querySelector('select[name="site"]');
+            if (siteSel) {
+                siteSel.addEventListener("change", function () { form.submit(); });
+            }
+            form.querySelectorAll('input[type="date"]').forEach(function (el) {
+                el.addEventListener("change", function () {
+                    // Both dates filled (or both cleared) -> apply at once.
+                    // One-sided submit would wipe the half-filled range.
+                    var f = form.querySelector('input[name="from"]');
+                    var t = form.querySelector('input[name="to"]');
+                    if (!f || !t) { form.submit(); return; }
+                    if ((f.value && t.value) || (!f.value && !t.value)) {
+                        form.submit();
+                    }
+                });
+            });
+
+            var box = document.getElementById("material-search");
+            var hidden = document.getElementById("material");
+            var list = document.getElementById("material-suggestions");
+            var clearBtn = document.getElementById("material-clear");
+            if (!box || !hidden || !list) return;
+            var pickedLabel = box.value;  // pre-filled when report re-renders
+            var activeIdx = -1;
+            var MAX_SHOWN = 12;
+
+            function esc(s) {
+                return String(s).replace(/[&<>"']/g, function (c) {
+                    return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+                });
+            }
+            function closeList() {
+                list.classList.add("hidden");
+                list.innerHTML = "";
+                box.setAttribute("aria-expanded", "false");
+                activeIdx = -1;
+            }
+            function toggleClear() {
+                if (clearBtn) clearBtn.classList.toggle("hidden", !box.value);
+            }
+            function render(matches) {
+                if (!matches.length) {
+                    list.innerHTML = '<li class="px-3 py-2.5 text-sm text-muted" role="option" aria-selected="false">No matches found</li>';
+                } else {
+                    list.innerHTML = matches.map(function (m, i) {
+                        return '<li role="option" aria-selected="false" id="mat-opt-' + i + '" data-id="' + m.id + '" data-name="' + esc(m.name) + '"' +
+                            ' class="px-3 py-2.5 min-h-[44px] flex items-center justify-between gap-2 text-sm cursor-pointer hover:bg-gray-50' + (i === activeIdx ? " bg-gray-50" : "") + '">' +
+                            '<span class="text-charcoal truncate">' + esc(m.name) + '</span>' +
+                            '<span class="text-xs text-muted flex-shrink-0">' + esc(m.cat) + '</span></li>';
+                    }).join("");
+                }
+                list.classList.remove("hidden");
+                box.setAttribute("aria-expanded", "true");
+            }
+            function currentMatches() {
+                var q = box.value.trim().toLowerCase();
+                if (!q) return [];
+                // Ranked contains-match: Material Name (1) outranks
+                // Sub-category (2) outranks Category (3). Best rank wins per
+                // material; ties break by earliest match position, then A-Z.
+                // Cap applies AFTER ranking so Name-matches are never pushed
+                // out by lower-priority Category-matches.
+                var scored = [];
+                MATERIAL_OPTIONS.forEach(function (m) {
+                    var rank = 0, pos = 0;
+                    var p = m.name.toLowerCase().indexOf(q);
+                    if (p !== -1) { rank = 1; pos = p; }
+                    else if (m.sub && (p = m.sub.toLowerCase().indexOf(q)) !== -1) { rank = 2; pos = p; }
+                    else if ((p = m.cat.toLowerCase().indexOf(q)) !== -1) { rank = 3; pos = p; }
+                    else return;
+                    scored.push({ m: m, rank: rank, pos: pos });
+                });
+                scored.sort(function (a, b) {
+                    if (a.rank !== b.rank) return a.rank - b.rank;
+                    if (a.pos !== b.pos) return a.pos - b.pos;
+                    var an = a.m.name.toLowerCase(), bn = b.m.name.toLowerCase();
+                    return an < bn ? -1 : an > bn ? 1 : 0;
+                });
+                return scored.slice(0, MAX_SHOWN).map(function (s) { return s.m; });
+            }
+            box.addEventListener("input", function () {
+                // Any keystroke invalidates the previous pick until a fresh
+                // suggestion is tapped | never submit a stale ID.
+                if (box.value !== pickedLabel) {
+                    pickedLabel = "";
+                    hidden.value = "";
+                }
+                toggleClear();
+                var q = box.value.trim();
+                if (!q) { closeList(); return; }
+                render(currentMatches());
+            });
+            box.addEventListener("focus", function () {
+                if (box.value.trim()) render(currentMatches());
+            });
+            function pick(li) {
+                pickedLabel = li.getAttribute("data-name");
+                box.value = pickedLabel;
+                hidden.value = li.getAttribute("data-id");
+                toggleClear();
+                closeList();
+                form.submit();
+            }
+            list.addEventListener("click", function (e) {
+                var li = e.target.closest ? e.target.closest("li[data-id]") : null;
+                if (li) pick(li);
+            });
+            box.addEventListener("keydown", function (e) {
+                var items = list.querySelectorAll("li[data-id]");
+                if (e.key === "Escape") { closeList(); box.blur(); }
+                else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                    if (list.classList.contains("hidden") || !items.length) return;
+                    e.preventDefault();
+                    activeIdx = e.key === "ArrowDown"
+                        ? (activeIdx + 1) % items.length
+                        : (activeIdx - 1 + items.length) % items.length;
+                    render(currentMatches());
+                    var sel = document.getElementById("mat-opt-" + activeIdx);
+                    if (sel) {
+                        sel.setAttribute("aria-selected", "true");
+                        box.setAttribute("aria-activedescendant", "mat-opt-" + activeIdx);
+                        sel.scrollIntoView({ block: "nearest" });
+                    }
+                }
+                else if (e.key === "Enter" && activeIdx >= 0 && !list.classList.contains("hidden")) {
+                    e.preventDefault();
+                    var li = document.getElementById("mat-opt-" + activeIdx);
+                    if (li) pick(li);
+                }
+            });
+            document.addEventListener("click", function (e) {
+                var wrap = document.getElementById("material-search-wrap");
+                if (wrap && !wrap.contains(e.target)) closeList();
+            });
+            if (clearBtn) {
+                clearBtn.addEventListener("click", function () {
+                    box.value = "";
+                    pickedLabel = "";
+                    hidden.value = "";
+                    toggleClear();
+                    closeList();
+                    box.focus();
+                    form.submit();
+                });
+            }
+            toggleClear();
+        })();
+        </script>
+    </div>
+
+    {% if selected_material %}
+    <div class="bg-surface border border-subtle rounded-lg overflow-hidden">
+        <div class="p-4 md:p-6 space-y-6">
+            <div>
+                <h2 class="text-charcoal mb-1">{{ selected_material.display_name }}</h2>
+                <p class="text-xs text-muted">{% if selected_site %}{{ selected_site.name }}{% else %}Combined stock{% endif %} · per {{ unit }}{% if date_from %} · {{ range_label }}{% endif %}</p>
+            </div>
+            {% if has_entries %}
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-surface border border-subtle rounded-lg p-4">
+                    <div class="text-xs font-medium text-muted uppercase tracking-wide mb-2">Total Inward</div>
+                    <div class="text-2xl font-semibold text-charcoal">{{ total_inward|whole }} <span class="text-sm text-muted font-normal">{{ unit }}</span></div>
+                </div>
+                <div class="bg-surface border border-subtle rounded-lg p-4">
+                    <div class="text-xs font-medium text-muted uppercase tracking-wide mb-2">Total Used</div>
+                    <div class="text-2xl font-semibold text-charcoal">{{ total_outward|whole }} <span class="text-sm text-muted font-normal">{{ unit }}</span></div>
+                </div>
+                <div class="bg-surface border border-subtle rounded-lg p-4">
+                    <div class="text-xs font-medium text-muted uppercase tracking-wide mb-2">Current Balance{% if date_from %} (all time){% endif %}</div>
+                    <div class="text-2xl font-semibold text-charcoal">{{ balance|whole }} <span class="text-sm text-muted font-normal">{{ unit }}</span></div>
+                </div>
+            </div>
+            <div>
+                <h2 class="text-charcoal mb-3">Usage by sub-location</h2>
+                {% if sub_location_breakdown %}
+                <div class="hidden md:block border border-subtle rounded-lg overflow-hidden">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                            <tr>
+                                <th class="text-left font-medium px-4 py-3">Used At</th>
+                                <th class="text-right font-medium px-4 py-3">Qty Used</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-subtle">
+                            {% for row in sub_location_breakdown %}
+                            <tr class="hover:bg-gray-50">
+                                <td class="px-4 py-3 text-charcoal">{{ row.sub_location_name|default:"-" }}</td>
+                                <td class="px-4 py-3 text-right text-charcoal font-medium whitespace-nowrap">{{ row.total|whole }} {{ unit }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {# Mobile cards (desktop uses the table above) #}
+                <div class="md:hidden divide-y divide-subtle border border-subtle rounded-lg overflow-hidden">
+                    {% for row in sub_location_breakdown %}
+                    <div class="p-3.5 bg-surface flex items-center justify-between gap-2">
+                        <div class="text-sm font-medium text-charcoal min-w-0">
+                            <span class="text-xs text-muted font-normal block">Used at</span>
+                            {{ row.sub_location_name|default:"-" }}
+                        </div>
+                        <div class="text-sm font-semibold text-charcoal whitespace-nowrap flex-shrink-0">{{ row.total|whole }} {{ unit }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="border border-subtle border-dashed rounded-lg p-6 text-center">
+                    <p class="text-sm text-muted">Received but not used yet in this scope.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="border border-subtle border-dashed rounded-lg p-10 text-center">
+                <i data-lucide="inbox" class="w-8 h-8 text-muted mx-auto mb-2"></i>
+                <p class="text-sm text-muted">No entries yet for this material in the selected scope.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

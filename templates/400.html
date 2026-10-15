@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0B3D91">
+    <title>Bad request | nibba</title>
+    <style>
+        /* Standalone like 500.html: must render with zero app context. */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+               color: #0F2440; background: #E8F6FF; min-height: 100vh;
+               display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .card { background: #FFFFFF; border: 1px solid #C9E2F2; border-radius: 12px;
+                padding: 32px; max-width: 28rem; width: 100%; text-align: center; }
+        h1 { font-size: 22px; margin-bottom: 8px; }
+        p { color: #5C738A; margin-bottom: 8px; line-height: 1.5; }
+        a.btn { display: inline-flex; align-items: center; justify-content: center;
+                margin-top: 24px; padding: 10px 16px; min-height: 44px; border-radius: 12px;
+                font-size: 14px; font-weight: 500; text-decoration: none;
+                background: #0B3D91; color: #FFF; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Bad request</h1>
+        <p>Your browser sent something the app could not understand. This is usually a stale or broken link.</p>
+        <a class="btn" href="/dashboard/">Back to Dashboard</a>
+    </div>
+</body>
+</html>

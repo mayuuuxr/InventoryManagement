@@ -1,0 +1,29 @@
+nibba - RECOVERY SHEET (SUPPORT ONLY, not for shop staff)
+==========================================================
+Keep this file + reset-pin.bat on YOUR pen drive, never on the shop PC.
+
+1) STOCK DATA IS SAFE IF THIS EXISTS: db.sqlite3
+   Every launch also copies it to Backup\db_YYYY-MM-DD_HHMM.sqlite3
+   (keeps 30). To restore: close the app (nibba Close icon), copy the
+   newest good Backup file over db.sqlite3, reopen nibba Shop.
+
+2) OWNER PIN FORGOTTEN (staff locked out):
+   Double-click reset-pin.bat, type RESET when asked. Owner login
+   becomes owner / 1234. Change it immediately after login.
+
+3) PAGE DOES NOT OPEN:
+   a. Double-click "nibba Close", wait 10 seconds.
+   b. Open "nibba Shop" again.
+   c. Still stuck: open Logs\nibba.log, read the last 20 lines,
+      send them to the developer with the VERSION file content.
+
+4) UPDATE A SHOP PC (new version from developer):
+   a. Confirm Backup\ has today's file (open the app once if unsure).
+   b. Close the app. Run:  update.bat vX.Y.Z  (exact tag from Help page)
+   c. It aborts BEFORE changing anything if the backup fails.
+   d. Reopen with the nibba Shop icon, check Help page version.
+
+5) NEVER DELETE: db.sqlite3, .env, Backup\, Logs\, Data\.
+   NEVER copy .env between PCs (it holds this PC's secret key).
+
+Support contact: ______________________  Phone: ______________________

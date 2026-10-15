@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Terms and Conditions | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">Terms and Conditions</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl space-y-4">
+    <div>
+        <h1 class="text-charcoal">Terms and Conditions</h1>
+        <p class="text-sm text-muted mt-1">Last updated: {% now "F j, Y" %}. Plain words, no legal fog.</p>
+    </div>
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-5 space-y-3 text-sm text-charcoal">
+        <div>
+            <h2 class="text-charcoal mb-1">What this app is</h2>
+            <p>nibba is the shop's own stock register on its own PC: inward entries, outward entries, live balances, low-stock alerts, and reports. One payment, no subscription, no internet needed to run.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">Who may use it</h2>
+            <p>Only logins the shop owner creates. The owner is an administrator; staff may add entries and view stock. Staff may edit or delete only their own entries. Sharing PINs is not allowed.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">Correct entries matter</h2>
+            <p>Balances are calculated from what is entered. Check date, quantity, and material before saving. Wrong entries should be corrected the same day; the activity log records every change.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">Backups are the owner's job</h2>
+            <p>The app keeps automatic daily copies in the Backup folder, but a dead disk without a pen-drive copy still means data loss. Copy Backup to a pen drive every month.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">Updates</h2>
+            <p>Updates arrive through the in-app update page and never touch saved entries. A verified backup is taken before every update; if a backup fails, the update refuses to run.</p>
+        </div>
+        <div>
+            <h2 class="text-charcoal mb-1">Provided as is</h2>
+            <p>The app is provided as is for running the shop's stock. Support covers installation, training agreed at purchase, and fixing defects. New features are quoted separately.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

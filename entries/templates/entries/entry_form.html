@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+{% load quantities %}
+
+{% block title %}{{ form_title }} | {{ material.display_name }} | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-xs md:text-sm text-muted mb-3 md:mb-4 whitespace-nowrap overflow-x-auto">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors flex-shrink-0">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5 flex-shrink-0"></i>
+    <a href="{% url 'sites:detail' site.id %}" class="hover:text-charcoal transition-colors truncate min-w-0 max-w-[120px] sm:max-w-[160px] md:max-w-none">{{ site.name }}</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5 flex-shrink-0"></i>
+    <a href="{{ back_url }}" class="hover:text-charcoal transition-colors truncate min-w-0 max-w-[120px] sm:max-w-[160px] md:max-w-none">{{ material.display_name }}</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5 flex-shrink-0"></i>
+    <span class="text-charcoal font-medium flex-shrink-0">{{ form_title }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl">
+    <div class="mb-6 flex items-start gap-3">
+        <a href="{{ back_url }}" class="mt-0.5 inline-flex items-center justify-center w-10 h-10 md:w-8 md:h-8 rounded-xl hover:bg-gray-100 text-muted hover:text-charcoal transition-colors flex-shrink-0">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+        </a>
+        <div>
+            <h1 class="text-charcoal">{{ form_title }}</h1>
+            <p class="text-sm text-muted mt-1">
+                {{ material.display_name }} <span class="mx-1">·</span>
+                {{ site.name }} <span class="mx-1">·</span>
+                per {{ material.unit }}
+            </p>
+        </div>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-lg p-4 md:p-6">
+        <form method="post" enctype="multipart/form-data" id="entry-form" class="space-y-4">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="flex items-start gap-2 p-3 bg-danger-bg/40 border border-subtle rounded-md">
+                <i data-lucide="x-circle" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"></i>
+                <p class="text-sm text-charcoal">{{ form.non_field_errors.0 }}</p>
+            </div>
+            {% endif %}
+
+            {# Repeat pre-fill notice | form opened via ?repeat=<pk> #}
+            {% if request.GET.repeat %}
+            <div class="flex items-center gap-2 px-3 py-2 bg-accent/5 border border-subtle rounded-md text-xs text-charcoal">
+                <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+                Pre-filled from your last entry. Just check the quantity and date, then save.
+            </div>
+            {% endif %}
+
+            {# Available balance hint | only set by the Outward view #}
+            {% if available_balance is not None %}
+            <div class="flex items-center gap-2.5 px-4 py-3 bg-accent/10 border border-accent/20 rounded-xl text-sm text-charcoal shadow-soft">
+                <i data-lucide="info" class="w-5 h-5 text-accent flex-shrink-0"></i>
+                Available here: <span class="font-black ml-1">{{ available_balance|whole }} {{ material.unit }}</span>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="{{ form.date.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                        Date <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ form.date.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                <div>
+                    <label for="{{ form.time.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                        Time <span class="text-red-500">*</span>
+                    </label>
+                    {{ form.time }}
+                    {% if form.time.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ form.time.errors.0 }}</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div>
+                <label for="{{ form.qty.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                    {% if qty_label %}{{ qty_label }}{% else %}Quantity{% endif %} ({{ material.unit }}) <span class="text-red-500">*</span>
+                </label>
+                {{ form.qty }}
+                {% if form.qty.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ form.qty.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            {% if form.received_from %}
+            <div>
+                <label for="{{ form.received_from.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                    Received From <span class="text-red-500">*</span>
+                </label>
+                {{ form.received_from }}
+                {% if form.received_from.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ form.received_from.errors.0 }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if form.sub_location %}
+            <div>
+                <label for="{{ form.sub_location.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                    Sub-location (where was it used) <span class="text-red-500">*</span>
+                </label>
+                <input type="text" name="sub_location" id="{{ form.sub_location.id_for_label }}"
+                       list="sublocation-suggestions" autocomplete="off"
+                       placeholder='e.g. "Banglo 21", "Plot 5"'
+                       value="{{ form.sub_location.value|default_if_none:'' }}"
+                       class="w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+                <datalist id="sublocation-suggestions">
+                    {% for name in sub_location_names %}
+                    <option value="{{ name }}"></option>
+                    {% endfor %}
+                </datalist>
+                {% if form.sub_location.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ form.sub_location.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-xs text-muted">
+                    e.g. "Banglo 21", "Plot 5", "Tower A foundation"
+                </p>
+            </div>
+            {% endif %}
+
+            {% if form.inward_entry %}
+            <div>
+                <label for="{{ form.inward_entry.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                    From inward delivery <span class="text-red-500">*</span>
+                </label>
+                {{ form.inward_entry }}
+                {% if form.inward_entry.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ form.inward_entry.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-xs text-muted">
+                    Which delivery this material is used from (remaining shown per delivery).
+                </p>
+            </div>
+            {% endif %}
+
+
+            <div class="sm:sticky sm:bottom-0 z-10 -mx-4 md:-mx-6 -mb-4 md:-mb-6 px-4 md:px-6 py-3 mt-2 bg-surface border-t border-subtle rounded-b-lg">
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <button type="submit"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 min-h-[52px] bg-accent text-white text-base font-bold rounded-xl shadow-soft hover:bg-accent-hover transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">
+                        <i data-lucide="check" class="w-5 h-5"></i>
+                        {{ submit_label }}
+                    </button>
+                    <a href="{{ back_url }}"
+                       class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-3 min-h-[48px] md:min-h-0 md:py-2 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors">
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+// Unsent-draft keeper: if the browser crashes, the tab closes, or Save
+// fails on network, typed values survive per form URL in sessionStorage
+// (tab-scoped | gone when the tab closes, never sent anywhere). Only
+// plain text fields are kept (qty/date/time/received_from/sub-location);
+// the photo input can't be restored by browsers, so staff still re-attach
+// it. Restores ONLY into empty fields (server values and repeat-prefill
+// always win), ignores drafts older than 24h, and wipes on submit.
+(function () {
+    var form = document.getElementById("entry-form");
+    if (!form || !window.sessionStorage) return;
+    var KEY = "vidarbha_entry_draft:" + location.pathname;
+    var FIELDS = ["qty", "date", "time", "received_from", "sub_location"];
+    var MAX_AGE = 24 * 60 * 60 * 1000;
+    function read() {
+        try { return JSON.parse(sessionStorage.getItem(KEY)) || {}; }
+        catch (e) { return {}; }
+    }
+    function collect() {
+        var d = { _at: Date.now() };
+        FIELDS.forEach(function (n) {
+            var el = form.elements[n];
+            if (el && el.value) d[n] = el.value;
+        });
+        return d;
+    }
+    // Restore first (before any input listener can overwrite the draft).
+    var draft = read();
+    if (draft._at && (Date.now() - draft._at) < MAX_AGE) {
+        FIELDS.forEach(function (n) {
+            var el = form.elements[n];
+            if (el && !el.value && draft[n]) el.value = draft[n];
+        });
+    }
+    // Snapshot whatever is on screen now (server values, repeat-prefill):
+    // a failed validation re-renders with values but wipes nothing, and a
+    // later crash still finds them in the draft.
+    try { sessionStorage.setItem(KEY, JSON.stringify(collect())); }
+    catch (e) { /* ignore */ }
+    form.addEventListener("input", function () {
+        try { sessionStorage.setItem(KEY, JSON.stringify(collect())); }
+        catch (e) { /* quota/private mode | draft just won't survive */ }
+    });
+    form.addEventListener("submit", function () {
+        try { sessionStorage.removeItem(KEY); }
+        catch (e) { /* ignore */ }
+    });
+})();
+</script>
+{% endblock %}

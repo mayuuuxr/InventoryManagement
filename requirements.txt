@@ -1,0 +1,38 @@
+# LEGACY cloud file — NOT installed anywhere. PC builds (INSTALL.bat,
+# BUILD-PORTABLE.bat, update.bat) install requirements-pc.txt only.
+# Kept as reference for the original cloud project.
+# Core
+Django==6.1.1
+django-axes==8.3.1
+python-dotenv>=1.0,<2.0
+
+# Cloudinary for image storage
+cloudinary==1.46.2
+django-cloudinary-storage==0.3.0
+
+# Database
+psycopg2-binary>=2.9,<3.0  # For PostgreSQL production
+
+# File validation: Pillow content-sniffs photo uploads (python-magic was
+# dropped — its native libmagic cannot install on Windows).
+Pillow>=11.0,<13.0
+
+# Excel export
+openpyxl==3.1.5
+et-xmlfile==2.0.0
+
+# PDF export
+reportlab>=4.0,<6.0
+
+# Free Web Push notifications (VAPID RFC 8292 - no Firebase/OneSignal/SMS)
+pywebpush>=1.14,<2.0
+
+# Production
+gunicorn==26.2.0
+whitenoise>=6.0,<7.0
+
+# Error monitoring (active only when SENTRY_DSN env is set — see settings)
+sentry-sdk>=2.0,<3.0
+
+# Development (optional)
+# django-debug-toolbar>=4.0,<5.0

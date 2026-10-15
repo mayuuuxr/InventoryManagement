@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Not allowed | nibba{% endblock %}
+
+{% block content %}
+<div class="max-w-lg mx-auto">
+    <div class="bg-surface border border-subtle rounded-lg p-8 md:p-12 text-center">
+        <div class="w-12 h-12 rounded-lg bg-danger-bg flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="alert-triangle" class="w-6 h-6 text-danger-fg"></i>
+        </div>
+        <h1 class="text-charcoal mb-2">Not allowed</h1>
+        <p class="text-sm text-muted mb-2">Your login ({{ user.username }}) doesn't have access to this page.</p>
+        {% if user.role == 'staff' %}
+        <p class="text-sm text-muted mb-6">Staff accounts can add entries and view reports. Member management, shop setup, and the activity log are owner-only. Ask your admin if you need something there.</p>
+        {% elif user.role == 'manager' %}
+        <p class="text-sm text-muted mb-6">Manager accounts are view-only. Entry changes and setup pages are owner/staff-only.</p>
+        {% else %}
+        <p class="text-sm text-muted mb-6">If you believe this is a mistake, ask your shop owner to check your role.</p>
+        {% endif %}
+        <div class="flex flex-col sm:flex-row sm:justify-center gap-3">
+            <a href="{% url 'dashboard' %}"
+               class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                Back to Dashboard
+            </a>
+            <a href="{% url 'help' %}"
+               class="inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-surface text-charcoal text-sm font-medium rounded-xl border border-subtle hover:bg-gray-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2">
+                <i data-lucide="info" class="w-4 h-4"></i>
+                How to use the app
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
