@@ -132,27 +132,46 @@ def backup_database(base_dir):
     return backup
 
 
-def format_size(num_bytes):
-    """Human size for the progress label: 0.5 MB, 1.2 GB, ..."""
-    mb = num_bytes / (1024 * 1024)
-    if mb < 1024:
-        return f"{mb:.1f} MB"
-    return f"{mb / 1024:.2f} GB"
+def download_release(zip_url, dest, timeout=120, on_progress=None):
+    """Fetch the release zip in chunks; aborts on errors or tiny files.
 
-
-def download_release(zip_url, dest, timeout=120):
-    """Fetch the release zip; aborts on network errors or tiny files."""
+    on_progress(received_bytes, total_or_None) fires per chunk so the UI
+    can show a live percent while downloading.
+    """
     dest = Path(dest)
     req = urllib.request.Request(
         zip_url, headers={"Accept": "application/octet-stream"})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as res:
-            data = res.read()
+        response = urllib.request.urlopen(req, timeout=timeout)
     except Exception as exc:
         raise UpdateError(f"Could not download the update ({exc}).")
-    if len(data) < MIN_ZIP_BYTES:
+    try:
+        with response as res:
+            try:
+                total = int(res.getheader("Content-Length") or 0) or None
+            except Exception:
+                # file:// URLs and odd servers may lack headers entirely.
+                total = None
+            received = 0
+            with open(dest, "wb") as fh:
+                while True:
+                    try:
+                        chunk = res.read(65536)
+                    except Exception as exc:
+                        raise UpdateError(
+                            f"Download broke halfway ({exc}).")
+                    if not chunk:
+                        break
+                    fh.write(chunk)
+                    received += len(chunk)
+                    if on_progress:
+                        on_progress(received, total)
+    except UpdateError:
+        raise
+    except Exception as exc:
+        raise UpdateError(f"Could not download the update ({exc}).")
+    if dest.stat().st_size < MIN_ZIP_BYTES:
         raise UpdateError("Downloaded update looks broken (too small).")
-    dest.write_bytes(data)
     return dest
 
 
@@ -208,29 +227,36 @@ setlocal
 cd /d "{appdir}"
 echo %date% %time% {tag} applying >> "Logs\\update-last-run.txt"
 REM Let the browser land on the updating page before the restart.
-powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 8"
-REM Stop the server (Windows locks running files). Kill by image name AND
-REM by port owner, so a wedged lookup of either kind cannot stall us.
-REM Refuse to touch code if the port will not free: a half-copy under a
-REM live server is worse than no update. The old code keeps serving
-REM untouched in that case. Every try is logged for diagnosis.
-powershell -NoProfile -WindowStyle Hidden -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ $n = '?'; try {{ $n = (Get-Process -Id $c.OwningProcess -ErrorAction Stop).ProcessName }} catch {{ }}; echo 'port owner: pid=' + $c.OwningProcess + ' name=' + $n >> 'Logs\\update-last-run.txt' }}"
+REM (ping = cmd-native sleep: no popups. powershell flashes a window
+REM even with -WindowStyle Hidden, so only ONE powershell call remains
+REM in this script: the final hidden restart at the bottom.)
+ping -n 9 127.0.0.1 >nul
+REM Stop the server (Windows locks running files): kill by image name
+REM plus any PID still listening. Refuse to touch code if the port will
+REM not free: a half-copy under a live server is worse than no update.
+REM The old code keeps serving untouched in that case.
 set TRIES=0
 :killagain
 taskkill /F /IM waitress-serve.exe >nul 2>&1
-powershell -NoProfile -WindowStyle Hidden -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ try {{ Stop-Process -Id $c.OwningProcess -Force -ErrorAction Stop }} catch {{ }}; exit 1 }}"
-if not errorlevel 1 goto killok
+set BUSY=0
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr LISTENING ^| findstr ":8000 "') do (
+    taskkill /F /PID %%a >nul 2>&1
+    set BUSY=1
+)
+if %BUSY%==0 goto killok
 set /a TRIES=%TRIES%+1
 if %TRIES% GEQ 30 goto stillrunning
-powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2"
+ping -n 3 127.0.0.1 >nul
 goto killagain
 :killok
 echo 30^|Copying new files > "Logs\\update-progress.txt"
 if exist "runtime\\python.exe" (set PY=runtime\\python.exe) else (set PY=venv\\Scripts\\python.exe)
 if exist "runtime\\Scripts\\waitress-serve.exe" (set WS=runtime\\Scripts\\waitress-serve.exe) else (set WS=venv\\Scripts\\waitress-serve.exe)
-REM Copy staged code only (protected names excluded - same list as update.bat).
-powershell -NoProfile -WindowStyle Hidden -Command "$prot = @('.env','Backup','Logs','Data','chrome-profile','venv','runtime','.git','staticfiles','__pycache__','tunnel.log','cloudflared.exe'); Get-ChildItem '{stage}' -Recurse -File | ForEach-Object {{ $rel = $_.FullName.Substring('{stage}'.Length + 1); $parts = $rel -split '[\\\\/]'; if (($parts | Where-Object {{ $prot -contains $_ }}).Count -gt 0) {{ return }}; if ($rel -like '*.sqlite3' -or $rel -like '*.pem') {{ return }}; $dest = Join-Path '.' $rel; New-Item -ItemType Directory -Path (Split-Path $dest) -Force | Out-Null; Copy-Item $_.FullName $dest -Force }}"
-if errorlevel 1 goto copyfail
+REM Copy staged code only (robocopy = cmd-native, no popups; /XD + /XF
+REM mirror the protected list; /R:2 /W:2 so a stuck file fails fast
+REM instead of retrying for hours; exit 0-7 all mean success).
+robocopy "{stage}" "." /E /XD .env Backup Logs Data chrome-profile venv runtime .git staticfiles __pycache__ /XF *.sqlite3 *.pem tunnel.log cloudflared.exe /R:2 /W:2 /NJH /NJS /NDL /NFL /NP >nul
+if errorlevel 8 goto copyfail
 echo 55^|Updating database > "Logs\\update-progress.txt"
 "%PY%" manage.py migrate --noinput -v 0
 if errorlevel 1 goto migratefail
@@ -273,35 +299,56 @@ def write_apply_script(base_dir, stage_dir, tag):
     return script
 
 
+def claim_update(base_dir, tag):
+    """Take the single-flight lock in the request thread. True if ours.
+
+    The view calls this BEFORE spawning the background worker, so an
+    impatient second click is refused up front instead of racing it.
+    """
+    base = Path(base_dir)
+    if not TAG_RE.match(tag):
+        return False
+    if update_in_progress(base):
+        return False
+    _write_lock(base, tag)
+    return True
+
+
 def perform_update(base_dir, tag, zip_url, tmp_root=None):
     """Backup + download + stage + write applier. Returns the script path.
 
-    Raises UpdateError on any problem — the running app is never touched
-    (all work happens in the temp staging dir + one generated script).
-    Refuses when another update is in flight (single-flight lock), so a
-    second click can never stage over a running applier. Launching is the
-    view's job (launch_detached), so tests can stop here.
+    Runs in a background thread (see background_update): reports live
+    download percent to the progress file as chunks arrive. Raises
+    UpdateError on any problem — the running app is never touched (all
+    work happens in the temp staging dir + one generated script).
     """
     base = Path(base_dir)
     if not TAG_RE.match(tag):
         raise UpdateError("Bad update version — aborted.")
     live = update_in_progress(base)
-    if live:
+    if live and live != tag:
         raise UpdateError(
             f"Update {live} is already installing — "
             "wait a minute and check Help again.")
+    if not live:
+        _write_lock(base, tag)
     staging_root = Path(tmp_root) if tmp_root else Path(tempfile.gettempdir())
     stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
     stage = staging_root / f"nibba_update_stage_{stamp}"
     staged_zip = staging_root / f"nibba_update_{stamp}.zip"
-    backup_database(base)
-    _write_lock(base, tag)
+
+    def on_download(received, total):
+        if total:
+            pct = 6 + int(6 * min(received, total) / total)
+            write_progress(base, pct, f"Downloading update {pct}%")
+        else:
+            write_progress(base, 8, "Downloading update…")
+
     try:
         write_progress(base, 5, "Backing up your entries")
-        download_release(zip_url, staged_zip)
-        write_progress(
-            base, 12,
-            f"Downloaded update ({format_size(staged_zip.stat().st_size)})")
+        backup_database(base)
+        download_release(zip_url, staged_zip, on_progress=on_download)
+        write_progress(base, 12, "Download complete")
         extract_staged(staged_zip, stage)
         return write_apply_script(base, stage, tag)
     except Exception:
@@ -310,6 +357,38 @@ def perform_update(base_dir, tag, zip_url, tmp_root=None):
         # installing" forever. The batch clears it on the happy path.
         _clear_lock(base)
         raise
+
+
+def record_result(base_dir, tag, outcome):
+    """Append one timestamped line to Logs/update-last-run.txt."""
+    try:
+        with open(Path(base_dir) / STATUS_FILE, "a",
+                  encoding="utf-8") as fh:
+            fh.write(f"{datetime.now():%Y-%m-%d %H:%M:%S} "
+                     f"{tag} {outcome}\n")
+    except OSError:
+        pass
+
+
+def background_update(base_dir, tag, zip_url):
+    """Thread entry for the view: stage, launch, never raise.
+
+    Failures are recorded to the status file (the updating page shows
+    them) instead of becoming a 500 nobody watches.
+    """
+    try:
+        script = perform_update(base_dir, tag, zip_url)
+    except UpdateError as exc:
+        record_result(base_dir, tag, f"FAILED: {exc}")
+        return
+    except Exception as exc:
+        record_result(base_dir, tag, f"FAILED: unexpected ({exc})")
+        return
+    try:
+        launch_detached(script)
+    except Exception as exc:
+        _clear_lock(base_dir)
+        record_result(base_dir, tag, f"FAILED: could not start ({exc})")
 
 
 def launch_detached(script):

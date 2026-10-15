@@ -129,8 +129,10 @@ class ApplyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
         return is_owner(self.request.user)
 
     def post(self, request):
+        import threading
+
         from core.selfupdate import (
-            UpdateError, launch_detached, perform_update, resolve_update,
+            background_update, claim_update, resolve_update,
         )
         resolved = resolve_update(
             getattr(settings, "UPDATE_REPO", ""),
@@ -140,19 +142,19 @@ class ApplyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
                 request, "No update found right now. Your app works as-is.")
             return redirect("help")
         tag, zip_url = resolved
-        try:
-            script = perform_update(settings.BASE_DIR, tag, zip_url)
-        except UpdateError as exc:
-            messages.error(request, f"Update did not start: {exc}")
+        # Claim first (synchronous): a second click is refused here,
+        # not after staging. The heavy work runs in a background thread
+        # so the updating page (with live download %) renders at once.
+        if not claim_update(settings.BASE_DIR, tag):
+            messages.info(
+                request, f"Update {tag} is already installing — "
+                "wait a minute and check Help again.")
             return redirect("help")
-        try:
-            launch_detached(script)
-        except Exception:
-            from core.selfupdate import _clear_lock
-            _clear_lock(settings.BASE_DIR)
-            messages.error(
-                request, "Update staged but could not start — try again.")
-            return redirect("help")
+        job = threading.Thread(
+            target=background_update,
+            args=(settings.BASE_DIR, tag, zip_url),
+            daemon=True, name=f"nibba-update-{tag}")
+        job.start()
         return render(request, "updating.html", {"tag": tag})
 
 

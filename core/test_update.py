@@ -116,13 +116,10 @@ class OneClickStageTests(SimpleTestCase):
             from core.selfupdate import read_progress
             pct, label = read_progress(base)
             self.assertEqual(pct, 12)
-            self.assertIn("MB", label)
-            from core.selfupdate import format_size
-            self.assertEqual(format_size(524288), "0.5 MB")
-            self.assertEqual(format_size(2 * 1024 * 1024 * 1024), "2.00 GB")
+            self.assertEqual(label, "Download complete")
             text = script.read_text(encoding="utf-8")
             self.assertIn("v9.9.9", text)
-            self.assertIn("Stop-Process", text)
+            self.assertIn("taskkill /F /IM waitress-serve.exe", text)
 
     def test_bad_tag_and_bad_zip_abort(self):
         from core.selfupdate import UpdateError, perform_update
@@ -142,7 +139,9 @@ class OneClickStageTests(SimpleTestCase):
                 perform_update(base, "v9.9.9", empty.as_uri(),
                                tmp_root=Path(tmp))
 
-    def test_second_run_blocked_while_in_flight(self):
+    def test_other_tag_blocked_while_in_flight(self):
+        # Same tag re-enters (the view claims, then stages with that tag);
+        # a DIFFERENT tag mid-flight is refused.
         from core.selfupdate import UpdateError, perform_update
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
@@ -152,9 +151,17 @@ class OneClickStageTests(SimpleTestCase):
             zf = _fixture_zip(Path(tmp) / "rel.zip")
             perform_update(base, "v9.9.9", zf.as_uri(), tmp_root=Path(tmp))
             with self.assertRaises(UpdateError) as cm:
-                perform_update(base, "v9.9.9", zf.as_uri(),
+                perform_update(base, "v9.9.10", zf.as_uri(),
                                tmp_root=Path(tmp))
             self.assertIn("already installing", str(cm.exception))
+
+    def test_claim_refuses_second_taker(self):
+        from core.selfupdate import claim_update
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            self.assertTrue(claim_update(base, "v9.9.9"))
+            self.assertFalse(claim_update(base, "v9.9.9"))
 
     def test_stale_lock_does_not_block(self):
         from core.selfupdate import _write_lock, update_in_progress
@@ -177,13 +184,16 @@ class OneClickStageTests(SimpleTestCase):
             script = write_apply_script(base, Path(tmp) / "stage", "v9.9.9")
             text = script.read_text(encoding="utf-8")
             self.assertIn("update-in-progress", text)
-            self.assertIn("Start-Sleep -Seconds 8", text)
+            self.assertIn("ping -n 9 127.0.0.1", text)
             self.assertIn("FAILED: server would not stop", text)
             self.assertIn("taskkill /F /IM waitress-serve.exe", text)
             self.assertIn("killagain", text)
-            self.assertIn("port owner", text)
+            self.assertIn("robocopy", text)
             self.assertIn("update-progress", text)
             self.assertNotIn("timeout /t", text)
+            # Only the two server (re)starts may invoke powershell now
+            # (comments may mention the word, invocations must not).
+            self.assertEqual(text.count("powershell -NoProfile"), 2)
 
     def test_changelog_line_stripped(self):
         from unittest import mock
@@ -264,23 +274,94 @@ class ApplyUpdateViewTests(TestCase):
         self.assertEqual(r.status_code, 302)
         self.assertIn("/help/", r["Location"])
 
-    def test_owner_stages_and_sees_polling_page(self):
+    def test_owner_gets_polling_page_at_once(self):
+        # Staging runs in a background thread: the response returns
+        # immediately and the worker (mocked here) does the heavy work.
+        # BASE_DIR is isolated so a stale dev lock can never refuse it.
         import tempfile
         self.client.force_login(self.admin)
         with tempfile.TemporaryDirectory() as tmp:
             app = Path(tmp) / "app"
             app.mkdir()
-            (app / "db.sqlite3").write_bytes(b"d" * 100000)
-            zf = _fixture_zip(Path(tmp) / "rel.zip")
             with mock.patch("core.selfupdate.resolve_update",
-                            return_value=("v9.9.9", zf.as_uri())), \
-                 mock.patch("core.selfupdate.tempfile.gettempdir",
-                            return_value=tmp), \
-                 mock.patch("core.selfupdate.launch_detached") as launched, \
+                            return_value=("v9.9.9", "https://x/nibba.zip")), \
+                 mock.patch("core.selfupdate.background_update") as worker, \
                  override_settings(BASE_DIR=str(app)):
                 r = self.client.post("/update/apply/")
-            self.assertEqual(r.status_code, 200)
-            self.assertContains(r, "Installing nibba v9.9.9")
-            self.assertContains(r, "update-state")
-            launched.assert_called_once()
-            self.assertTrue((app / "apply_update.bat").is_file())
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Installing nibba v9.9.9")
+        self.assertContains(r, "update-state")
+        self.assertContains(r, 'id="update-bar"')
+        worker.assert_called_once()
+
+    def test_second_click_refused_up_front(self):
+        import tempfile
+        from core.selfupdate import _write_lock
+        self.client.force_login(self.admin)
+        with tempfile.TemporaryDirectory() as tmp:
+            app = Path(tmp) / "app"
+            app.mkdir()
+            _write_lock(app, "v9.9.9")
+            with mock.patch("core.selfupdate.resolve_update",
+                            return_value=("v9.9.9", "https://x/nibba.zip")), \
+                 override_settings(BASE_DIR=str(app)):
+                r = self.client.post("/update/apply/")
+        self.assertEqual(r.status_code, 302)
+        self.assertIn("/help/", r["Location"])
+
+    def test_background_failure_recorded_lock_released(self):
+        import tempfile
+        from core.selfupdate import (
+            background_update, last_status, update_in_progress,
+        )
+        with tempfile.TemporaryDirectory() as tmp:
+            app = Path(tmp) / "app"
+            app.mkdir()
+            (app / "db.sqlite3").write_bytes(b"d" * 100000)
+            with mock.patch("core.selfupdate.tempfile.gettempdir",
+                            return_value=tmp):
+                background_update(app, "v9.9.9", "https://x/missing.zip")
+            self.assertIsNone(update_in_progress(app))
+            self.assertIn("FAILED", last_status(app))
+
+    def test_download_reports_live_percent(self):
+        import io
+        import tempfile
+        from core.selfupdate import download_release
+        body = b"z" * 60000
+
+        class FakeResp:
+            def __init__(self):
+                self._pos = 0
+
+            def getheader(self, name):
+                return str(len(body)) if name == "Content-Length" else None
+
+            def read(self, size=-1):
+                if self._pos >= len(body):
+                    return b""
+                out = body[self._pos:self._pos + 10000]
+                self._pos += len(out)
+                return out
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        seen = []
+        with tempfile.TemporaryDirectory() as tmp:
+            dest = Path(tmp) / "r.zip"
+            with mock.patch("urllib.request.urlopen",
+                            return_value=FakeResp()):
+                download_release("https://x/nibba.zip", dest,
+                                 on_progress=lambda got, total: seen.append(
+                                     (got, total)))
+            self.assertTrue(dest.is_file())
+            self.assertEqual(dest.stat().st_size, len(body))
+            self.assertGreater(len(seen), 2)
+            self.assertTrue(all(t == len(body) for _, t in seen))
+            got_last, _ = seen[-1]
+            self.assertEqual(got_last, len(body))
+            self.assertLess(seen[0][0], got_last)
