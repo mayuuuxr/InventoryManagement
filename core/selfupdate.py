@@ -132,6 +132,14 @@ def backup_database(base_dir):
     return backup
 
 
+def format_size(num_bytes):
+    """Human size for the progress label: 0.5 MB, 1.2 GB, ..."""
+    mb = num_bytes / (1024 * 1024)
+    if mb < 1024:
+        return f"{mb:.1f} MB"
+    return f"{mb / 1024:.2f} GB"
+
+
 def download_release(zip_url, dest, timeout=120):
     """Fetch the release zip; aborts on network errors or tiny files."""
     dest = Path(dest)
@@ -200,28 +208,28 @@ setlocal
 cd /d "{appdir}"
 echo %date% %time% {tag} applying >> "Logs\\update-last-run.txt"
 REM Let the browser land on the updating page before the restart.
-powershell -NoProfile -Command "Start-Sleep -Seconds 8"
+powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 8"
 REM Stop the server (Windows locks running files). Kill by image name AND
 REM by port owner, so a wedged lookup of either kind cannot stall us.
 REM Refuse to touch code if the port will not free: a half-copy under a
 REM live server is worse than no update. The old code keeps serving
 REM untouched in that case. Every try is logged for diagnosis.
-powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ $n = '?'; try {{ $n = (Get-Process -Id $c.OwningProcess -ErrorAction Stop).ProcessName }} catch {{ }}; echo 'port owner: pid=' + $c.OwningProcess + ' name=' + $n >> 'Logs\\update-last-run.txt' }}"
+powershell -NoProfile -WindowStyle Hidden -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ $n = '?'; try {{ $n = (Get-Process -Id $c.OwningProcess -ErrorAction Stop).ProcessName }} catch {{ }}; echo 'port owner: pid=' + $c.OwningProcess + ' name=' + $n >> 'Logs\\update-last-run.txt' }}"
 set TRIES=0
 :killagain
 taskkill /F /IM waitress-serve.exe >nul 2>&1
-powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ try {{ Stop-Process -Id $c.OwningProcess -Force -ErrorAction Stop }} catch {{ }}; exit 1 }}"
+powershell -NoProfile -WindowStyle Hidden -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue | Select-Object -First 1; if ($c) {{ try {{ Stop-Process -Id $c.OwningProcess -Force -ErrorAction Stop }} catch {{ }}; exit 1 }}"
 if not errorlevel 1 goto killok
 set /a TRIES=%TRIES%+1
 if %TRIES% GEQ 30 goto stillrunning
-powershell -NoProfile -Command "Start-Sleep -Seconds 2"
+powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2"
 goto killagain
 :killok
 echo 30^|Copying new files > "Logs\\update-progress.txt"
 if exist "runtime\\python.exe" (set PY=runtime\\python.exe) else (set PY=venv\\Scripts\\python.exe)
 if exist "runtime\\Scripts\\waitress-serve.exe" (set WS=runtime\\Scripts\\waitress-serve.exe) else (set WS=venv\\Scripts\\waitress-serve.exe)
 REM Copy staged code only (protected names excluded - same list as update.bat).
-powershell -NoProfile -Command "$prot = @('.env','Backup','Logs','Data','chrome-profile','venv','runtime','.git','staticfiles','__pycache__','tunnel.log','cloudflared.exe'); Get-ChildItem '{stage}' -Recurse -File | ForEach-Object {{ $rel = $_.FullName.Substring('{stage}'.Length + 1); $parts = $rel -split '[\\\\/]'; if (($parts | Where-Object {{ $prot -contains $_ }}).Count -gt 0) {{ return }}; if ($rel -like '*.sqlite3' -or $rel -like '*.pem') {{ return }}; $dest = Join-Path '.' $rel; New-Item -ItemType Directory -Path (Split-Path $dest) -Force | Out-Null; Copy-Item $_.FullName $dest -Force }}"
+powershell -NoProfile -WindowStyle Hidden -Command "$prot = @('.env','Backup','Logs','Data','chrome-profile','venv','runtime','.git','staticfiles','__pycache__','tunnel.log','cloudflared.exe'); Get-ChildItem '{stage}' -Recurse -File | ForEach-Object {{ $rel = $_.FullName.Substring('{stage}'.Length + 1); $parts = $rel -split '[\\\\/]'; if (($parts | Where-Object {{ $prot -contains $_ }}).Count -gt 0) {{ return }}; if ($rel -like '*.sqlite3' -or $rel -like '*.pem') {{ return }}; $dest = Join-Path '.' $rel; New-Item -ItemType Directory -Path (Split-Path $dest) -Force | Out-Null; Copy-Item $_.FullName $dest -Force }}"
 if errorlevel 1 goto copyfail
 echo 55^|Updating database > "Logs\\update-progress.txt"
 "%PY%" manage.py migrate --noinput -v 0
@@ -291,7 +299,9 @@ def perform_update(base_dir, tag, zip_url, tmp_root=None):
     try:
         write_progress(base, 5, "Backing up your entries")
         download_release(zip_url, staged_zip)
-        write_progress(base, 12, "Downloading update")
+        write_progress(
+            base, 12,
+            f"Downloaded update ({format_size(staged_zip.stat().st_size)})")
         extract_staged(staged_zip, stage)
         return write_apply_script(base, stage, tag)
     except Exception:

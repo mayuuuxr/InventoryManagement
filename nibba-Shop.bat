@@ -44,23 +44,23 @@ echo Preparing display files (one time)...
 "%PY%" manage.py collectstatic --noinput -v 0
 :backupstep
 if not exist "Backup" mkdir "Backup"
-for /f %%t in ('powershell -NoProfile -Command "Get-Date -Format yyyy-MM-dd_HHmm"') do set STAMP=%%t
+for /f %%t in ('powershell -NoProfile -WindowStyle Hidden -Command "Get-Date -Format yyyy-MM-dd_HHmm"') do set STAMP=%%t
 if not exist "db.sqlite3" goto servstep
 copy /Y "db.sqlite3" "Backup\db_%STAMP%.sqlite3" >nul
-powershell -NoProfile -Command "Get-ChildItem 'Backup\db_*.sqlite3' | Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 | Remove-Item -Force"
+powershell -NoProfile -WindowStyle Hidden -Command "Get-ChildItem 'Backup\db_*.sqlite3' | Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 | Remove-Item -Force"
 :servstep
 REM Monthly Excel files for direct work (fail-soft: never blocks launch).
 "%PY%" manage.py export_monthly_files -v 0
 if errorlevel 1 echo WARNING: monthly Excel files not updated - app still opens fine.
-powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) { Stop-Process -Id $c.OwningProcess -Force }"
-powershell -NoProfile -Command "Start-Sleep -Seconds 2"
+powershell -NoProfile -WindowStyle Hidden -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) { Stop-Process -Id $c.OwningProcess -Force }"
+powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2"
 REM Hidden server window: no terminal on screen. Output goes to Logs/nibba.log.
 powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WAITRESS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
 set TRIES=0
 :waitloop
-powershell -NoProfile -Command "try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 http://127.0.0.1:8000/accounts/login/ | Out-Null; exit 0 } catch { exit 1 }"
+powershell -NoProfile -WindowStyle Hidden -Command "try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 http://127.0.0.1:8000/accounts/login/ | Out-Null; exit 0 } catch { exit 1 }"
 if not errorlevel 1 goto openit
-powershell -NoProfile -Command "Start-Sleep -Seconds 2"
+powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2"
 set /a TRIES=%TRIES%+1
 if %TRIES% LSS 30 goto waitloop
 echo WARNING: server is slow - opening the browser anyway...
@@ -88,5 +88,5 @@ exit /b 0
 start "" "%ProgramFiles(x86)%\Microsoft\Edge\Application\msedge.exe" --app="%APPURL%" --user-data-dir="%CD%\chrome-profile"
 exit /b 0
 :makeenv
-powershell -NoProfile -Command "$k=((48..57)+(65..90)+(97..122) | Get-Random -Count 50 | ForEach-Object {[char]$_}) -join ''; Set-Content '.env' ('DJANGO_SECRET_KEY=' + $k + [Environment]::NewLine + 'DEBUG=False' + [Environment]::NewLine + 'ALLOWED_HOSTS=localhost,127.0.0.1')"
+powershell -NoProfile -WindowStyle Hidden -Command "$k=((48..57)+(65..90)+(97..122) | Get-Random -Count 50 | ForEach-Object {[char]$_}) -join ''; Set-Content '.env' ('DJANGO_SECRET_KEY=' + $k + [Environment]::NewLine + 'DEBUG=False' + [Environment]::NewLine + 'ALLOWED_HOSTS=localhost,127.0.0.1')"
 exit /b %errorlevel%

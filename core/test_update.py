@@ -113,6 +113,13 @@ class OneClickStageTests(SimpleTestCase):
             self.assertTrue(nested.is_file())
             self.assertTrue((stage / "accounts" / "templates").is_dir())
             self.assertTrue(script.is_file())
+            from core.selfupdate import read_progress
+            pct, label = read_progress(base)
+            self.assertEqual(pct, 12)
+            self.assertIn("MB", label)
+            from core.selfupdate import format_size
+            self.assertEqual(format_size(524288), "0.5 MB")
+            self.assertEqual(format_size(2 * 1024 * 1024 * 1024), "2.00 GB")
             text = script.read_text(encoding="utf-8")
             self.assertIn("v9.9.9", text)
             self.assertIn("Stop-Process", text)
