@@ -145,7 +145,14 @@ class ApplyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
         except UpdateError as exc:
             messages.error(request, f"Update did not start: {exc}")
             return redirect("help")
-        launch_detached(script)
+        try:
+            launch_detached(script)
+        except Exception:
+            from core.selfupdate import _clear_lock
+            _clear_lock(settings.BASE_DIR)
+            messages.error(
+                request, "Update staged but could not start — try again.")
+            return redirect("help")
         return render(request, "updating.html", {"tag": tag})
 
 

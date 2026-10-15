@@ -57,6 +57,11 @@ def _fixture_zip(path, version="9.9.9"):
         zf.writestr("Backup/db_old.sqlite3", "fakedb")
         zf.writestr("../escape.txt", "evil")
         zf.writestr("/abs.txt", "evil")
+        # Explicit directory entries (Compress-Archive writes these):
+        # must be skipped, never extracted as files.
+        zf.writestr("accounts/", "")
+        zf.writestr("accounts/templates/", "")
+        zf.writestr("accounts/templates/accounts/base.html", "<p>x</p>")
     return path
 
 
@@ -104,6 +109,9 @@ class OneClickStageTests(SimpleTestCase):
             self.assertFalse((stage / "db.sqlite3").exists())
             self.assertFalse((stage / "Backup").exists())
             self.assertFalse((Path(tmp) / "escape.txt").exists())
+            nested = stage / "accounts" / "templates" / "accounts" / "base.html"
+            self.assertTrue(nested.is_file())
+            self.assertTrue((stage / "accounts" / "templates").is_dir())
             self.assertTrue(script.is_file())
             text = script.read_text(encoding="utf-8")
             self.assertIn("v9.9.9", text)

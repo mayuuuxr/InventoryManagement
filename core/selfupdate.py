@@ -150,9 +150,13 @@ def download_release(zip_url, dest, timeout=120):
 def _safe_pair(name):
     """Map a zip member to a safe relative path, or None to skip it.
 
-    Skips anything that would escape the staging dir (absolute paths,
-    ../ climbs) and anything protected (DB, .env, venv, ...).
+    Skips directory entries (Compress-Archive writes them explicitly;
+    extracting one as a file would poison later mkdirs), anything that
+    would escape the staging dir (absolute paths, ../ climbs), and
+    anything protected (DB, .env, venv, ...).
     """
+    if name.endswith(("/", "\\")):
+        return None
     rel = name.replace("\\", "/").lstrip("/")
     if not rel or rel.startswith(("/", "../")) or "/../" in rel:
         return None
@@ -179,8 +183,10 @@ def extract_staged(zip_path, stage_dir):
             raise UpdateError("Downloaded update is not a nibba release.")
         for name, rel in pairs:
             target = stage / rel
+            if target.is_dir():
+                continue  # belt-and-braces alongside the dir-entry skip
+            target.parent.mkdir(parents=True, exist_ok=True)
             with zf.open(name) as src:
-                target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(src.read())
     return stage
 
@@ -270,7 +276,10 @@ def perform_update(base_dir, tag, zip_url, tmp_root=None):
         download_release(zip_url, staged_zip)
         extract_staged(staged_zip, stage)
         return write_apply_script(base, stage, tag)
-    except UpdateError:
+    except Exception:
+        # Any failure (expected or raw OS error) releases the lock, so
+        # the next click retries clean instead of seeing "already
+        # installing" forever. The batch clears it on the happy path.
         _clear_lock(base)
         raise
 
