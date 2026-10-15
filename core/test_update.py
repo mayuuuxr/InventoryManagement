@@ -95,7 +95,9 @@ class OneClickStageTests(SimpleTestCase):
             zf = _fixture_zip(Path(tmp) / "rel.zip")
             script = perform_update(
                 base, "v9.9.9", zf.as_uri(), tmp_root=Path(tmp))
-            stage = Path(tmp) / "nibba_update_stage"
+            stages = list(Path(tmp).glob("nibba_update_stage_*"))
+            self.assertEqual(len(stages), 1)
+            stage = stages[0]
             self.assertTrue((stage / "VERSION").is_file())
             self.assertTrue((stage / "templates" / "new.html").is_file())
             self.assertFalse((stage / ".env").exists())
@@ -124,6 +126,56 @@ class OneClickStageTests(SimpleTestCase):
             with self.assertRaises(UpdateError):
                 perform_update(base, "v9.9.9", empty.as_uri(),
                                tmp_root=Path(tmp))
+
+    def test_second_run_blocked_while_in_flight(self):
+        from core.selfupdate import UpdateError, perform_update
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "app"
+            base.mkdir()
+            (base / "db.sqlite3").write_bytes(b"data" * 30000)
+            zf = _fixture_zip(Path(tmp) / "rel.zip")
+            perform_update(base, "v9.9.9", zf.as_uri(), tmp_root=Path(tmp))
+            with self.assertRaises(UpdateError) as cm:
+                perform_update(base, "v9.9.9", zf.as_uri(),
+                               tmp_root=Path(tmp))
+            self.assertIn("already installing", str(cm.exception))
+
+    def test_stale_lock_does_not_block(self):
+        from core.selfupdate import _write_lock, update_in_progress
+        import tempfile
+        import time
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            _write_lock(base, "v9.9.9")
+            self.assertEqual(update_in_progress(base), "v9.9.9")
+            lock = base / "Logs" / "update-in-progress.txt"
+            old = time.time() - 20 * 60
+            lock.write_text(f"v9.9.9\n{old}\n", encoding="utf-8")
+            self.assertIsNone(update_in_progress(base))
+
+    def test_applier_batch_markers(self):
+        from core.selfupdate import write_apply_script
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            script = write_apply_script(base, Path(tmp) / "stage", "v9.9.9")
+            text = script.read_text(encoding="utf-8")
+            self.assertIn("update-in-progress", text)
+            self.assertIn("Start-Sleep -Seconds 8", text)
+            self.assertIn("FAILED: server would not stop", text)
+            self.assertNotIn("timeout /t", text)
+
+    def test_changelog_line_stripped(self):
+        from unittest import mock
+        from core.update import get_latest_release
+        body = "Better balance math.\n\n**Full Changelog**: https://x/y"
+        fake = {"tag_name": "v1.2.0", "name": "v1.2.0", "body": body,
+                "assets": [{"browser_download_url": "https://x/nibba.zip"}]}
+        with mock.patch("core.update._api", return_value=fake):
+            info = get_latest_release("o/r")
+        self.assertEqual(info["notes"], "Better balance math.")
+        self.assertNotIn("Changelog", info["notes"])
 
     def test_last_status_roundtrip(self):
         from core.selfupdate import last_status

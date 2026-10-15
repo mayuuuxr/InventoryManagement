@@ -34,10 +34,51 @@ MIN_ZIP_BYTES = 50_000
 TAG_RE = re.compile(r"^v\d+\.\d+\.\d+$")
 
 STATUS_FILE = Path("Logs") / "update-last-run.txt"
+LOCK_FILE = Path("Logs") / "update-in-progress.txt"
+
+#: A lock older than this is treated as a crashed run, not a live one.
+LOCK_STALE_SECONDS = 15 * 60
 
 
 class UpdateError(Exception):
     """Anything that must abort the update before the app is touched."""
+
+
+def _read_lock(base):
+    try:
+        return (Path(base) / LOCK_FILE).read_text(
+            encoding="utf-8").strip().splitlines()
+    except OSError:
+        return []
+
+
+def update_in_progress(base):
+    """Tag currently installing, or None (stale locks don't count)."""
+    import time
+    lines = _read_lock(base)
+    if len(lines) < 2:
+        return None
+    try:
+        started = float(lines[1])
+    except ValueError:
+        return None
+    if time.time() - started > LOCK_STALE_SECONDS:
+        return None
+    return lines[0] or None
+
+
+def _write_lock(base, tag):
+    import time
+    lock = Path(base) / LOCK_FILE
+    lock.parent.mkdir(exist_ok=True)
+    lock.write_text(f"{tag}\n{time.time()}\n", encoding="utf-8")
+
+
+def _clear_lock(base):
+    try:
+        (Path(base) / LOCK_FILE).unlink(missing_ok=True)
+    except OSError:
+        pass
 
 
 def is_staged_protected(rel_path):
@@ -124,8 +165,14 @@ def extract_staged(zip_path, stage_dir):
     """Extract approved members only; aborts unless it looks like our app."""
     stage = Path(stage_dir)
     if stage.exists():
-        shutil.rmtree(stage)
-    stage.mkdir(parents=True)
+        shutil.rmtree(stage, ignore_errors=True)
+    try:
+        stage.mkdir(parents=True)
+    except FileExistsError:
+        # Windows can linger a beat on deleted dirs (indexer/AV holds).
+        import time
+        time.sleep(2)
+        stage.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(zip_path) as zf:
         pairs = [p for p in (_safe_pair(n) for n in zf.namelist()) if p]
         if not set(REQUIRED_MEMBERS) <= {rel for _, rel in pairs}:
@@ -140,15 +187,19 @@ def extract_staged(zip_path, stage_dir):
 
 APPLY_TEMPLATE = """@echo off
 REM nibba one-click updater: applies staged {tag}, restarts the server.
-REM Generated automatically - do not edit. Deletes itself on success.
+REM Generated automatically - do not edit. Runs hidden. Deletes its lock,
+REM its stage and itself when done (success or failure).
 setlocal
 cd /d "{appdir}"
-echo %date% %time% {tag} start >> "Logs\\update-last-run.txt"
+echo %date% %time% {tag} applying >> "Logs\\update-last-run.txt"
 REM Let the browser land on the updating page before the restart.
-timeout /t 8 /nobreak >nul
-REM Stop the server (Windows locks running files).
-powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) {{ Stop-Process -Id $c.OwningProcess -Force }}"
-powershell -NoProfile -Command "Start-Sleep -Seconds 3"
+powershell -NoProfile -Command "Start-Sleep -Seconds 8"
+REM Stop the server (Windows locks running files). Refuse to touch code
+REM if the port will not free: a half-copy under a live server is worse
+REM than no update. The old code keeps serving untouched in that case.
+powershell -NoProfile -Command "$tries = 0; while ($tries -lt 15) {{ $c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if (-not $c) {{ break }}; try {{ Stop-Process -Id $c.OwningProcess -Force -ErrorAction Stop }} catch {{ }}; Start-Sleep -Seconds 2; $tries++ }}"
+powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) {{ exit 1 }}"
+if errorlevel 1 goto stillrunning
 if exist "runtime\\python.exe" (set PY=runtime\\python.exe) else (set PY=venv\\Scripts\\python.exe)
 if exist "runtime\\Scripts\\waitress-serve.exe" (set WS=runtime\\Scripts\\waitress-serve.exe) else (set WS=venv\\Scripts\\waitress-serve.exe)
 REM Copy staged code only (protected names excluded - same list as update.bat).
@@ -160,6 +211,7 @@ if errorlevel 1 goto migratefail
 powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
 echo %date% %time% {tag} OK >> "Logs\\update-last-run.txt"
 rmdir /S /Q "{stage}"
+del "Logs\\update-in-progress.txt"
 del "%~f0"
 exit /b 0
 :copyfail
@@ -169,6 +221,11 @@ goto restartonly
 echo %date% %time% {tag} FAILED: migrate >> "Logs\\update-last-run.txt"
 :restartonly
 powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
+del "Logs\\update-in-progress.txt"
+exit /b 1
+:stillrunning
+echo %date% %time% {tag} FAILED: server would not stop, nothing changed >> "Logs\\update-last-run.txt"
+del "Logs\\update-in-progress.txt"
 exit /b 1
 """
 
@@ -191,29 +248,46 @@ def perform_update(base_dir, tag, zip_url, tmp_root=None):
 
     Raises UpdateError on any problem — the running app is never touched
     (all work happens in the temp staging dir + one generated script).
-    Launching is the view's job (launch_detached), so tests can stop here.
+    Refuses when another update is in flight (single-flight lock), so a
+    second click can never stage over a running applier. Launching is the
+    view's job (launch_detached), so tests can stop here.
     """
     base = Path(base_dir)
     if not TAG_RE.match(tag):
         raise UpdateError("Bad update version — aborted.")
+    live = update_in_progress(base)
+    if live:
+        raise UpdateError(
+            f"Update {live} is already installing — "
+            "wait a minute and check Help again.")
     staging_root = Path(tmp_root) if tmp_root else Path(tempfile.gettempdir())
-    stage = staging_root / "nibba_update_stage"
-    staged_zip = staging_root / "nibba_update.zip"
+    stamp = datetime.now().strftime("%Y%m%d-%H%M%S")
+    stage = staging_root / f"nibba_update_stage_{stamp}"
+    staged_zip = staging_root / f"nibba_update_{stamp}.zip"
     backup_database(base)
-    download_release(zip_url, staged_zip)
-    extract_staged(staged_zip, stage)
-    return write_apply_script(base, stage, tag)
+    _write_lock(base, tag)
+    try:
+        download_release(zip_url, staged_zip)
+        extract_staged(staged_zip, stage)
+        return write_apply_script(base, stage, tag)
+    except UpdateError:
+        _clear_lock(base)
+        raise
 
 
 def launch_detached(script):
-    """Start the applier and return at once (it outlives this process)."""
+    """Start the applier hidden and return at once (it outlives us).
+
+    CREATE_NO_WINDOW: no black console window pops on the shop screen.
+    """
     detached = getattr(subprocess, "DETACHED_PROCESS", 0)
     new_group = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    no_window = getattr(subprocess, "CREATE_NO_WINDOW", 0)
     subprocess.Popen(
         [str(script)], cwd=str(Path(script).parent),
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
         stdin=subprocess.DEVNULL,
-        creationflags=detached | new_group,
+        creationflags=detached | new_group | no_window,
     )
 
 

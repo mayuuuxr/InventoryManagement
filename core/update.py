@@ -76,8 +76,13 @@ def get_latest_release(repo, token="", timeout=15):
     assets = [a.get("browser_download_url", "")
               for a in data.get("assets", [])]
     zip_url = next((u for u in assets if u.endswith(".zip")), "")
+    # Drop the auto-generated "Full Changelog" link line: it is noise in
+    # the shop UI (owner asked it removed). Real notes stay untouched.
+    notes = "\n".join(
+        line for line in (data.get("body") or "").splitlines()
+        if "**Full Changelog**" not in line).strip()
     return {"tag": tag, "name": data.get("name") or tag,
-            "notes": data.get("body") or "", "zip_url": zip_url}
+            "notes": notes, "zip_url": zip_url}
 
 
 @lru_cache(maxsize=1)
