@@ -22,7 +22,7 @@ jobs:
       - name: Build code-only zip
         shell: pwsh
         run: |
-          $excl = @('venv','runtime','.git','.gitignore','staticfiles','Backup','Logs','Data','chrome-profile','build','__pycache__','.github',
+          $excl = @('venv','runtime','.git','.gitignore','staticfiles','Backup','Logs','Data','chrome-profile','build','__pycache__','.github','pkg',
                      'db.sqlite3','tunnel.log','cloudflared.exe','.env','.env.example','e2e',
                      'INSTALL.bat','run_all.bat','run.bat','tunnel_env.py','BUILD-PORTABLE.bat','BUILD-INSTALLER.bat','nibba.iss',
                      'Procfile','seed_catalog.json','UPDATE-MODEL.md','requirements.txt')
