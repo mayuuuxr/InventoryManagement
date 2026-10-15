@@ -24,8 +24,9 @@ BACKUP (automatic):
   Backup folder to a pen drive.
 
 SUPPORT:
-- Updates: Help page shows the version; support sends update steps
-  when a new version is ready. Saved stock is never touched.
+- Updates: Help page shows the version and an Install button when
+  a new version is ready. One click — the app updates and restarts
+  itself. Saved stock is never touched.
 - If the page does not open: double-click "nibba Close", wait
   10 seconds, open "nibba Shop" again. Still stuck: call support,
   say exactly what you see on screen.

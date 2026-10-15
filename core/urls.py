@@ -7,7 +7,9 @@ from django.shortcuts import redirect
 from django.urls import include, path
 
 from . import pwa
-from .views import DashboardView, HelpView, PrivacyView, TermsView
+from .views import (
+    ApplyUpdateView, DashboardView, HelpView, PrivacyView, TermsView,
+)
 
 
 def root_redirect(request):
@@ -31,6 +33,7 @@ urlpatterns = [
     path("sw.js", pwa.service_worker_view, name="pwa_sw"),
     path("pwa/<str:filename>", pwa.icon_view, name="pwa_icon"),
     path("help/", HelpView.as_view(), name="help"),
+    path("update/apply/", ApplyUpdateView.as_view(), name="update_apply"),
     path("privacy/", PrivacyView.as_view(), name="privacy"),
     path("terms/", TermsView.as_view(), name="terms"),
     path("dashboard/", DashboardView.as_view(tab="all"), name="dashboard"),

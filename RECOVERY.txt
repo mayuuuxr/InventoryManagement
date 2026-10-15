@@ -18,10 +18,11 @@ Keep this file + reset-pin.bat on YOUR pen drive, never on the shop PC.
       send them to the developer with the VERSION file content.
 
 4) UPDATE A SHOP PC (new version from developer):
-   a. Confirm Backup\ has today's file (open the app once if unsure).
-   b. Close the app. Run:  update.bat vX.Y.Z  (exact tag from Help page)
-   c. It aborts BEFORE changing anything if the backup fails.
-   d. Reopen with the nibba Shop icon, check Help page version.
+   a. Owner opens Help → App updates → clicks Install update. Done.
+   b. Fallback if that ever fails: confirm Backup\ has today's file,
+      close the app, run:  update.bat vX.Y.Z  (exact tag from Help page).
+      It aborts BEFORE changing anything if the backup fails.
+   c. Reopen with the nibba Shop icon, check Help page version.
 
 5) NEVER DELETE: db.sqlite3, .env, Backup\, Logs\, Data\.
    NEVER copy .env between PCs (it holds this PC's secret key).

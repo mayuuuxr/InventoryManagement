@@ -81,7 +81,14 @@
             <div class="mt-2 p-3 bg-warning-bg border border-subtle rounded-md">
                 <p class="text-sm text-charcoal font-medium">Update available: {{ update.latest }} (you have {{ update.current }})</p>
                 {% if update.notes %}<p class="text-xs text-muted mt-1">{{ update.notes|truncatewords:40 }}</p>{% endif %}
-                <p class="text-xs text-charcoal mt-2">Close the server windows, then run <span class="font-medium">update.bat {{ update.latest }}</span> in the nibba folder. Your entries stay exactly as they are. The updater backs up first and never touches saved data.</p>
+                <form method="post" action="{% url 'update_apply' %}" class="mt-2">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                        Install update {{ update.latest }}
+                    </button>
+                </form>
+                <p class="text-xs text-muted mt-2">One click. The app backs up your entries, installs, and restarts itself in about a minute. Saved data is never touched.</p>
             </div>
             {% elif update and update.reason == "ok" %}
             <p class="text-xs text-muted mt-1">Up to date (latest {{ update.latest }}).</p>
@@ -89,6 +96,9 @@
             <p class="text-xs text-muted mt-1">Automatic update checks are not set up on this PC yet.</p>
             {% else %}
             <p class="text-xs text-muted mt-1">Could not reach the update server (offline?). Your app works fine without it.</p>
+            {% endif %}
+            {% if update_status %}
+            <p class="text-xs text-muted mt-1">Last update: {{ update_status }}</p>
             {% endif %}
         {% endif %}
     </div>

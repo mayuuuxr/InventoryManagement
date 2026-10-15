@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-md mx-auto mt-10 bg-surface border border-subtle rounded-lg p-8 text-center">
+    <div class="mx-auto mb-4 inline-flex items-center justify-center w-12 h-12 rounded-full bg-accent/10">
+        <i data-lucide="refresh-cw" class="w-6 h-6 text-accent"></i>
+    </div>
+    <h2 class="text-charcoal mb-1">Installing nibba {{ tag }}</h2>
+    <p class="text-sm text-muted mb-2">Your entries were backed up first. The app restarts itself in about a minute.</p>
+    <p class="text-sm font-medium text-charcoal" id="update-state">Please keep this window open…</p>
+</div>
+<script>
+(function () {
+    var tries = 0, max = 150;
+    var state = document.getElementById("update-state");
+    function poll() {
+        tries++;
+        fetch("/accounts/login/", { method: "HEAD", cache: "no-store" }).then(function (res) {
+            window.location.href = "/dashboard/";
+        }).catch(function () {
+            if (tries >= max) {
+                state.textContent = "Still working — wait a minute, then open the nibba Shop icon.";
+                return;
+            }
+            setTimeout(poll, 2000);
+        });
+    }
+    setTimeout(poll, 10000);
+})();
+</script>
+{% endblock %}

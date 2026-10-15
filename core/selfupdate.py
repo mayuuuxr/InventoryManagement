@@ -1,0 +1,227 @@
+"""One-click in-app updater (nibba PC build).
+
+Flow: owner clicks "Install update" on the Help page -> this module
+backups the DB, downloads the release zip, extracts it to a staging dir
+and writes apply_update.bat next to manage.py. The view then launches
+that batch detached and returns at once; the batch waits a few seconds
+(so the browser lands on the polling page), stops the server (Windows
+locks running files), copies staged code over the app (protected names
+skipped — same list update.bat enforces), runs migrate + collectstatic,
+restarts waitress and records the result in Logs/update-last-run.txt.
+
+Nothing here touches the running server: staging is pure file IO in
+%TEMP% plus one generated script. The dangerous half (stop/copy/
+restart) runs after this process is gone, inside the batch.
+"""
+import re
+import shutil
+import subprocess
+import tempfile
+import urllib.request
+import zipfile
+from datetime import datetime
+from pathlib import Path
+
+from core.update import PROTECTED_NAMES, PROTECTED_SUFFIXES, check_for_updates
+
+#: A staged zip must at least contain these (else it is not our release).
+REQUIRED_MEMBERS = ("manage.py", "VERSION")
+
+#: Minimum plausible release-zip size (v1.0.0 ships ~500KB of code).
+MIN_ZIP_BYTES = 50_000
+
+#: Tag format enforced on anything that reaches the staging step.
+TAG_RE = re.compile(r"^v\d+\.\d+\.\d+$")
+
+STATUS_FILE = Path("Logs") / "update-last-run.txt"
+
+
+class UpdateError(Exception):
+    """Anything that must abort the update before the app is touched."""
+
+
+def is_staged_protected(rel_path):
+    """Same protection as update.bat/is_protected, for staged members."""
+    parts = rel_path.replace("\\", "/").split("/")
+    if any(p in PROTECTED_NAMES for p in parts):
+        return True
+    return any(parts[-1].endswith(s) for s in PROTECTED_SUFFIXES)
+
+
+def resolve_update(repo="", token=""):
+    """Fresh update check; returns (tag, zip_url) or None.
+
+    The view calls this on POST (never trusts tag/zip from the form).
+    """
+    try:
+        info = check_for_updates(repo, token)
+    except Exception:
+        return None
+    if not info or info.get("reason") != "ok":
+        return None
+    if not info.get("update_available"):
+        return None
+    tag, zip_url = info.get("latest", ""), info.get("zip_url", "")
+    if not TAG_RE.match(tag) or not zip_url.startswith("https://"):
+        return None
+    return tag, zip_url
+
+
+def backup_database(base_dir):
+    """Copy db.sqlite3 to Backup/pre-update_<stamp>.sqlite3, size-verified.
+
+    Aborts (raises) unless the backup byte-matches the live DB — the
+    update must never start without a proven restore point.
+    """
+    base = Path(base_dir)
+    live = base / "db.sqlite3"
+    if not live.is_file():
+        raise UpdateError("No stock database found — refusing to update.")
+    backup_dir = base / "Backup"
+    backup_dir.mkdir(exist_ok=True)
+    stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    backup = backup_dir / f"pre-update_{stamp}.sqlite3"
+    shutil.copyfile(live, backup)
+    if backup.stat().st_size != live.stat().st_size or backup.stat().st_size == 0:
+        backup.unlink(missing_ok=True)
+        raise UpdateError("Database backup failed verification — aborted.")
+    for old in sorted(backup_dir.glob("pre-update_*.sqlite3"))[:-10]:
+        old.unlink(missing_ok=True)
+    return backup
+
+
+def download_release(zip_url, dest, timeout=120):
+    """Fetch the release zip; aborts on network errors or tiny files."""
+    dest = Path(dest)
+    req = urllib.request.Request(
+        zip_url, headers={"Accept": "application/octet-stream"})
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as res:
+            data = res.read()
+    except Exception as exc:
+        raise UpdateError(f"Could not download the update ({exc}).")
+    if len(data) < MIN_ZIP_BYTES:
+        raise UpdateError("Downloaded update looks broken (too small).")
+    dest.write_bytes(data)
+    return dest
+
+
+def _safe_pair(name):
+    """Map a zip member to a safe relative path, or None to skip it.
+
+    Skips anything that would escape the staging dir (absolute paths,
+    ../ climbs) and anything protected (DB, .env, venv, ...).
+    """
+    rel = name.replace("\\", "/").lstrip("/")
+    if not rel or rel.startswith(("/", "../")) or "/../" in rel:
+        return None
+    if is_staged_protected(rel):
+        return None
+    return name, rel
+
+
+def extract_staged(zip_path, stage_dir):
+    """Extract approved members only; aborts unless it looks like our app."""
+    stage = Path(stage_dir)
+    if stage.exists():
+        shutil.rmtree(stage)
+    stage.mkdir(parents=True)
+    with zipfile.ZipFile(zip_path) as zf:
+        pairs = [p for p in (_safe_pair(n) for n in zf.namelist()) if p]
+        if not set(REQUIRED_MEMBERS) <= {rel for _, rel in pairs}:
+            raise UpdateError("Downloaded update is not a nibba release.")
+        for name, rel in pairs:
+            target = stage / rel
+            with zf.open(name) as src:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(src.read())
+    return stage
+
+
+APPLY_TEMPLATE = """@echo off
+REM nibba one-click updater: applies staged {tag}, restarts the server.
+REM Generated automatically - do not edit. Deletes itself on success.
+setlocal
+cd /d "{appdir}"
+echo %date% %time% {tag} start >> "Logs\\update-last-run.txt"
+REM Let the browser land on the updating page before the restart.
+timeout /t 8 /nobreak >nul
+REM Stop the server (Windows locks running files).
+powershell -NoProfile -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) {{ Stop-Process -Id $c.OwningProcess -Force }}"
+powershell -NoProfile -Command "Start-Sleep -Seconds 3"
+if exist "runtime\\python.exe" (set PY=runtime\\python.exe) else (set PY=venv\\Scripts\\python.exe)
+if exist "runtime\\Scripts\\waitress-serve.exe" (set WS=runtime\\Scripts\\waitress-serve.exe) else (set WS=venv\\Scripts\\waitress-serve.exe)
+REM Copy staged code only (protected names excluded - same list as update.bat).
+powershell -NoProfile -Command "$prot = @('.env','Backup','Logs','Data','chrome-profile','venv','runtime','.git','staticfiles','__pycache__','tunnel.log','cloudflared.exe'); Get-ChildItem '{stage}' -Recurse -File | ForEach-Object {{ $rel = $_.FullName.Substring('{stage}'.Length + 1); $parts = $rel -split '[\\\\/]'; if (($parts | Where-Object {{ $prot -contains $_ }}).Count -gt 0) {{ return }}; if ($rel -like '*.sqlite3' -or $rel -like '*.pem') {{ return }}; $dest = Join-Path '.' $rel; New-Item -ItemType Directory -Path (Split-Path $dest) -Force | Out-Null; Copy-Item $_.FullName $dest -Force }}"
+if errorlevel 1 goto copyfail
+"%PY%" manage.py migrate --noinput -v 0
+if errorlevel 1 goto migratefail
+"%PY%" manage.py collectstatic --noinput -v 0
+powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
+echo %date% %time% {tag} OK >> "Logs\\update-last-run.txt"
+rmdir /S /Q "{stage}"
+del "%~f0"
+exit /b 0
+:copyfail
+echo %date% %time% {tag} FAILED: file copy >> "Logs\\update-last-run.txt"
+goto restartonly
+:migratefail
+echo %date% %time% {tag} FAILED: migrate >> "Logs\\update-last-run.txt"
+:restartonly
+powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
+exit /b 1
+"""
+
+
+def write_apply_script(base_dir, stage_dir, tag):
+    """Render apply_update.bat into the app dir. Returns the script path."""
+    if not TAG_RE.match(tag):
+        raise UpdateError("Bad update version — aborted.")
+    script = Path(base_dir) / "apply_update.bat"
+    script.write_text(APPLY_TEMPLATE.format(
+        appdir=str(Path(base_dir).resolve()),
+        stage=str(Path(stage_dir).resolve()),
+        tag=tag,
+    ), encoding="utf-8")
+    return script
+
+
+def perform_update(base_dir, tag, zip_url, tmp_root=None):
+    """Backup + download + stage + write applier. Returns the script path.
+
+    Raises UpdateError on any problem — the running app is never touched
+    (all work happens in the temp staging dir + one generated script).
+    Launching is the view's job (launch_detached), so tests can stop here.
+    """
+    base = Path(base_dir)
+    if not TAG_RE.match(tag):
+        raise UpdateError("Bad update version — aborted.")
+    staging_root = Path(tmp_root) if tmp_root else Path(tempfile.gettempdir())
+    stage = staging_root / "nibba_update_stage"
+    staged_zip = staging_root / "nibba_update.zip"
+    backup_database(base)
+    download_release(zip_url, staged_zip)
+    extract_staged(staged_zip, stage)
+    return write_apply_script(base, stage, tag)
+
+
+def launch_detached(script):
+    """Start the applier and return at once (it outlives this process)."""
+    detached = getattr(subprocess, "DETACHED_PROCESS", 0)
+    new_group = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    subprocess.Popen(
+        [str(script)], cwd=str(Path(script).parent),
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
+        creationflags=detached | new_group,
+    )
+
+
+def last_status(base_dir):
+    """Last line of Logs/update-last-run.txt, or None if never updated."""
+    try:
+        lines = (Path(base_dir) / STATUS_FILE).read_text(
+            encoding="utf-8").splitlines()
+        return lines[-1].strip() or None
+    except (OSError, IndexError):
+        return None

@@ -1,7 +1,10 @@
 """Cross-cutting pages that belong to no single app (help center, dashboard)."""
 from django.conf import settings
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.views import View
 from django.views.generic import TemplateView
 
 
@@ -99,7 +102,51 @@ class HelpView(LoginRequiredMixin, TemplateView):
                     getattr(settings, "UPDATE_TOKEN", ""))
             except Exception:
                 ctx["update"] = None
+            from core.selfupdate import last_status
+            try:
+                ctx["update_status"] = last_status(settings.BASE_DIR)
+            except Exception:
+                ctx["update_status"] = None
         return ctx
+
+
+def is_owner(user):
+    """Shop owner: superuser or admin role. Gate for the updater."""
+    return user.is_superuser or getattr(user, "role", "") == "admin"
+
+
+class ApplyUpdateView(LoginRequiredMixin, UserPassesTestMixin, View):
+    """One-click update (owner only): stage the release, restart, done.
+
+    POST re-checks GitHub itself (tag/zip never trusted from the form),
+    then backup + download + stage via core.selfupdate and launches the
+    applier batch detached. The response is a polling page: the batch
+    stops this server seconds later and brings it back on the new code.
+    Any failure before staging aborts with a message and touches nothing.
+    """
+
+    def test_func(self):
+        return is_owner(self.request.user)
+
+    def post(self, request):
+        from core.selfupdate import (
+            UpdateError, launch_detached, perform_update, resolve_update,
+        )
+        resolved = resolve_update(
+            getattr(settings, "UPDATE_REPO", ""),
+            getattr(settings, "UPDATE_TOKEN", ""))
+        if not resolved:
+            messages.info(
+                request, "No update found right now. Your app works as-is.")
+            return redirect("help")
+        tag, zip_url = resolved
+        try:
+            script = perform_update(settings.BASE_DIR, tag, zip_url)
+        except UpdateError as exc:
+            messages.error(request, f"Update did not start: {exc}")
+            return redirect("help")
+        launch_detached(script)
+        return render(request, "updating.html", {"tag": tag})
 
 
 class PrivacyView(TemplateView):
