@@ -38,6 +38,30 @@ format. Shipped in this release:
 Shop PC deployment planned **through the repaired update.bat itself** (dogfood) after
 owner approves push + tag — GitHub push stays consent-gated.
 
+## 2026-10-18 — v1.2.1 LANDED: commit `139824f`, tag `v1.2.1`
+
+- Full-suite gate: 146 OK (run 4, this release). CI release run #12 published
+  release v1.2.1 with `nibba-v1.2.1.zip` — 586,368 bytes, sha256
+  `bbe7b963e2aab53098510f0cb73f369aaffb2f175a37557d5ee2991a531357c1`
+  (digest also verified directly from the GitHub API).
+- **First real update.bat run ever (dogfood of the repair):**
+  1. Bootstrap: repaired `update.bat` copied once into the installed copy (its own
+     copy was still the defective bytes — a bat cannot fix itself; from v1.2.1 on,
+     updates self-serve).
+  2. `nibba-Close.bat` → port 8000 free.
+  3. `update.bat v1.2.1` in `AppData\Local\nibba`: **EXIT=0** — backup
+     `Backup\pre-update_2026-10-18_004934.sqlite3` (1,851,392 bytes, verified),
+     correct asset URL, download + protected copy, migrate "No migrations to apply",
+     collectstatic, system check clean, banner "Version now: 1.2.1".
+  4. Post checks: downloaded zip sha == GitHub digest; db byte-size unchanged;
+     .env untouched (DEBUG=False still set); feature files present; the installed
+     update.bat now carries the baked repo and no placeholder.
+  5. Relaunched via `nibba-Shop.bat` — server up (port 8000, pid 15428); login 200;
+     `/entries/orders/outward/1/` + `/entries/orders/inward/1/` → **302 login
+     redirect** (404 before v1.2.1: the new order-detail routes are live).
+- In-app Updates page now compares 1.2.1 vs 1.2.1 → no Install button (correct,
+  nothing newer exists).
+
 ---
 
 ## 2026-10-17 — COMMIT NOTE

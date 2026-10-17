@@ -7,6 +7,21 @@ referred to as "the old brand string".
 
 ---
 
+## 2026-10-18 | 1.2.1 | WATCH | Portable-runtime pip fails TLS setup during update.bat package sync
+
+During the first real update.bat run (v1.2.1 install on the shop copy), the pip step
+printed a full traceback ending `FileNotFoundError ... certifi.where()` inside
+`pip._vendor.truststore` (the portable runtime's certifi layout). The bat correctly
+downgraded it to "WARNING: package sync had errors - continuing with migrate anyway"
+and the update proceeded — requirements-pc.txt is identical between v1.2.0 and
+v1.2.1, so nothing needed installing. **Risk:** if a future release ADDS a
+dependency, the automatic package sync through update.bat will fail on the portable
+runtime; stopgap = run the sync manually (`runtime\Scripts\python.exe -m pip install
+-r requirements-pc.txt` from the install dir, or venv). Root cause not investigated
+tonight — repair later, before a dependency-changing release ships.
+
+---
+
 ## 2026-10-18 | 1.2.1 | FIXED | update.bat was parse-broken on every invocation
 
 Root cause proven by an A/B sandbox probe (scratch tools
