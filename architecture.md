@@ -52,6 +52,12 @@
 **AuditLog** (`entries/models.py`)
 - user, action (create/edit/delete/login/export), entry_type, entry_id, entry_summary, timestamp
 
+**Bill printing (`entries/views.py`)** — after a bill saves, POST returns a redirect to
+`entries:{sale,purchase}_bill_print?ids=…`; `_bill_print_context()` renders
+`entries/bill_print.html` (80mm thermal layout, standard Indian-shop format). Rate/Amount/Total
+cells are intentionally blank — the app stores no price fields; the shop writes prices by hand.
+Header comes from env `BILL_SHOP_NAME` (default `nibba`) / `BILL_SHOP_TAGLINE`.
+
 **Balance (calculated, never stored — `entries/utils.py`)**
 - `balance_for(site, material)`; `balances_for_site()` bulk; `balance_for_sub_location()` = allocated-here − used-here, falls back to site balance when zero allocations
 - `LOW_STOCK_THRESHOLD = 10` (per-material `reorder_point` overrides); dashboard low/out-of-stock tabs via `low_stock_items()`

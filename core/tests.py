@@ -197,7 +197,7 @@ class ShellMarkerTests(AuditTestBase):
         r = self.client.get(url)
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, 'id="entry-form"')
-        self.assertContains(r, "vidarbha_entry_draft")
+        self.assertContains(r, "nibba_entry_draft")
 
     def test_pwa_endpoints_alive(self):
         self.login(self.staff)

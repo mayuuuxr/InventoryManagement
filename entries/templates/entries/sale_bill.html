@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}New Sale | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">New Sale</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+{% csrf_token %}
+<div class="max-w-3xl space-y-4">
+    <div>
+        <h1 class="text-charcoal">New Sale</h1>
+        <p class="text-sm text-muted mt-1">Add items to the bill. Stock deducts automatically, oldest purchase first.</p>
+    </div>
+
+    <div class="bg-surface border border-subtle rounded-xl p-4 md:p-6 space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div>
+                <label for="bill-customer" class="block text-xs font-medium text-muted mb-1.5">Customer Name</label>
+                <input id="bill-customer" type="text" placeholder="optional" maxlength="100"
+                       class="w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+            <div>
+                <label for="bill-date" class="block text-xs font-medium text-muted mb-1.5">Date</label>
+                <input id="bill-date" type="date" value="{{ default_date }}"
+                       class="w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+            <div>
+                <label for="bill-time" class="block text-xs font-medium text-muted mb-1.5">Time</label>
+                <input id="bill-time" type="time" value="{{ default_time }}"
+                       class="w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+        </div>
+
+        <div class="relative">
+            <i data-lucide="search" class="w-4 h-4 text-muted absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+            <input id="bill-search" type="text" placeholder="Type to add product" autocomplete="off"
+                   class="w-full bg-gray-50 border border-subtle rounded-md pl-9 pr-3 py-2.5 text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            <div id="bill-results" class="hidden absolute left-0 right-0 top-full mt-1 bg-surface border border-subtle rounded-md shadow-lift z-30 max-h-64 overflow-y-auto divide-y divide-subtle"></div>
+        </div>
+
+        <div class="border border-subtle rounded-md overflow-hidden">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
+                        <th class="text-left font-medium px-3 py-2">Product</th>
+                        <th class="font-medium px-3 py-2 w-28 text-center">Qty</th>
+                        <th class="font-medium px-3 py-2 w-20">Unit</th>
+                        <th class="w-10"></th>
+                    </tr>
+                </thead>
+                <tbody id="bill-rows" class="divide-y divide-subtle"></tbody>
+            </table>
+            <p id="bill-empty" class="px-3 py-6 text-center text-sm text-muted">No items yet — search above to add products.</p>
+        </div>
+
+        <div id="bill-error" class="hidden flex items-start gap-2 p-3 bg-danger-bg/40 border border-subtle rounded-md">
+            <i data-lucide="x-circle" class="w-4 h-4 text-danger-fg flex-shrink-0 mt-0.5"></i>
+            <p class="text-sm text-charcoal" id="bill-error-text"></p>
+        </div>
+
+        <div class="flex items-center justify-between gap-3 border-t border-subtle pt-4">
+            <div class="text-sm text-charcoal">
+                <span class="font-semibold" id="bill-total">0</span>
+                <span class="text-muted">items in bill</span>
+            </div>
+            <button id="bill-save" type="button"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-2.5 min-h-[44px] bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                Save Sale
+            </button>
+        </div>
+    </div>
+</div>
+
+<noscript><p class="text-sm text-muted mt-2">This billing screen needs JavaScript enabled.</p></noscript>
+
+<script>
+(function () {
+    var MATERIALS = {{ materials_json|safe }};
+    var rows = [];
+    var search = document.getElementById("bill-search");
+    var results = document.getElementById("bill-results");
+    var tbody = document.getElementById("bill-rows");
+    var empty = document.getElementById("bill-empty");
+    var total = document.getElementById("bill-total");
+    var errorBox = document.getElementById("bill-error");
+    var errorText = document.getElementById("bill-error-text");
+    var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
+
+    function fmt(n) {
+        return Number.isInteger(n) ? String(n) : n.toFixed(1);
+    }
+
+    function badgeFor(m) {
+        if (m.balance <= 0) {
+            return { cls: "text-danger-fg", text: "Out of stock: " + fmt(m.balance) + " " + m.unit };
+        }
+        if (m.balance <= m.reorder) {
+            return { cls: "text-warning-fg", text: "Low stock: " + fmt(m.balance) + " " + m.unit };
+        }
+        return { cls: "text-success-fg", text: "In stock: " + fmt(m.balance) + " " + m.unit };
+    }
+
+    function renderResults(needle) {
+        results.innerHTML = "";
+        if (!needle) { results.classList.add("hidden"); return; }
+        var hits = MATERIALS.filter(function (m) {
+            return m.name.toLowerCase().indexOf(needle) !== -1;
+        }).slice(0, 8);
+        if (!hits.length) {
+            var none = document.createElement("div");
+            none.className = "px-3 py-2.5 text-sm text-muted";
+            none.textContent = "No product matches.";
+            results.appendChild(none);
+            results.classList.remove("hidden");
+            return;
+        }
+        hits.forEach(function (m) {
+            var b = badgeFor(m);
+            var item = document.createElement("button");
+            item.type = "button";
+            item.className = "w-full flex items-center gap-3 px-3 py-2.5 text-left hover:bg-gray-50 transition-colors";
+            item.innerHTML =
+                '<span class="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gray-100 text-muted flex-shrink-0">' +
+                '<i data-lucide="package" class="w-4 h-4"></i></span>' +
+                '<span class="min-w-0 flex-1">' +
+                '<span class="block text-sm font-medium text-charcoal truncate">' + m.name + "</span>" +
+                '<span class="block text-xs ' + b.cls + '">' + b.text + "</span>" +
+                "</span>";
+            item.addEventListener("click", function () { addRow(m); });
+            results.appendChild(item);
+        });
+        results.classList.remove("hidden");
+    }
+
+    function addRow(material) {
+        var existing = null;
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].id === material.id) { existing = rows[i]; break; }
+        }
+        if (existing) {
+            existing.qty += 1;
+        } else {
+            rows.push({ id: material.id, name: material.name, unit: material.unit, qty: 1 });
+        }
+        renderRows();
+        search.value = "";
+        results.classList.add("hidden");
+        search.focus();
+    }
+
+    function renderRows() {
+        tbody.innerHTML = "";
+        empty.style.display = rows.length ? "none" : "";
+        var sum = 0;
+        rows.forEach(function (row, idx) {
+            sum += row.qty;
+            var tr = document.createElement("tr");
+            tr.innerHTML =
+                '<td class="px-3 py-2">' +
+                '<span class="flex items-center gap-3">' +
+                '<span class="inline-flex items-center justify-center w-8 h-8 rounded-md bg-gray-100 text-muted flex-shrink-0">' +
+                '<i data-lucide="package" class="w-4 h-4"></i></span>' +
+                '<span class="text-sm font-medium text-charcoal">' + row.name + "</span>" +
+                "</span>" +
+                "</td>" +
+                '<td class="px-3 py-2 text-center">' +
+                '<input type="number" min="1" step="1" value="' + row.qty + '" data-qty="' + idx + '" ' +
+                'class="w-20 px-2 py-1.5 bg-surface border border-subtle rounded-md text-sm text-charcoal text-center focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">' +
+                "</td>" +
+                '<td class="px-3 py-2 text-sm text-muted">' + row.unit + "</td>" +
+                '<td class="px-3 py-2 text-center">' +
+                '<button type="button" data-remove="' + idx + '" aria-label="Remove" ' +
+                'class="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted hover:text-danger-fg hover:bg-gray-100 transition-colors">' +
+                '<i data-lucide="trash-2" class="w-4 h-4"></i></button>' +
+                "</td>";
+            tbody.appendChild(tr);
+        });
+        total.textContent = fmt(sum);
+    }
+
+    function showError(message) {
+        errorText.textContent = message;
+        errorBox.classList.remove("hidden");
+    }
+
+    search.addEventListener("input", function () {
+        renderResults(search.value.trim().toLowerCase());
+    });
+    search.addEventListener("focus", function () {
+        renderResults(search.value.trim().toLowerCase());
+    });
+    document.addEventListener("click", function (e) {
+        if (!results.contains(e.target) && e.target !== search) {
+            results.classList.add("hidden");
+        }
+    });
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") results.classList.add("hidden");
+    });
+    tbody.addEventListener("input", function (e) {
+        var t = e.target;
+        if (t.dataset.qty === undefined) return;
+        var v = parseInt(t.value, 10);
+        if (isNaN(v) || v < 1) { t.value = rows[+t.dataset.qty].qty; return; }
+        rows[+t.dataset.qty].qty = v;
+        renderRows();
+    });
+    tbody.addEventListener("click", function (e) {
+        var btn = e.target.closest("[data-remove]");
+        if (!btn) return;
+        rows.splice(+btn.dataset.remove, 1);
+        renderRows();
+    });
+
+    document.getElementById("bill-save").addEventListener("click", function () {
+        if (!rows.length) { showError("Add at least one item to the bill."); return; }
+        errorBox.classList.add("hidden");
+        var items = rows.map(function (r) {
+            return { material_id: r.id, qty: r.qty };
+        });
+        var body = JSON.stringify({
+            customer: document.getElementById("bill-customer").value,
+            date: document.getElementById("bill-date").value,
+            time: document.getElementById("bill-time").value,
+            items: items
+        });
+        fetch("{% url 'entries:sale_bill' %}", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": csrf ? csrf.value : ""
+            },
+            body: body
+        }).then(function (res) { return res.json().then(function (j) {
+            return { ok: res.ok, body: j };
+        }); }).then(function (out) {
+            if (out.ok && out.body.redirect) {
+                window.location.href = out.body.redirect;
+            } else if (!out.ok) {
+                showError(out.body.error || "Could not save the bill.");
+            }
+        }).catch(function () {
+            showError("Network problem while saving. Try again.");
+        });
+    });
+
+    lucide.createIcons();
+})();
+</script>
+{% endblock %}

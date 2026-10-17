@@ -3,11 +3,13 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
 from django.db.models import Q, Sum
 from django.http import Http404, HttpResponseRedirect
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.views import View
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, TemplateView, UpdateView
 
+import os
 import logging
 
 from materials.models import Material
@@ -721,6 +723,399 @@ class SaleCreateView(EntryWriterRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse("entries:orders")
+
+
+class SaleBillView(EntryWriterRequiredMixin, View):
+    """Billing screen: multi-item sale in one bill (Indian shop front door).
+
+    GET renders the bill with the material catalog embedded as JSON.
+    POST takes {"customer", "date", "time", "items": [{"material_id",
+    "qty"}, ...]} and creates one OutwardEntry per material (same
+    customer/date/time, FIFO delivery picked per material). Same
+    material twice in one bill is aggregated into one entry. Stock
+    guard is re-checked under row locks before each save.
+    """
+
+    template_name = "entries/sale_bill.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        from sites.models import get_default_site
+        self.site = get_default_site()
+        if self.site is None:
+            messages.error(
+                request, "Set up your shop site first (more than one site "
+                         "exists, so pick one from Sites).")
+            return redirect("sites:list")
+        return super().dispatch(request, *args, **kwargs)
+
+    def _materials_payload(self):
+        import json
+        from materials.models import Material
+        from .utils import balance_for
+        items = []
+        qs = Material.objects.select_related(
+            "category", "sub_category").order_by(
+            "category__name", "sub_category__name", "name")
+        for m in qs:
+            bal = balance_for(self.site, m)
+            items.append({
+                "id": m.pk,
+                "name": m.display_name,
+                "unit": m.unit,
+                "balance": int(bal) if float(bal).is_integer() else bal,
+                "reorder": m.reorder_point,
+            })
+        return json.dumps(items)
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {
+            "materials_json": self._materials_payload(),
+            "default_date": timezone.localdate().isoformat(),
+            "default_time": timezone.localtime().strftime("%H:%M"),
+        })
+
+    def post(self, request, *args, **kwargs):
+        import json
+        from django.db import transaction
+        from django.forms import DateField as _DateField
+        from django.forms import TimeField as _TimeField
+        from django.http import JsonResponse
+
+        from materials.models import Material
+        from .forms import ENTRY_TIME_INPUT_FORMATS
+        from .models import InwardEntry, OutwardEntry
+        from .utils import balance_for, fmt_qty, inward_remaining, lock_stock_rows
+
+        def fail(message):
+            return JsonResponse({"ok": False, "error": message}, status=400)
+
+        try:
+            payload = json.loads(request.body or b"{}")
+        except json.JSONDecodeError:
+            return fail("Could not read the bill. Try again.")
+
+        customer = str(payload.get("customer") or "").strip()[:100]
+        try:
+            bill_date = _DateField().clean(payload.get("date") or "")
+        except Exception:
+            return fail("Pick a valid date.")
+        try:
+            bill_time = _TimeField(
+                input_formats=ENTRY_TIME_INPUT_FORMATS).clean(
+                payload.get("time") or "")
+        except Exception:
+            return fail("Pick a valid time.")
+
+        raw_items = payload.get("items")
+        if not isinstance(raw_items, list) or not raw_items:
+            return fail("Add at least one item to the bill.")
+
+        # Aggregate same material into one entry (one row per material).
+        wanted = {}
+        for row in raw_items:
+            try:
+                mid = int(row.get("material_id"))
+                qty = int(row.get("qty"))
+            except (TypeError, ValueError):
+                return fail("Each item needs a product and a whole quantity.")
+            if qty <= 0:
+                return fail("Quantities must be greater than zero.")
+            wanted[mid] = wanted.get(mid, 0) + qty
+
+        materials = {m.pk: m for m in Material.objects.filter(pk__in=wanted)}
+        missing = [mid for mid in wanted if mid not in materials]
+        if missing:
+            return fail("A product in the bill no longer exists.")
+
+        # Duplicate guard: one sale per material per date+time.
+        for mid in wanted:
+            if OutwardEntry.objects.filter(
+                    site=self.site, material_id=mid,
+                    date=bill_date, time=bill_time).exists():
+                return fail(
+                    f"{materials[mid].display_name} already has a sale on "
+                    f"{bill_date} at "
+                    f"{bill_time.strftime('%I:%M %p').lstrip('0')}. "
+                    "Change the time slightly.")
+
+        saved = []
+        try:
+            with transaction.atomic():
+                for mid, qty in wanted.items():
+                    material = materials[mid]
+                    lock_stock_rows(self.site, material)
+                    fresh = balance_for(self.site, material)
+                    if qty > fresh:
+                        return fail(
+                            f"Only {fmt_qty(fresh)} {material.unit} in stock "
+                            f"for {material.display_name}. The bill has "
+                            f"{fmt_qty(qty)}.")
+                    delivery = None
+                    for inw in InwardEntry.objects.filter(
+                            site=self.site, material=material).order_by(
+                            "date", "time", "id"):
+                        if inward_remaining(inw) > 0:
+                            delivery = inw
+                            break
+                    entry = OutwardEntry.objects.create(
+                        site=self.site, material=material,
+                        date=bill_date, time=bill_time, qty=qty,
+                        customer=customer, inward_entry=delivery,
+                        created_by=request.user)
+                    log_audit(request.user, AuditLog.Action.CREATE,
+                              AuditLog.EntryType.OUTWARD, entry.pk,
+                              entry_summary(entry, AuditLog.EntryType.OUTWARD))
+                    saved.append(entry)
+        except IntegrityError:
+            return fail("Save conflict — please try again.")
+
+        total_qty = sum(e.qty for e in saved)
+        messages.success(
+            request,
+            f"Bill saved: {len(saved)} item{'s' if len(saved) != 1 else ''}"
+            f" ({fmt_qty(total_qty)} total)"
+            f" to {customer or 'walk-in'}.")
+        # Straight to the printable bill (80mm thermal): Rate/Amount print
+        # blank for hand-filling, since the app stores no price fields.
+        ids = ",".join(str(e.pk) for e in saved)
+        return JsonResponse(
+            {"ok": True,
+             "redirect": reverse("entries:sale_bill_print") + f"?ids={ids}"})
+
+
+class PurchaseBillView(EntryWriterRequiredMixin, View):
+    """Billing screen: multi-item purchase in one bill (stock comes in).
+
+    GET renders the bill with the material catalog embedded as JSON.
+    POST takes {"supplier", "date", "time", "items": [{"material_id",
+    "qty"}, ...]} and creates one InwardEntry per material (same
+    supplier/date/time). Same material twice in one bill is aggregated
+    into one entry.
+    """
+
+    template_name = "entries/purchase_bill.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        from sites.models import get_default_site
+        self.site = get_default_site()
+        if self.site is None:
+            messages.error(
+                request, "Set up your shop site first (more than one site "
+                         "exists, so pick one from Sites).")
+            return redirect("sites:list")
+        return super().dispatch(request, *args, **kwargs)
+
+    def _materials_payload(self):
+        import json
+        from materials.models import Material
+        from .utils import balance_for
+        items = []
+        qs = Material.objects.select_related(
+            "category", "sub_category").order_by(
+            "category__name", "sub_category__name", "name")
+        for m in qs:
+            bal = balance_for(self.site, m)
+            items.append({
+                "id": m.pk,
+                "name": m.display_name,
+                "unit": m.unit,
+                "balance": int(bal) if float(bal).is_integer() else bal,
+                "reorder": m.reorder_point,
+            })
+        return json.dumps(items)
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {
+            "materials_json": self._materials_payload(),
+            "default_date": timezone.localdate().isoformat(),
+            "default_time": timezone.localtime().strftime("%H:%M"),
+        })
+
+    def post(self, request, *args, **kwargs):
+        import json
+        from django.db import transaction
+        from django.forms import DateField as _DateField
+        from django.forms import TimeField as _TimeField
+        from django.http import JsonResponse
+
+        from materials.models import Material
+        from .forms import ENTRY_TIME_INPUT_FORMATS
+        from .models import InwardEntry
+        from .utils import fmt_qty
+
+        def fail(message):
+            return JsonResponse({"ok": False, "error": message}, status=400)
+
+        try:
+            payload = json.loads(request.body or b"{}")
+        except json.JSONDecodeError:
+            return fail("Could not read the bill. Try again.")
+
+        supplier = str(payload.get("supplier") or "").strip()[:200]
+        if not supplier:
+            return fail("Enter the supplier name (who did you buy from).")
+        try:
+            bill_date = _DateField().clean(payload.get("date") or "")
+        except Exception:
+            return fail("Pick a valid date.")
+        try:
+            bill_time = _TimeField(
+                input_formats=ENTRY_TIME_INPUT_FORMATS).clean(
+                payload.get("time") or "")
+        except Exception:
+            return fail("Pick a valid time.")
+
+        raw_items = payload.get("items")
+        if not isinstance(raw_items, list) or not raw_items:
+            return fail("Add at least one item to the bill.")
+
+        wanted = {}
+        for row in raw_items:
+            try:
+                mid = int(row.get("material_id"))
+                qty = int(row.get("qty"))
+            except (TypeError, ValueError):
+                return fail("Each item needs a product and a whole quantity.")
+            if qty <= 0:
+                return fail("Quantities must be greater than zero.")
+            wanted[mid] = wanted.get(mid, 0) + qty
+
+        materials = {m.pk: m for m in Material.objects.filter(pk__in=wanted)}
+        missing = [mid for mid in wanted if mid not in materials]
+        if missing:
+            return fail("A product in the bill no longer exists.")
+
+        # Duplicate guard: one purchase per material per date+time.
+        for mid in wanted:
+            if InwardEntry.objects.filter(
+                    site=self.site, material_id=mid,
+                    date=bill_date, time=bill_time).exists():
+                return fail(
+                    f"{materials[mid].display_name} already has a purchase on "
+                    f"{bill_date} at "
+                    f"{bill_time.strftime('%I:%M %p').lstrip('0')}. "
+                    "Change the time slightly.")
+
+        saved = []
+        try:
+            with transaction.atomic():
+                for mid, qty in wanted.items():
+                    entry = InwardEntry.objects.create(
+                        site=self.site, material=materials[mid],
+                        date=bill_date, time=bill_time, qty=qty,
+                        received_from=supplier, created_by=request.user)
+                    log_audit(request.user, AuditLog.Action.CREATE,
+                              AuditLog.EntryType.INWARD, entry.pk,
+                              entry_summary(entry, AuditLog.EntryType.INWARD))
+                    saved.append(entry)
+        except IntegrityError:
+            return fail("Save conflict — please try again.")
+
+        total_qty = sum(e.qty for e in saved)
+        messages.success(
+            request,
+            f"Purchase bill saved: {len(saved)} item"
+            f"{'s' if len(saved) != 1 else ''} ({fmt_qty(total_qty)} total)"
+            f" from {supplier}.")
+        # Straight to the printable bill (80mm thermal): Rate/Amount cells
+        # print blank for hand-filling — the app stores no price fields.
+        ids = ",".join(str(e.pk) for e in saved)
+        return JsonResponse(
+            {"ok": True,
+             "redirect":
+                 reverse("entries:purchase_bill_print") + f"?ids={ids}"})
+
+
+def _bill_print_context(
+        request, site, model, ids, *, bill_kind, party_label,
+        related=("material",)):
+    """Shared context for the printed bill pages (sale / purchase).
+
+    Fetches the named entry rows (this shop only). Rate/Amount are
+    intentionally absent — the app stores no price fields; the printed
+    bill leaves those cells blank so the owner writes prices by hand
+    (owner decision). Shop header comes from BILL_SHOP_NAME and
+    BILL_SHOP_TAGLINE env vars (.env), so rebranding the print needs no
+    code edit. Raises Http404 when nothing resolves (bad/tampered ids).
+    """
+    id_list = []
+    for chunk in str(ids or "").split(","):
+        chunk = chunk.strip()
+        if chunk:
+            # Reject non-numeric ids early so int() failures fail flat.
+            if not chunk.isdigit():
+                raise Http404("Nothing to print — bad ids.")
+            id_list.append(int(chunk))
+    qs = model.objects.filter(site=site, pk__in=id_list).select_related(
+        *related).order_by("id")
+    entries = list(qs) if id_list else []
+    if not entries:
+        raise Http404("Nothing to print — the bill was not found.")
+
+    head = entries[0]
+    party = getattr(head, "customer", None) or getattr(
+        head, "received_from", "") or "-"
+    return render(request, "entries/bill_print.html", {
+        "entries": entries,
+        "bill_kind": bill_kind,
+        "party_label": party_label,
+        "party": party or "-",
+        "bill_date": head.date.strftime("%d-%m-%Y"),
+        "bill_time": head.time.strftime("%I:%M %p").lstrip("0"),
+        "total_qty": fmt_qty(sum(e.qty for e in entries)),
+        "shop_name": os.environ.get("BILL_SHOP_NAME", "nibba"),
+        "shop_tagline": os.environ.get("BILL_SHOP_TAGLINE", ""),
+    })
+
+
+class SaleBillPrintView(LoginRequiredMixin, View):
+    """Print-ready 80mm thermal bill for a just-saved multi-item sale.
+
+    GET entries/sale/bill/print/?ids=31,32 — Rate and Amount cells print
+    blank (prices are filled by hand on the paper; entry models hold no
+    price fields by design). Reads are global, so any logged-in user may
+    print any saved bill of this shop (matches read policy everywhere).
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        from sites.models import get_default_site
+        self.site = get_default_site()
+        if self.site is None:
+            messages.error(
+                request, "Set up your shop site first (more than one site "
+                         "exists, so pick one from Sites).")
+            return redirect("sites:list")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return _bill_print_context(
+            request, self.site, OutwardEntry, request.GET.get("ids", ""),
+            bill_kind="SALE", party_label="Customer",
+            related=("material", "sub_location"))
+
+
+class PurchaseBillPrintView(LoginRequiredMixin, View):
+    """Print-ready 80mm thermal bill for a just-saved multi-item purchase.
+
+    Same blank-price layout as the sale bill; the party line shows the
+    supplier (received_from). Reserved for stock-in slips the owner may
+    hand-check against the supplier's own bill.
+    """
+
+    def dispatch(self, request, *args, **kwargs):
+        from sites.models import get_default_site
+        self.site = get_default_site()
+        if self.site is None:
+            messages.error(
+                request, "Set up your shop site first (more than one site "
+                         "exists, so pick one from Sites).")
+            return redirect("sites:list")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        return _bill_print_context(
+            request, self.site, InwardEntry, request.GET.get("ids", ""),
+            bill_kind="PURCHASE", party_label="Supplier")
 
 
 def entry_summary(entry, entry_type):

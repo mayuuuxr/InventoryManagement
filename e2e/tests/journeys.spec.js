@@ -17,7 +17,7 @@ test('J1 happy: login lands on sites; failure: bad PIN shows error, 5x locks', a
 authed('J2 happy: staff inward (no photo) raises balance; failure: duplicate datetime blocked', async ({ authedPage: page }) => {
   const tag = Date.now();
   await page.goto('/sites/');
-  await expect(page.getByText(/vidarbha|site/i).first()).toBeVisible({ timeout: 15000 });
+  await expect(page.getByText(/nibba|site/i).first()).toBeVisible({ timeout: 15000 });
   // NOTE: selectors below assume data-testid added per template step 4; fallback to roles.
   // Happy path exercised end-to-end once testids land; today asserts list renders (no 500).
   await expect(page).not.toHaveTitle(/server error/i);

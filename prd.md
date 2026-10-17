@@ -3,6 +3,11 @@
 ## Purpose
 Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (stock gaya) track kare aur live balance dikhaye. Manual register/Excel replace karega. Koi server kharcha nahi, koi photo ka overhead nahi, koi phone nahi — ek PC holds the truth, entry usi PC par hoti hai.
 
+## Shop Profile
+- Shop **paint aur household hardware materials** bechti hai.
+- **Sites ka concept shop ke liye NAHI hai** — one shop, one catalog (koi site picker UI nahi; code-level `Shop` row sirf backend ke liye).
+- Prices bill par haath se likhe jate hain; app me koi price field nahi (see 5a Bill Printing).
+
 ## Users
 - Owner/Admin — full access, catalog, reports, staff PIN, updates
 - Staff — purchase/sale entry karta hai (same PC, alag login)
@@ -40,6 +45,12 @@ Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (
 - Koi photo proof nahi
 - Quick form: `entries/sale/add/`; Orders history: `entries/orders/`
 - NOTE: purane `Supplied To` / `Place of Supply` fields hata diye gaye hain — material sirf apni shop se bikta hai (no external supply concept).
+
+### 5a. Bill Printing (thermal, prices hand-written)
+- Sale/Purchase **billing screens** (`entries/sale/bill/`, `entries/purchase/bill/`): ek bill me multiple items; fields sirf — party (customer/supplier) name, items, qty, date, time.
+- Save ke turant baad printable bill khulta hai (`entries/sale/bill/print/?ids=…`) aur print dialog auto-chal jata hai (80mm roll).
+- Paper format: centered shop header (`BILL_SHOP_NAME`/`BILL_SHOP_TAGLINE` env), party + date/time, items table (#, Item, Qty), **Rate aur Amount columns BLANK**, **TOTAL blank** — sab haath se likha jata hai.
+- Prices/price fields app me kahin store NAHI hote — bilkul design ke hisaab se.
 
 ### 6. Transfer Entry
 - Shop-to-shop transfer ka concept nahi hai (single shop)

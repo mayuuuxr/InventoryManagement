@@ -121,9 +121,13 @@
                 <i data-lucide="layers" class="w-[18px] h-[18px]"></i>
                 Orders
             </a>
-            <a href="{% url 'entries:purchase_add' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'entries:purchase_add' or vn == 'entries:sale_add' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
-                <i data-lucide="plus-circle" class="w-[18px] h-[18px]"></i>
-                New Entry
+            <a href="{% url 'entries:purchase_bill' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'entries:purchase_bill' or vn == 'entries:purchase_bill_print' or vn == 'entries:purchase_add' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="truck" class="w-[18px] h-[18px]"></i>
+                New Purchase
+            </a>
+            <a href="{% url 'entries:sale_bill' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn == 'entries:sale_bill' or vn == 'entries:sale_bill_print' or vn == 'entries:sale_add' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
+                <i data-lucide="shopping-cart" class="w-[18px] h-[18px]"></i>
+                New Sale
             </a>
             <a href="{% url 'reports:landing' %}" class="flex items-center gap-3 px-4 py-2.5 rounded-xl transition-colors {% if vn|slice:':8' == 'reports:' and vn != 'reports:site_summary' and vn != 'reports:site_summary_export' and vn != 'reports:site_summary_export_pdf' %}bg-accent-hover text-white font-medium{% else %}text-white/85 hover:bg-white/10{% endif %}">
                 <i data-lucide="bar-chart-3" class="w-[18px] h-[18px]"></i>
@@ -404,7 +408,7 @@
         var form = e.target;
         if (!form || !form.action || form.action.indexOf("/logout/") === -1) return;
         try {
-            if ('caches' in window) caches.delete('nibba-shell-v1').catch(function () {});
+            if ('caches' in window) caches.delete('nibba-shell-v2').catch(function () {});
         } catch (err) {}
     });
     </script>

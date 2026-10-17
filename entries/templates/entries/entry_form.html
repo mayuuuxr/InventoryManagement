@@ -168,7 +168,7 @@
 (function () {
     var form = document.getElementById("entry-form");
     if (!form || !window.sessionStorage) return;
-    var KEY = "vidarbha_entry_draft:" + location.pathname;
+    var KEY = "nibba_entry_draft:" + location.pathname;
     var FIELDS = ["qty", "date", "time", "received_from", "sub_location"];
     var MAX_AGE = 24 * 60 * 60 * 1000;
     function read() {

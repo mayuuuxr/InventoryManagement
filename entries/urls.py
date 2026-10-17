@@ -35,10 +35,34 @@ urlpatterns = [
         views.PurchaseCreateView.as_view(),
         name="purchase_add",
     ),
+    # Billing screen: multi-item purchase in one bill
+    path(
+        "purchase/bill/",
+        views.PurchaseBillView.as_view(),
+        name="purchase_bill",
+    ),
     path(
         "sale/add/",
         views.SaleCreateView.as_view(),
         name="sale_add",
+    ),
+    # Billing screen: multi-item sale in one bill (Indian shop front door)
+    path(
+        "sale/bill/",
+        views.SaleBillView.as_view(),
+        name="sale_bill",
+    ),
+    # Printable bill (80mm thermal, Rate/Amount blank for hand-filling)
+    path(
+        "sale/bill/print/",
+        views.SaleBillPrintView.as_view(),
+        name="sale_bill_print",
+    ),
+    # Same for purchases
+    path(
+        "purchase/bill/print/",
+        views.PurchaseBillPrintView.as_view(),
+        name="purchase_bill_print",
     ),
     # Material detail with tabs (inward / outward / balance)
     path(

@@ -11,7 +11,7 @@
  *   go straight to the network — the worker can neither complete nor
  *   safely replay them (offline entry queue is a separate future feature).
  */
-var SHELL_CACHE = 'vidarbha-shell-v2';
+var SHELL_CACHE = 'nibba-shell-v2';
 var CDN_HOSTS = [
   'cdn.tailwindcss.com',
   'fonts.googleapis.com',

@@ -19,8 +19,20 @@
     <div class="bg-surface border border-subtle rounded-xl p-4 md:p-6">
         <div class="flex items-center gap-6 text-sm border-b border-subtle mb-4">
             <a href="{% url 'entries:purchase_add' %}" class="pb-2 -mb-px transition-colors {% if kind == "purchase" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Purchase</a>
-            <a href="{% url 'entries:sale_add' %}" class="pb-2 -mb-px transition-colors {% if kind == "sale" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Sale</a>
+            <a href="{% url 'entries:sale_bill' %}" class="pb-2 -mb-px transition-colors {% if kind == "sale" %}text-accent font-medium border-b-2 border-accent{% else %}text-muted hover:text-charcoal{% endif %}">Sale</a>
         </div>
+        {% if kind == "sale" %}
+        <a href="{% url 'entries:sale_bill' %}" class="flex items-center justify-center gap-2 w-full px-4 py-3 min-h-[44px] bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            Open Sale Billing — add multiple items in one bill
+        </a>
+        {% endif %}
+        {% if kind == "purchase" %}
+        <a href="{% url 'entries:purchase_bill' %}" class="flex items-center justify-center gap-2 w-full px-4 py-3 min-h-[44px] bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
+            <i data-lucide="truck" class="w-4 h-4"></i>
+            Open Purchase Billing — add multiple items in one bill
+        </a>
+        {% endif %}
         <form method="post" class="space-y-4">
             {% csrf_token %}
             {% if form.non_field_errors %}

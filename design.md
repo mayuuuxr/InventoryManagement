@@ -1,4 +1,4 @@
-# Design System — Vidarbha Homes App
+# Design System — nibba
 
 > **This is the standing style guide. Every future page MUST follow these rules.**
 > When in doubt: flat, clean, compact, no decoration. This is an internal business tool, not a marketing site.
@@ -135,7 +135,7 @@ All colors are exposed as Tailwind tokens via the inline config in `base.html`. 
 ```html
 <div class="bg-surface border border-subtle rounded-lg border-l-4 border-l-warning p-4 flex gap-3">
   <i data-lucide="alert-triangle" class="w-5 h-5 text-warning flex-shrink-0 mt-0.5"></i>
-  <div class="text-sm text-charcoal">Low stock for Crushed Stone at Vidarbha Park - 1.</div>
+  <div class="text-sm text-charcoal">Low stock for Crushed Stone at Shop 1.</div>
 </div>
 ```
 
@@ -152,7 +152,7 @@ All colors are exposed as Tailwind tokens via the inline config in `base.html`. 
     </thead>
     <tbody class="divide-y divide-subtle">
       <tr class="hover:bg-gray-50">
-        <td class="px-4 py-3 text-charcoal">Vidarbha Park - 1</td>
+        <td class="px-4 py-3 text-charcoal">Shop 1</td>
         <td class="px-4 py-3 text-muted">Nagpur</td>
         <td class="px-4 py-3 text-right text-charcoal font-medium">1,240 ft</td>
       </tr>
