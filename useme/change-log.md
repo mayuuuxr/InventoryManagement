@@ -18,6 +18,10 @@ Old handover snapshot DBs and rotating backups were DELETED this session (brand 
 owner-approved) — no DB rollback anchor remains; the daily `nibba-Shop.bat` backup
 rotation takes over from the next launch.
 
+**LANDED:** commit `671f458`, tag `v1.2.0` — 26 files, +1681/−27, Sat 2026-10-17
+23:48:47 IST (owner ran the commands personally). Green gate for the release:
+`useme/test-reports/2026-10-17_full-suite_run3.md` (139 tests OK).
+
 ---
 
 ## 2026-10-17 — Session pass #2: sidebar split + field labels (UNCOMMITTED, same stack)
