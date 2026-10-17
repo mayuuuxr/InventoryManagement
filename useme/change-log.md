@@ -61,6 +61,11 @@ owner approves push + tag — GitHub push stays consent-gated.
      redirect** (404 before v1.2.1: the new order-detail routes are live).
 - In-app Updates page now compares 1.2.1 vs 1.2.1 → no Install button (correct,
   nothing newer exists).
+- Owner-side verification done the same night: owner logged in as OWNER, refreshed
+  once, opened order sheets from Orders and printed receipts — reported "done", no
+  issues raised. Feature considered accepted at v1.2.1. Only remaining unexercised
+  update path: the in-app Install button (`core/selfupdate.py`) — will prove itself
+  on the next release from the Updates page.
 
 ---
 
