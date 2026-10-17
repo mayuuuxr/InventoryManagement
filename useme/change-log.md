@@ -24,6 +24,45 @@ rotation takes over from the next launch.
 
 ---
 
+## 2026-10-18 — Session pass: v1.2.0 shipped to the shop PC
+
+- **Version:** 1.2.0 · **git HEAD:** `623306c` · **Working tree:** clean at start of pass.
+
+Half past midnight the owner asked why the shop app shows no update option. Traced the
+whole path — this machine is BOTH the dev PC and the shop PC, and the two copies differ:
+- The desktop "nibba Shop" icon launches the **installed copy**
+  `C:\Users\mayuuuxr\AppData\Local\nibba` — NOT this repo. That copy was
+  VERSION 1.1.5-era with its own small db (3,750 + 3,750 seeded demo rows, Oct 15-16).
+- **No entries were created anywhere on 2026-10-17 in either DB** — the copy
+  divergence is data-safe today; zero sales/purchases were lost or at risk.
+- The repo's 30 MB db (95.5k inward / 70.5k outward historical dataset) is NOT what
+  the daily app reads. Going forward the shop register is
+  `AppData\Local\nibba\db.sqlite3` (currently seeded demo data).
+- Why no update option, two stacked reasons: the sidebar Updates item is ADMIN-ONLY
+  (`user.is_admin_role`), and an Install button only appears when GitHub has a release
+  newer than the app's own VERSION — nothing was newer than v1.1.5 at that point.
+
+Shipped tonight (all owner-approved):
+1. **Pushed** main `3793daf..623306c` + tag `v1.2.0`; CI (release.yml run #11) published
+   release v1.2.0 with `nibba-v1.2.0.zip` — 576,292 bytes, sha256
+   `e85e8a188314b1a3582fbd4a8c99648e62bc9d6698c7fca8e3c401d6d7a3928a`, verified before install.
+2. **Installed copy updated 1.1.5 → 1.2.0** following update.bat's algorithm by hand,
+   because the bat itself is parse-broken on this PC (bug-log 2026-10-18 OPEN): port
+   stopped via nibba-Close.bat → size-verified db backup
+   `Backup/pre-update_2026-10-18_001332.sqlite3` → 192 code files copied (data files
+   double-filtered) → migrate "No migrations to apply" → collectstatic → check clean →
+   relaunched via nibba-Shop.bat (server started 00:15:05).
+   requirements-pc.txt unchanged v1.1.5→v1.2.0 (git diff) → pip sync skipped = no-op.
+3. **Verified live:** `/entries/purchase/bill/` and `/entries/sale/bill/print/` now 302
+   → login (both 404 before the update); login page 200. The in-app updater path was
+   not exercised (server was stopped at the moment of update) — next natural attempt:
+   v1.2.1 via the app's own Install button.
+
+Note: the release zip was built from tag-commit `671f458`; the follow-up
+`623306c` (test-report + this pass's docs) is not in the installed copy — docs-only.
+
+---
+
 ## 2026-10-17 — Session pass #2: sidebar split + field labels (UNCOMMITTED, same stack)
 
 - **Version:** 1.1.5 · **git HEAD:** `3793daf` · **Working tree:** still uncommitted (billing WIP + brand sweep + printing + this).

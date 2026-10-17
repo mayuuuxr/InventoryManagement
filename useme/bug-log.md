@@ -7,6 +7,31 @@ referred to as "the old brand string".
 
 ---
 
+## 2026-10-18 | 1.2.0 | 623306c | OPEN | update.bat is parse-broken ("…was unexpected at this time.")
+
+Discovered while updating the shop PC's installed copy to v1.2.0. `cmd /c update.bat`
+exits 255 immediately — even with NO arguments — dying at batch parse before the file
+prints its own usage text ("Usage: update.bat v1.1.0"). Same bytes in the repo and in
+the installed copy (`git diff v1.1.5 v1.2.0 -- update.bat` is empty; deploy was made
+from the same tree). Suspect: the fragile multi-caret `powershell -Command ^` block
+(lines ~95-104); not yet root-caused line-precisely.
+
+Second latent defect in the same file: `UPDATE_REPO` is read from the shell ENV only —
+the batch never parses `.env` — and the built-in fallback is the placeholder
+`__YOUR_GITHUB_REPO__` (confirmed at v1.2.0). A shop owner running the documented
+`update.bat v1.2.0` flow would try to download from a bogus URL. It fails safe
+(update aborts before any code change; db backup already taken), but the documented
+path is dead until fixed.
+
+**Fix plan:** rewrite the brittle construct in the repo's `update.bat`, bake/parse the
+real repo name (`mayuuuxr/InventoryManagement`) instead of the placeholder, then ship
+in the next tagged release and exercise the fix through the app's own Install button
+(that also tests the in-app `core/selfupdate.py` path end-to-end, still unexercised).
+Workaround used tonight: the bat's algorithm executed by hand — script
+`%TEMP%\opencode\apply_v120.ps1` + `apply_v120_finish2.ps1` (scratch tools, logged
+here for rollback archaeology). Successful result: v1.2.0 live on the installed copy
+(see change-log 2026-10-18 pass).
+
 ## 2026-10-17 | 1.1.5 | 3793daf | FIXED | Legacy DB blocked by soft-deleted site row
 
 `get_default_site()` used to return None whenever `Site.objects.count() != 1`, and this
