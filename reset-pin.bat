@@ -20,7 +20,7 @@ if exist "runtime\python.exe" (
     set PY=venv\Scripts\python.exe
 )
 if not exist "%PY%" (
-    echo ERROR: no Python runtime found (need runtime\ or venv\).
+    echo ERROR: no Python runtime found - need runtime\ or venv\.
     pause
     exit /b 1
 )

@@ -49,7 +49,8 @@ Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (
 ### 5a. Bill Printing (thermal, prices hand-written)
 - Sale/Purchase **billing screens** (`entries/sale/bill/`, `entries/purchase/bill/`): ek bill me multiple items; fields sirf — party (customer/supplier) name, items, qty, date, time.
 - Save ke turant baad printable bill khulta hai (`entries/sale/bill/print/?ids=…`) aur print dialog auto-chal jata hai (80mm roll).
-- Paper format: centered shop header (`BILL_SHOP_NAME`/`BILL_SHOP_TAGLINE` env), party + date/time, items table (#, Item, Qty), **Rate aur Amount columns BLANK**, **TOTAL blank** — sab haath se likha jata hai.
+- Paper format: centered shop header (`BILL_SHOP_NAME`/`BILL_SHOP_TAGLINE` env), party + date/time, **Bill No: line** (`OUT-…`/`IN-…` = bill ki pehli line ka order id — Orders page se cross-reference), items table (#, Item, Qty), **Rate aur Amount columns BLANK**, **TOTAL blank** — sab haath se likha jata hai.
+- Orders page se kisi bhi order par click karne se uska **order sheet khulta hai** (`entries/orders/<kind>/<pk>/`): saare stored fields + same bill ki baaki lines + Print receipt button (same 80mm paper).
 - Prices/price fields app me kahin store NAHI hote — bilkul design ke hisaab se.
 
 ### 6. Transfer Entry

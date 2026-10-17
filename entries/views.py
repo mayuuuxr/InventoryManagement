@@ -582,6 +582,79 @@ class OrdersHistoryView(EntryWriterRequiredMixin, TemplateView):
         return ctx
 
 
+class OrderDetailView(EntryWriterRequiredMixin, TemplateView):
+    """One saved order line from the Orders page (IN-12 / OUT-5), opened
+    by clicking its order id.
+
+    Shows every stored field plus the other lines of the SAME bill — one
+    bill is one party + date + time (exactly what a bill save writes, so
+    merging follows identical stored data; nothing merges that the
+    registry can tell apart). A Print receipt button opens the 80mm
+    thermal bill containing ALL those lines (standard Indian-shop
+    format, Rate/Amount/Total blank for hand-writing). Read-only on
+    purpose: edit/delete happens in the material ledger so balance rules
+    stay enforced there.
+    """
+
+    template_name = "entries/order_detail.html"
+
+    def get(self, request, kind, pk):
+        if kind == "inward":
+            model, bill_kind, party_label = InwardEntry, "PURCHASE", "Supplier"
+        elif kind == "outward":
+            model, bill_kind, party_label = OutwardEntry, "SALE", "Customer"
+        else:
+            raise Http404("Unknown order kind.")
+
+        related = ["material", "site", "created_by"]
+        if kind == "outward":
+            related += ["sub_location", "inward_entry",
+                        "inward_entry__material"]
+        entry = get_object_or_404(
+            model.objects.select_related(*related), pk=pk)
+
+        # Sibling lines of the same paper bill.
+        bill_qs = model.objects.filter(site=entry.site_id,
+                                       date=entry.date, time=entry.time)
+        if kind == "outward":
+            bill_entries = list(bill_qs.filter(customer=entry.customer)
+                                .select_related("material").order_by("id"))
+        else:
+            bill_entries = list(bill_qs.filter(received_from=entry.received_from)
+                                .select_related("material").order_by("id"))
+        bill_ids = ",".join(str(e.pk) for e in bill_entries)
+        print_url = reverse(
+            "entries:sale_bill_print" if kind == "outward"
+            else "entries:purchase_bill_print") + "?ids=" + bill_ids
+
+        fifo = None
+        if kind == "outward" and entry.inward_entry:
+            fifo = {
+                "ref": f"IN-{entry.inward_entry.pk}",
+                "name": entry.inward_entry.material.display_name,
+                "url": reverse("entries:order_detail", kwargs={
+                    "kind": "inward", "pk": entry.inward_entry.pk}),
+            }
+
+        ctx = {
+            "entry": entry,
+            "kind": kind,
+            "bill_kind": bill_kind,
+            "party_label": party_label,
+            "party_value": entry.customer if kind == "outward" else (
+                entry.received_from),
+            "ref": f"{'OUT' if kind == 'outward' else 'IN'}-{entry.pk}",
+            "bill_entries": bill_entries,
+            "bill_ids": bill_ids,
+            "print_url": print_url,
+            "fifo": fifo,
+            "total_qty": fmt_qty(sum(e.qty for e in bill_entries)),
+            "recorded_at": timezone.localtime(entry.created_at).strftime(
+                "%d-%m-%Y at %I:%M %p"),
+        }
+        return self.render_to_response(ctx)
+
+
 class PurchaseCreateView(EntryWriterRequiredMixin, CreateView):
     """Shop front door: record stock bought (inward), no site picker."""
 
@@ -1058,6 +1131,8 @@ def _bill_print_context(
     return render(request, "entries/bill_print.html", {
         "entries": entries,
         "bill_kind": bill_kind,
+        "bill_ref": ("OUT-" if bill_kind == "SALE" else "IN-")
+                    + str(head.pk),
         "party_label": party_label,
         "party": party or "-",
         "bill_date": head.date.strftime("%d-%m-%Y"),

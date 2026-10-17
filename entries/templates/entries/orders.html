@@ -61,7 +61,7 @@
                 <tr>
                     <td class="py-3.5 pr-4 text-muted">{{ start_index|add:forloop.counter0 }}</td>
                     <td class="py-3.5 pr-4">
-                        <a href="{% url 'entries:detail' r.entry.site_id r.entry.material_id %}" class="text-charcoal hover:text-accent transition-colors font-medium">{{ r.ref }}</a>
+                        <a href="{% url 'entries:order_detail' r.kind r.entry.pk %}" class="text-charcoal hover:text-accent transition-colors font-medium">{{ r.ref }}</a>
                     </td>
                     <td class="py-3.5 pr-4 text-charcoal">{{ r.entry.material.display_name }}</td>
                     <td class="py-3.5 pr-4 text-right text-charcoal">{{ r.entry.qty|whole }} {{ r.entry.material.unit }}</td>

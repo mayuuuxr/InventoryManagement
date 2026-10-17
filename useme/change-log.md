@@ -8,6 +8,38 @@ log useful while honoring the no-mentions rule.
 
 ---
 
+## 2026-10-18 — Session pass: v1.2.1 — order detail page + print receipt + update.bat repair
+
+- **Version:** 1.2.1 · **git HEAD:** recorded in the landing note below ·
+  **Working tree:** single release commit (same pattern as v1.2.0).
+
+Half past midnight the owner asked: on the Orders page, clicking any order should open
+ALL its details, and there was no print-receipt option in the Indian shop receipt
+format. Shipped in this release:
+
+1. **Order detail page** — new `entries:order_detail` route
+   (`entries/orders/<inward|outward>/<pk>/`, `OrderDetailView`): every stored field
+   (material + unit, qty, Customer/Supplier, business date + time, sub-location,
+   FIFO linked-purchase link, entered-by, recorded-at) PLUS the other lines of the
+   SAME bill (same party + date + time = one paper receipt) and a **Print receipt**
+   button that opens the 80mm bill paper for ALL of those ids. Orders rows now open
+   this sheet (they used to jump to the material ledger; the ledger link stays on
+   the sheet).
+2. **Receipt format** — the printed bill gains a `Bill No: OUT-…/IN-…` line (the
+   bill's first line order id) so a paper receipt pins back to the Orders page.
+   Rate/Amount/Total stay BLANK — the no-price shop rule is untouched.
+3. **update.bat repaired** (bug-log 2026-10-18 → FIXED): five paren landmines
+   removed (line-25 killed every invocation; line-70 escaped `pause`/`exit` outside
+   the tag gate), reset-pin.bat clone fixed, and UPDATE_REPO resolves env → .env →
+   baked real repo (placeholder gone).
+4. **Tests:** 7 new OrderDetailViewTests; full suite 146 green
+   (`useme/test-reports/2026-10-18_full-suite_v121.md`); makemigrations --check clean.
+
+Shop PC deployment planned **through the repaired update.bat itself** (dogfood) after
+owner approves push + tag — GitHub push stays consent-gated.
+
+---
+
 ## 2026-10-17 — COMMIT NOTE
 
 The three pass entries in this file (billing WIP inherited + brand sweep +

@@ -29,6 +29,14 @@ urlpatterns = [
         views.OrdersHistoryView.as_view(),
         name="orders",
     ),
+    # Clicked from Orders: one saved order (IN-12 / OUT-5) with all its
+    # fields, the sibling lines of the same bill, and a Print receipt
+    # button (reuses the 80mm thermal bill paper).
+    path(
+        "orders/<str:kind>/<int:pk>/",
+        views.OrderDetailView.as_view(),
+        name="order_detail",
+    ),
     # Shop front doors: record a purchase / sale in one screen.
     path(
         "purchase/add/",

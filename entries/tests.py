@@ -375,6 +375,134 @@ class BillPrintViewTests(TestCase):
         self.assertIn("/accounts/login/", r["Location"])
 
 
+class OrderDetailViewTests(TestCase):
+    """Order sheets opened by clicking a row on the Orders page
+    (entries/orders/<inward|outward>/<pk>/): every stored field, the
+    sibling lines of the same bill (same party + date + time), and a
+    Print receipt link to the 80mm bill paper for the whole bill."""
+
+    def setUp(self):
+        self.admin = User.objects.create_user(
+            username="od_admin", password="1111", role=User.Role.ADMIN)
+        self.site = Site.objects.get(name="Shop")
+        cat = Category.objects.create(name="OD Cat")
+        self.mat_a = Material.objects.create(
+            category=cat, name="Asian Paint 1L", unit="pcs",
+            reorder_point=5)
+        self.mat_b = Material.objects.create(
+            category=cat, name="Putty 5kg", unit="pkts")
+        self.mat_o = Material.objects.create(
+            category=cat, name="Brush 2in", unit="pcs")
+        # One paper bill: same customer + date + time, two lines.
+        self.sale_a = OutwardEntry.objects.create(
+            site=self.site, material=self.mat_a, date="2026-10-17",
+            time="11:30", qty=6, customer="Ramesh Hardware",
+            created_by=self.admin)
+        self.sale_b = OutwardEntry.objects.create(
+            site=self.site, material=self.mat_b, date="2026-10-17",
+            time="11:30", qty=2, customer="Ramesh Hardware",
+            created_by=self.admin)
+        # Different customer at the same date/time — a DIFFERENT bill.
+        self.other_sale = OutwardEntry.objects.create(
+            site=self.site, material=self.mat_o, date="2026-10-17",
+            time="11:30", qty=1, customer="Ganesh Sweets",
+            created_by=self.admin)
+        self.inw = InwardEntry.objects.create(
+            site=self.site, material=self.mat_a, date="2026-10-15",
+            time="09:00", qty=50, received_from="Sharma Paints",
+            created_by=self.admin)
+
+    def _url(self, kind, pk):
+        return reverse("entries:order_detail",
+                       kwargs={"kind": kind, "pk": pk})
+
+    def test_requires_login(self):
+        for kind, pk in (("outward", self.sale_a.pk),
+                         ("inward", self.inw.pk)):
+            r = self.client.get(self._url(kind, pk))
+            self.assertEqual(r.status_code, 302)
+            self.assertIn("/accounts/login/", r["Location"])
+
+    def test_unknown_404s(self):
+        self.client.force_login(self.admin)
+        self.assertEqual(
+            self.client.get(self._url("bogus", 1)).status_code, 404)
+        # Outward and Inward are separate tables with separate id
+        # sequences: an id that exists nowhere in THIS table is a plain
+        # 404 for that URL, never a crash. The inward table holds exactly
+        # one row (pk=1), so these ids are unknown to it.
+        self.assertEqual(
+            self.client.get(
+                self._url("inward", self.sale_b.pk)).status_code, 404)
+        self.assertEqual(
+            self.client.get(
+                self._url("inward", 999999)).status_code, 404)
+        self.assertEqual(
+            self.client.get(
+                self._url("outward", 999999)).status_code, 404)
+
+    def test_sale_sheet_shows_fields_and_bill_lines(self):
+        self.client.force_login(self.admin)
+        r = self.client.get(self._url("outward", self.sale_a.pk))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "OUT-" + str(self.sale_a.pk))
+        self.assertContains(r, "Ramesh Hardware")
+        self.assertContains(r, "Asian Paint 1L")
+        self.assertContains(r, "Entered by")
+        self.assertContains(r, "od_admin")
+        # The sibling line of the SAME bill shows up…
+        self.assertContains(r, "Putty 5kg")
+        # …the other customer's sale is NOT on this receipt: the bill
+        # card shows exactly 2 items. (String-absence can't be asserted
+        # for material/customer names — the topbar notification panel
+        # echoes the latest rows across the whole app.)
+        self.assertContains(r, "Same bill — 2 items")
+        # …and the receipt link carries BOTH ids in bill order.
+        self.assertContains(
+            r, "/entries/sale/bill/print/?ids="
+            + f"{self.sale_a.pk},{self.sale_b.pk}")
+
+    def test_fifo_link_when_linked_purchase_exists(self):
+        self.client.force_login(self.admin)
+        linked = OutwardEntry.objects.create(
+            site=self.site, material=self.mat_a, date="2026-10-17",
+            time="16:00", qty=3, customer="Deepa", created_by=self.admin,
+            inward_entry=self.inw)
+        r = self.client.get(self._url("outward", linked.pk))
+        self.assertContains(r, "Linked purchase")
+        self.assertContains(r, "IN-" + str(self.inw.pk))
+
+    def test_purchase_sheet_shows_supplier_and_receipt_ids(self):
+        self.client.force_login(self.admin)
+        r = self.client.get(self._url("inward", self.inw.pk))
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, "Sharma Paints")
+        self.assertContains(r, "Asian Paint 1L")
+        self.assertContains(
+            r, "/entries/purchase/bill/print/?ids="
+            + str(self.inw.pk))
+
+    def test_print_paper_adds_bill_no(self):
+        """The receipt pins the bill to the Orders page: Bill No reuses
+        the bill's first line order id (extra Indian-shop detail)."""
+        self.client.force_login(self.admin)
+        body = self.client.get(
+            reverse("entries:sale_bill_print")
+            + f"?ids={self.sale_a.pk},{self.sale_b.pk}").content.decode()
+        self.assertIn("Bill No:", body)
+        self.assertIn("OUT-" + str(self.sale_a.pk), body)
+        body = self.client.get(
+            reverse("entries:purchase_bill_print")
+            + f"?ids={self.inw.pk}").content.decode()
+        self.assertIn("IN-" + str(self.inw.pk), body)
+
+    def test_orders_page_rows_link_to_detail(self):
+        self.client.force_login(self.admin)
+        r = self.client.get(reverse("entries:orders"))
+        self.assertContains(r, self._url("outward", self.sale_a.pk))
+        self.assertContains(r, self._url("inward", self.inw.pk))
+
+
 class ExportMonthlyFilesTests(TestCase):
     """export_monthly_files writes Data/YYYY-MM/{sales,purchases}.xlsx
     with entry sheets plus per-material totals."""

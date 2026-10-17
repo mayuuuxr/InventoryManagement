@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load quantities %}
+{# One saved order from the Orders page (IN-12 / OUT-5). Every stored
+   field + the other lines of the SAME bill + a Print receipt button
+   that opens the 80mm bill paper for the whole bill. No price fields —
+   per the shop rule, printed Rate/Amount/Total stay blank. #}
+
+{% block title %}{{ ref }} | nibba{% endblock %}
+
+{% block breadcrumb %}
+<nav class="flex items-center gap-1.5 text-sm text-muted mb-4">
+    <a href="{% url 'dashboard' %}" class="hover:text-charcoal transition-colors">Dashboard</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <a href="{% url 'entries:orders' %}" class="hover:text-charcoal transition-colors">Orders</a>
+    <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+    <span class="text-charcoal font-medium">{{ ref }}</span>
+</nav>
+{% endblock %}
+
+{% block content %}
+<div class="bg-surface border border-subtle rounded-xl">
+    <div class="flex flex-wrap items-center justify-between gap-3 p-4 md:p-6">
+        <div class="flex items-center gap-3">
+            <span class="text-sm font-medium {% if kind == 'outward' %}text-accent{% else %}text-green-500{% endif %}">
+                {% if kind == "outward" %}Stock Out{% else %}Stock In{% endif %}
+            </span>
+            <h1 class="text-charcoal text-lg font-semibold">{{ ref }}</h1>
+            <span class="text-sm text-muted">{{ entry.date|date:"d-m-Y" }} · {{ entry.time|date:"g:i A" }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="{{ print_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors">
+                <i data-lucide="printer" class="w-4 h-4"></i>
+                Print receipt
+            </a>
+            <a href="{% url 'entries:detail' entry.site_id entry.material_id %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm text-charcoal border border-subtle rounded-lg hover:border-accent hover:text-accent transition-colors">
+                <i data-lucide="book-open" class="w-4 h-4"></i>
+                Material ledger
+            </a>
+        </div>
+    </div>
+
+    <div class="grid sm:grid-cols-2 gap-x-10 gap-y-4 border-t border-subtle px-4 py-5 md:px-6">
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Material</span>
+            <span class="text-sm text-charcoal text-right">{{ entry.material.display_name }} <span class="text-muted">(unit: {{ entry.material.unit }})</span></span>
+        </div>
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Quantity</span>
+            <span class="text-sm text-charcoal font-medium">{{ entry.qty|whole }} {{ entry.material.unit }}</span>
+        </div>
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">{{ party_label }}</span>
+            {% if party_value %}<span class="text-sm text-charcoal text-right">{{ party_value }}</span>{% else %}<span class="text-sm text-muted">Not recorded</span>{% endif %}
+        </div>
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Date</span>
+            <span class="text-sm text-charcoal">{{ entry.date|date:"d-m-Y" }}</span>
+        </div>
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Time</span>
+            <span class="text-sm text-charcoal">{{ entry.time|date:"g:i A" }}</span>
+        </div>
+        {% if kind == "outward" %}
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Sub-location</span>
+            {% if entry.sub_location %}<span class="text-sm text-charcoal">{{ entry.sub_location.name }}</span>{% else %}<span class="text-sm text-muted">—</span>{% endif %}
+        </div>
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Linked purchase</span>
+            {% if fifo %}
+            <a href="{{ fifo.url }}" class="text-sm text-accent hover:text-charcoal transition-colors text-right">{{ fifo.ref }} · {{ fifo.name }}</a>
+            {% else %}<span class="text-sm text-muted">Auto-picked at sale time</span>{% endif %}
+        </div>
+        {% endif %}
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Entered by</span>
+            <span class="text-sm text-charcoal">{{ entry.created_by.username }}</span>
+        </div>
+        <div class="flex items-start justify-between gap-4">
+            <span class="text-sm text-muted shrink-0">Recorded at</span>
+            <span class="text-sm text-charcoal">{{ recorded_at }}</span>
+        </div>
+    </div>
+</div>
+
+<div class="bg-surface border border-subtle rounded-xl mt-5 p-4 md:p-6">
+    <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <h2 class="text-charcoal text-sm font-semibold">Same bill — {{ bill_entries|length }} item{{ bill_entries|length|pluralize }}</h2>
+        <span class="text-xs text-muted">Print receipt prints every line of this bill on one 80mm roll.</span>
+    </div>
+    <div class="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
+        <table class="w-full text-sm">
+            <thead>
+                <tr class="text-left text-muted text-xs uppercase tracking-wide">
+                    <th class="font-medium py-2 pr-4">#</th>
+                    <th class="font-medium py-2 pr-4">Item</th>
+                    <th class="font-medium py-2 pr-4 text-right">Qty</th>
+                    <th class="font-medium py-2">Rate / Amount</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-subtle">
+                {% for line in bill_entries %}
+                <tr {% if line.pk == entry.pk %}class="bg-accent-hover bg-opacity-5"{% endif %}>
+                    <td class="py-2.5 pr-4 text-muted">{{ forloop.counter }}.</td>
+                    <td class="py-2.5 pr-4 text-charcoal">
+                        {{ line.material.display_name }}
+                        {% if line.pk == entry.pk %}<span class="text-xs text-muted">(this order)</span>{% endif %}
+                    </td>
+                    <td class="py-2.5 pr-4 text-right text-charcoal">{{ line.qty|whole }} {{ line.material.unit }}</td>
+                    <td class="py-2.5 text-muted text-xs">written by hand on paper</td>
+                </tr>
+                {% endfor %}
+                <tr class="border-t border-subtle">
+                    <td class="py-2.5 pr-4 text-charcoal font-medium" colspan="2">TOTAL</td>
+                    <td class="py-2.5 pr-4 text-right text-charcoal font-medium">{{ total_qty }}<span class="text-muted text-xs font-normal"> items qty on paper</span></td>
+                    <td class="py-2.5 text-muted text-xs">blank strip on the bill</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="flex items-start gap-2 mt-4 text-xs text-muted">
+    <i data-lucide="info" class="w-3.5 h-3.5 mt-px shrink-0"></i>
+    <span>No prices are stored in the app (shop rule) — the printed bill shows the shop header, party, date/time, items and qty, and leaves Rate, Amount and Total blank to fill in by hand. Edit or delete this entry from the material ledger.</span>
+</div>
+{% endblock %}

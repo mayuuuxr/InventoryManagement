@@ -22,7 +22,7 @@ if exist "runtime\python.exe" (
     set PIP=venv\Scripts\pip.exe
 )
 if not exist "%PY%" (
-    echo ERROR: no Python runtime found (need runtime\ or venv\).
+    echo ERROR: no Python runtime found - need runtime\ or venv\.
     pause
     exit /b 1
 )
@@ -55,7 +55,7 @@ if errorlevel 1 (
 for %%f in ("%BACKUP_FILE%") do set BACKUP_SIZE=%%~zf
 for %%f in ("db.sqlite3") do set DB_SIZE=%%~zf
 if not "%BACKUP_SIZE%"=="%DB_SIZE%" (
-    echo ERROR: backup size mismatch (db=%DB_SIZE%, backup=%BACKUP_SIZE%) - ABORTED, nothing changed.
+    echo ERROR: backup size mismatch - db=%DB_SIZE%, backup=%BACKUP_SIZE% - ABORTED, nothing changed.
     del "%BACKUP_FILE%"
     pause
     exit /b 1
@@ -67,17 +67,18 @@ REM --- 2. Resolve the release zip URL ---
 set TAG=%1
 if "%TAG%"=="" (
     echo Usage: update.bat v1.1.0
-    echo (Find the version on the Help page under App updates.)
+    echo  Find the version on the Help page under App updates.
     pause
     exit /b 1
 )
-REM UPDATE_REPO is baked below at release time; override via env if needed.
-if "%UPDATE_REPO%"=="" set UPDATE_REPO=__YOUR_GITHUB_REPO__
+REM UPDATE_REPO: process env first, then .env, then this repo (baked).
+if "%UPDATE_REPO%"=="" if exist ".env" for /f "eol=# tokens=1,* delims==" %%a in (.env) do if /i "%%a"=="UPDATE_REPO" if not defined UPDATE_REPO set "UPDATE_REPO=%%b"
+if "%UPDATE_REPO%"=="" set UPDATE_REPO=mayuuuxr/InventoryManagement
 set ZIP_URL=https://github.com/%UPDATE_REPO%/releases/download/%TAG%/nibba-%TAG%.zip
 echo Downloading %ZIP_URL% ...
 powershell -NoProfile -Command "Invoke-WebRequest -Uri '%ZIP_URL%' -OutFile '%TEMP%\nibba_update.zip'"
 if errorlevel 1 (
-    echo ERROR: download failed - your data and code are untouched (backup at %BACKUP_FILE%).
+    echo ERROR: download failed - your data and code are untouched, backup at %BACKUP_FILE%.
     pause
     exit /b 1
 )
@@ -87,7 +88,7 @@ if exist "%TEMP%\nibba_update" rmdir /S /Q "%TEMP%\nibba_update"
 mkdir "%TEMP%\nibba_update"
 powershell -NoProfile -Command "Expand-Archive -Path '%TEMP%\nibba_update.zip' -DestinationPath '%TEMP%\nibba_update' -Force"
 if errorlevel 1 (
-    echo ERROR: zip extract failed - nothing changed (backup at %BACKUP_FILE%).
+    echo ERROR: zip extract failed - nothing changed, backup at %BACKUP_FILE%.
     pause
     exit /b 1
 )
