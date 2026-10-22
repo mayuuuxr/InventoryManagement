@@ -42,8 +42,11 @@ Owner answered every pending question in one pass:
 **Gates:** `makemigrations --check --dry-run` → "No changes detected";
 `manage.py test` → **146 tests OK** (run twice: 188.3 s / 186.9 s), system check clean.
 Landed the same day after owner approval: commit 4e8c8a9 pushed to origin/main
-with annotated tag v1.2.2. The shop PC picks up migration 0008 through update.bat
-once the nibba-v1.2.2.zip release asset is uploaded to GitHub Releases.
+with annotated tag v1.2.2. release.yml auto-published GitHub Release v1.2.2 with
+asset nibba-v1.2.2.zip (589,549 B, sha256 4ab8acfe…) on the tag push; the asset
+was re-downloaded and verified from the owner PC — digest match, zip contains
+VERSION=1.2.2, materials/migrations/0008_normalize_units.py and the Pillow pin.
+Shop PC completes the rollout itself by running: update.bat v1.2.2.
 
 ---
 
