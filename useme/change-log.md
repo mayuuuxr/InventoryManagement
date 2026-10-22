@@ -8,6 +8,45 @@ log useful while honoring the no-mentions rule.
 
 ---
 
+## 2026-10-22 — Session: owner decisions locked + unit normalization + dependency hardening (v1.2.2)
+
+- **Version:** 1.2.2 (bumped from 1.2.1) · **git HEAD at session start:** 5e3b1cf ·
+  **Landing:** released as commit 4e8c8a9 "v1.2.2: normalize material units
+  (migration 0008); Pillow >=13.0,<14.0 after pip-audit" on main; annotated tag
+  v1.2.2 points at it; both pushed to origin/main.
+
+Owner answered every pending question in one pass:
+
+1. **Units = Indian market** — canonical glossary recorded in prd.md/AGENTS.md
+   (bags / nos / cft / ft / rft / mtr / kg / L / box / bundle / pairs / sqft / pk / ml).
+   New data migration `materials/migrations/0008_normalize_units.py` rewrites legacy
+   spellings on every install: miter/m/mtrs→mtr, no→nos, bkt→L. Dev db.sqlite3
+   (17 rows) and seed_catalog.json (18 rows) verified clean after apply.
+2. **Low-stock threshold = 10** — DECIDED (was "confirm with client").
+3. **Transfer entries: never used** — DECIDED. TransferEntry stays dormant
+   admin-only; balance formula keeps its terms (always zero on real installs).
+4. **seed_catalog.json kept** as the dev/e2e fixture; synced to the new units.
+5. **Security fix (fresh pip-audit run):** requirements-pc.txt Pillow pin
+   `>=11.0,<13.0` → `>=13.0,<14.0` — installed 12.3.0 carried 34 CVEs, all fixed in
+   13.0.0; re-audit now "No known vulnerabilities found". pip-audit itself is a
+   dev-only tool in the dev venv (not in requirements; never ships to shop PCs).
+6. `.env` audited by KEY NAMES only: just DJANGO_SECRET_KEY / DEBUG /
+   ALLOWED_HOSTS / UPDATE_REPO — no legacy Cloudinary/VAPID leftovers, and no stray
+   *.pem / *token*.txt / nibbakey.txt files anywhere. Dev copy runs DEBUG=True on
+   purpose (local testing).
+7. Owner notes the owner/1234 login is testing-only — change before shop handover.
+8. Docs updated: prd.md (units glossary + resolved open questions), PRD-PC.md
+   (§10 resolved), AGENTS.md (§5 decisions; tests list corrected — materials/tests.py
+   is an empty stub, the 146 count includes core/test_update.py's 25).
+
+**Gates:** `makemigrations --check --dry-run` → "No changes detected";
+`manage.py test` → **146 tests OK** (run twice: 188.3 s / 186.9 s), system check clean.
+Landed the same day after owner approval: commit 4e8c8a9 pushed to origin/main
+with annotated tag v1.2.2. The shop PC picks up migration 0008 through update.bat
+once the nibba-v1.2.2.zip release asset is uploaded to GitHub Releases.
+
+---
+
 ## 2026-10-18 — Session pass: v1.2.1 — order detail page + print receipt + update.bat repair
 
 - **Version:** 1.2.1 · **git HEAD:** recorded in the landing note below ·

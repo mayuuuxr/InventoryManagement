@@ -7,6 +7,19 @@ referred to as "the old brand string".
 
 ---
 
+## 2026-10-22 | 1.2.1 | WATCH | Slow-network pip timeouts hit the dev venv too
+
+Installing pip-audit into the dev venv (for today's dependency audit) hit
+`ReadTimeoutError ... files.pythonhosted.org` on the first attempt — same symptom
+family as the 2026-10-18 portable-runtime TLS WATCH. **Workaround that worked here:**
+`pip install --retries 10 --timeout 90 ...` (retry succeeded). If update.bat's
+package-sync ever fails this way during a dependency-changing release, run the sync
+manually from the install dir with the same flags. The 2026-10-18 item (portable
+runtime's certifi layout inside `pip _vendor.truststore`) remains OPEN and must be
+repaired before the next release that adds a dependency.
+
+---
+
 ## 2026-10-18 | 1.2.1 | WATCH | Portable-runtime pip fails TLS setup during update.bat package sync
 
 During the first real update.bat run (v1.2.1 install on the shop copy), the pip step
