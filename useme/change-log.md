@@ -114,6 +114,20 @@ still stands; margin-0 dropped the Chromium header/footer entirely).
   (1.2.1 → 1.2.6) carries every fix from this session. No python logic
   changes; entries suite green.
 
+### v1.2.7 (same session — receipt typography, owner's screenshot #2)
+
+The second screenshot showed the layout complaint behind "should come in
+same line only": paint names ("Asian Paints Royale 1L") wrapped 3–4 lines
+inside a 33mm Item column while `vertical-align: bottom` dropped the row
+number and qty onto the name's LAST line — the row looked scrambled.
+
+- entries/templates/entries/bill_print.html: body font 11.5px → 10.5px
+  (labels/sub/meta/thanks/total trimmed to match); Item column 33mm →
+  39mm; qty strip freed (no fixed 9mm — nowrap, auto); Rate/Amt hand-fill
+  strips 12/13mm → 9.5mm each (still pen-friendly); items cells align
+  TOP so number, name and qty always begin on the same line.
+- Version-surface: 1.2.7. Template-only; entries suite green.
+
 ---
 
 ## 2026-10-22 — Session: production-pages audit (checklist vs. evidence)
