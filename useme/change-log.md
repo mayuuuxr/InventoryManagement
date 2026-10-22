@@ -128,6 +128,28 @@ number and qty onto the name's LAST line — the row looked scrambled.
   TOP so number, name and qty always begin on the same line.
 - Version-surface: 1.2.7. Template-only; entries suite green.
 
+### v1.2.8 (same session — the leak the guard missed + uniform type)
+
+Owner's print-preview screenshot (03:37) showed the receipt tail
+"…comments are NOT supported by the Django #}" STILL leaking. Two truths:
+the shop copy had not installed the newer code yet, AND the v1.2.6
+"warning note" itself nested a template-comment pair inside its own
+comment — the inner pair closed early and the line's tail rendered as
+text. The v1.2.6 lint (unclosed-opener regex) could not see a
+premature close.
+
+- bill_print.html + order_detail.html: both note blocks rewritten free of
+  nested brace pairs (text kept, advice intact).
+- Uniform type on the receipt (owner: "use the thank-you size"): body,
+  meta, item rows, header row and TOTAL all 10px; only the NIBBA brand
+  line stays 14px bold. With the smaller size the 39mm Item column now
+  fits even longer paint names on one line.
+- TemplateCommentLint hardened into a per-line mini-lexer: fails on an
+  opener left open AND on a stray closer in plain text (both render as
+  text) — the class of bug can no longer pass the suite silently.
+- Version-surface: 1.2.8; suite green. Owner's next in-app install
+  carries 1.2.1/1.2.5/1.2.7 → 1.2.8 in one click.
+
 ---
 
 ## 2026-10-22 — Session: production-pages audit (checklist vs. evidence)

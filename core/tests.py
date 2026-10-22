@@ -509,7 +509,6 @@ class TemplateCommentLint(SimpleTestCase):
     """
 
     def test_no_template_opens_an_unclosed_comment(self):
-        import re
         from pathlib import Path
 
         from django.apps import apps
@@ -523,7 +522,28 @@ class TemplateCommentLint(SimpleTestCase):
             p = Path(cfg.path) / "templates"
             if p.is_dir():
                 dirs.append(p)
-        offender = re.compile(r"\{#(?:(?!#\}).)*$")
+
+        def leaky(line):
+            """Simulate the lexer on ONE line: `{#` must close before the
+            line ends, and no stray `#}` may appear in plain text. Either
+            way the remainder of the line renders as literal text — this
+            exact leak printed the developer note on thermal receipts
+            (including an early-fix note that nested a brace pair inside
+            its own comment)."""
+            i = 0
+            while i < len(line):
+                two = line[i:i + 2]
+                if two == "{#":
+                    j = line.find("#}", i + 2)
+                    if j == -1:
+                        return True
+                    i = j + 2
+                elif two == "#}":
+                    return True
+                else:
+                    i += 1
+            return False
+
         scanned = 0
         for d in dirs:
             for f in d.rglob("*.html"):
@@ -531,10 +551,8 @@ class TemplateCommentLint(SimpleTestCase):
                 lines = f.read_text(
                     encoding="utf-8", errors="replace").splitlines()
                 for n, line in enumerate(lines, 1):
-                    m = offender.search(line)
-                    self.assertIsNone(
-                        m,
-                        msg=(f"{f}:{n} opens a multi-line {{# comment "
-                             f"(renders as literal text): "
-                             f"{line.strip()[:80]}"))
+                    self.assertFalse(
+                        leaky(line),
+                        msg=(f"{f}:{n} renders comment braces as literal "
+                             f"text: {line.strip()[:80]}"))
         self.assertGreaterEqual(scanned, 20)
