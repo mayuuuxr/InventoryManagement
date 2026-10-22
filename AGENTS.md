@@ -18,7 +18,7 @@ Single-shop build is complete and production-hardened. Do NOT reintroduce remove
 - **Models:** `User` (admin/staff/manager), `Site` (one auto-created `Shop` row), `Category`, `SubCategory`, `Material`, `InwardEntry` (a purchase, `received_from`, NO photo), `OutwardEntry` (a sale, `customer` + `inward_entry` FIFO link + free-text `sub_location`, NO photo), `TransferEntry` (admin-only, no app UI), `SubLocation`, `SubLocationAllocation`, `AuditLog`
 - **Balance:** calculated, never stored (`entries/utils.py: balance_for`) — `Inward − Outward − Transfer(out) + Transfer(in)`, per site per material; negative blocked in forms; qty whole numbers only
 - **Safeguards:** outward/sale saves re-check balance under row locks in `transaction.atomic` (race-proof); allocations cannot exceed delivery; sub-location names unique case-insensitively per site; login lockout 5-fails/1h per (IP, username) via django-axes; soft-deleted catalog rows restorable via admin action; DEBUG fail-closed (default False); Excel formula-injection guard; `?repeat=` reads the latest row in this site+material
-- **Tests:** `manage.py test` — 146 tests green (`accounts/tests.py`, `core/tests.py`, `entries/tests.py`, `entries/tests_audit.py`, `materials/tests.py`, `reports/tests.py`, `sites/tests.py`). No network, no third-party services in tests.
+- **Tests:** `manage.py test` — 146 tests green (`accounts/tests.py`, `core/tests.py`, `core/test_update.py`, `entries/tests.py`, `entries/tests_audit.py`, `reports/tests.py`, `sites/tests.py`). No network, no third-party services in tests. (`materials/tests.py` is an empty stub — catalog behaviour is covered indirectly by the other suites.)
 - **Database:** SQLite only (`db.sqlite3`, gitignored). No Postgres anywhere.
 - **Tech stack:** Django + Django Templates + Tailwind CSS (vendored offline in `static/vendor/`), served by waitress on the shop PC. Zero monthly cost.
 
@@ -55,6 +55,7 @@ When adding a migration, prove a fresh install still works:
 
 ## 5. Open Questions (resolved unless noted)
 
-- Units for steel, plumbing, and other materials (client to confirm) — PENDING
 - Negative balance allowed or blocked — DECIDED: blocked in app forms (`qty > available → error`)
-- Low-stock alerts — IMPLEMENTED (`reorder_point` per material + `LOW_STOCK_THRESHOLD=10` fallback, dashboard low/out-of-stock tabs); thresholds to confirm with client
+- Units for steel, plumbing, and other materials — DECIDED (owner, Oct 2026): Indian-market units, one canonical spelling each (bags / nos / cft / ft / rft / mtr / kg / L / box / bundle / pairs / sqft / pk / ml). Legacy spellings are normalized on every install by `materials/migrations/0008_normalize_units.py` (miter/m/mtrs→mtr, no→nos, bkt→L).
+- Low-stock alerts — IMPLEMENTED (`reorder_point` per material + `LOW_STOCK_THRESHOLD=10` fallback, dashboard low/out-of-stock tabs); threshold — DECIDED: 10 (owner, Oct 2026).
+- TransferEntry — DECIDED (owner, Oct 2026): the shop will NEVER use transfers. The model stays dormant admin-only (no app UI, no new features); the balance formula keeps its terms (always zero on real installs).

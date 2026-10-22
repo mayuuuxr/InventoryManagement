@@ -1,10 +1,12 @@
 # nibba shop build: everything on this PC (db.sqlite3). No cloud
 # services at all: no Postgres, no gunicorn, no sentry, no Cloudinary,
-# no push. Pillow stays for Excel image support via openpyxl.
+# no push. Pillow >=13.0 (pip-audit 2026-10-22: 12.x carries 34 CVEs,
+# all fixed in 13.0.0) — only used by the dev icon generator and for
+# openpyxl image support; never imported at app runtime.
 Django==6.1.1
 django-axes==8.3.1
 python-dotenv>=1.0,<2.0
-Pillow>=11.0,<13.0
+Pillow>=13.0,<14.0
 openpyxl==3.1.5
 et-xmlfile==2.0.0
 reportlab>=4.0,<6.0

@@ -27,13 +27,13 @@ Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (
 - Owner aur Staff dono material add kar sakte hain
 - Catalog hierarchy: Category > SubCategory > Material (e.g. Steel > 8mm)
 - Har material ka apna unit + reorder_point (default 10) hota hai:
-  - Cement — bags
-  - Crushed Stone (gitti) — ft
-  - Fly Ash — ft
-  - Murrom — ft
-  - Sand — ft
-  - Bricks — pieces
-  - Steel, Plumbing, etc. — TBD (client se confirm karna hai)
+- Units — DECIDED (owner, Oct 2026): Indian-market units, ek canonical spelling per unit
+  (Cement — bags, grit/ bajri/murum/sand/fly-ash — cft, bricks/blocks — nos,
+  TMT steel/nails/putty — kg, pipes/roofing sheets — ft (running length mtr), paints
+  aur chemicals — L, tiles/cover blocks — box, TMT/jali/bamboo — bundle, PPE — pairs).
+  Purane spellings migration `materials/migrations/0008_normalize_units` se normalize
+  hote hain (miter/m/mtrs→mtr, no→nos, bkt→L). Naya material add karte waqt isi list
+  ka unit use karein.
 
 ### 4. Purchase Entry (Inward)
 - Fields: Date, Time, Qty (whole numbers only), Received From (supplier), Material
@@ -85,6 +85,7 @@ Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (
 - No photo proof, no push notifications, no phones, no LAN/tunnel access, no cloud hosting, no multi-shop sync, no GPS/QR, no accounting/GST, no Transfer UI in v1
 
 ## Open Questions (client se confirm karna baaki)
-- Steel/plumbing/other materials ke units — PENDING
 - Negative balance allow karna hai ya block karna hai — DECIDED: blocked in app forms
-- Low-stock thresholds — IMPLEMENTED (reorder_point + dashboard low/out-of-stock tabs); bell ab latest purchase/sale notifications dikhata hai; thresholds client se confirm karna baaki
+- Steel/plumbing/other materials ke units — DECIDED (Oct 2026): Indian-market glossary; migration `materials/0008` purani spellings normalize karta hai
+- Low-stock thresholds — DECIDED: 10 (owner, Oct 2026); IMPLEMENTED (reorder_point + dashboard low/out-of-stock tabs; bell ab latest purchase/sale notifications dikhata hai)
+- Transfer entries — DECIDED (owner, Oct 2026): shop kabhi use nahi karega; TransferEntry model dormant admin-only rahega (no UI)

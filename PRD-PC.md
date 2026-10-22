@@ -61,7 +61,8 @@ Later: Transfer app UI, Excel bulk import, second-PC replica (only if the shop o
 - Backup exists for every run day (Backup\ count = run days).
 - 30 days without a negative-balance incident or duplicate-datetime row.
 
-## 10. Open questions
-- [FLAG] Transfer UI in v1? Current decision: NO (admin-only). Confirm owner never moves stock shop-to-shop in daily work.
-- [FLAG] Staff PIN policy: 4-digit shared vs per-person? Current: per-person PIN, axes lockout on.
-- [FLAG] Units for steel/plumbing variants (kg/pieces/length?) — client to confirm list before material seeding.
+## 10. Open questions — RESOLVED (owner, Oct 2026)
+- [DECIDED] Transfer: the shop never moves stock shop-to-shop. TransferEntry stays dormant admin-only (no UI).
+- [DECIDED] Staff PIN policy: per-person 4-digit PIN, axes lockout on.
+- [DECIDED] Units: Indian-market glossary (bags / nos / cft / ft / rft / mtr / kg / L / box / bundle / pairs / sqft / pk / ml); migration `materials/0008_normalize_units` normalizes legacy spellings (miter/m/mtrs→mtr, no→nos, bkt→L).
+- Owner login `owner/1234` on THIS dev copy is testing-only convenience and will be changed before handover to the shop PC.
