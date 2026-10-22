@@ -11,15 +11,23 @@
 <meta charset="UTF-8">
 <title>{{ bill_kind|title }} Bill | nibba</title>
 <style>
-  /* 80mm roll: page width fixed, height auto-cut by the printer. */
-  @page { size: 80mm auto; margin: 2.5mm; }
+  /* 80mm roll: page width fixed, height auto-cut by the printer.
+     Zero page margin (owner request, Oct 2026): Chromium draws its own
+     date/URL/title stamp lines INSIDE the page margins - with a 2.5mm
+     margin they still rendered as a line above the bill. At 0 the
+     browser has nowhere to draw them and drops them entirely. The body
+     padding below keeps ink off the paper edge instead. */
+  @page { size: 80mm auto; margin: 0; }
   * { box-sizing: border-box; }
   body {
     font-family: "Courier New", monospace;
     font-size: 11.5px;
     color: #000;
     margin: 0;
-    padding: 0;
+    /* Thermal drivers walk the paper a little anyway; these paddings
+       replace the page margins removed above (top breathes, bottom
+       survives the auto-cut). */
+    padding: 1.5mm 0 4mm;
     width: 74mm;
   }
   .center { text-align: center; }

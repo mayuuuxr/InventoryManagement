@@ -78,6 +78,23 @@ switching pages felt jittery. Answers + changes:
 - Tests: JustUpdatedBannerTests (+2: missing file; fresh/stale window ×
   version match). Suite green; no model/migration changes in v1.2.4.
 
+### v1.2.5 (same session, minutes later, owner-approved)
+
+Owner request: "remove above comment in the print receipt" — clarified via
+options; the offender is Chromium's OWN print header/footer stamp (date,
+page URL, "Sale Bill | nibba") drawn INSIDE the @page margins at the
+receipt's top edge.
+
+- entries/templates/entries/bill_print.html: @page margin 2.5mm → 0 (with
+  margin gone the browser has nowhere to draw its stamp and drops it
+  entirely — documented Chromium behaviour) + body padding 1.5mm top /
+  4mm bottom so ink clears the paper edge and the auto-cut. Template-only;
+  suppressed v1.2.4 within minutes of its publish so the shop's single
+  in-app install covers everything (1.2.1 → 1.2.5 one click). No tag-level
+  fix-up games, no redundant in-place prod patch (the update delivers it).
+- No python changes; entries suite green (template renders unchanged
+  except the margin/padding CSS).
+
 ---
 
 ## 2026-10-22 — Session: production-pages audit (checklist vs. evidence)
