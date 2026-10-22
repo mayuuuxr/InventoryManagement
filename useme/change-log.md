@@ -95,6 +95,25 @@ receipt's top edge.
 - No python changes; entries suite green (template renders unchanged
   except the margin/padding CSS).
 
+### v1.2.6 (same session, minutes later — the receipt "comment" decoded)
+
+The owner's screenshot (03:11) showed the receipt printing a wall of text
+above the bill: "{# Printable bill (sale + purchase) … paper. #}" — the
+original request's true target was THIS, not the browser stamp (that fix
+still stands; margin-0 dropped the Chromium header/footer entirely).
+
+- Root cause: Django template comments `{# … #}` are single-line only —
+  a MULTI-LINE `{# … #}` block falls through the lexer as literal text
+  and renders (and prints). `bill_print.html` opened with a 6-line note;
+  `order_detail.html` printed the same kind of note above every order.
+- Fix: both notes re-broken into single-line `{# #}` lines (text kept,
+  renders as nothing), each now carrying its own "never multi-line"
+  warning so the pattern cannot quietly return. Repo-wide scan confirms
+  these were the only two multi-line offenders across all templates.
+- VERSION → 1.2.6; published so the owner's single in-app install
+  (1.2.1 → 1.2.6) carries every fix from this session. No python logic
+  changes; entries suite green.
+
 ---
 
 ## 2026-10-22 — Session: production-pages audit (checklist vs. evidence)

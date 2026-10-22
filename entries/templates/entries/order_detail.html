@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% load quantities %}
-{# One saved order from the Orders page (IN-12 / OUT-5). Every stored
-   field + the other lines of the SAME bill + a Print receipt button
-   that opens the 80mm bill paper for the whole bill. No price fields —
-   per the shop rule, printed Rate/Amount/Total stay blank. #}
+{# One saved order from the Orders page (IN-12 / OUT-5). Every stored #}
+{# field + the other lines of the SAME bill + a Print receipt button #}
+{# that opens the 80mm bill paper for the whole bill. No price fields — #}
+{# per the shop rule, printed Rate/Amount/Total stay blank. Multi-line #}
+{# {# ... #} comments render as literal text (engine single-line rule); #}
+{# this note used to print above every order page. #}
 
 {% block title %}{{ ref }} | nibba{% endblock %}
 

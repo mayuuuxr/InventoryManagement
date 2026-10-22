@@ -1,10 +1,13 @@
 {% load quantities %}
-{# Printable bill (sale + purchase) for an 80mm thermal roll printer.
-   Standard Indian shop bill: centered header, party + date/time, items
-   table with BLANK Rate/Amt cells (prices are hand-written after
-   printing — the app stores no price fields by design), blank Total,
-   thank-you footer. Standalone HTML — deliberately NOT extending
-   base.html, so nothing app-related leaks onto the paper. #}
+{# Printable bill (sale + purchase) for an 80mm thermal roll printer. #}
+{# Standard Indian shop bill: centered header, party + date/time, items #}
+{# table with BLANK Rate/Amt cells (prices are hand-written after #}
+{# printing — the app stores no price fields by design), blank Total, #}
+{# thank-you footer. Standalone HTML — deliberately NOT extending #}
+{# base.html, so nothing app-related leaks onto the paper. #}
+{# NOTE: multi-line {# ... #} comments are NOT supported by the Django #}
+{# template engine — they render as literal text. Keep template comments #}
+{# single-line; this block used to leak the whole note onto the receipt. #}
 <!DOCTYPE html>
 <html lang="en">
 <head>

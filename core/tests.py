@@ -5,7 +5,7 @@ Covers: help center per role, custom error pages (403/404 + standalone
 entry validation with no uploads and no network in tests.
 """
 from django.template import loader
-from django.test import TestCase, override_settings
+from django.test import SimpleTestCase, TestCase, override_settings
 
 from accounts.models import User
 from entries.models import InwardEntry, OutwardEntry, SubLocation, SubLocationAllocation
@@ -494,3 +494,47 @@ class CsrfAndSearchStateTests(AuditTestBase):
         self.assertNotContains(r, "dismissal ticks")
         self.assertContains(r, "security cookie")
         self.assertContains(r, "Last updated: October 22, 2026")
+
+
+class TemplateCommentLint(SimpleTestCase):
+    """Multi-line {# ... #} comments are unsupported by the Django lexer.
+
+    The engine treats a `{# … #}` comment as single-line only: a block
+    spanning lines falls through as literal TEXT and renders — and the
+    bill_print.html note printed above every thermal receipt until the
+    owner's screenshot exposed it (Oct 23 2026). Multi-line template notes
+    must use {% comment %} or several single-line `{# … #}` lines; this
+    guard fails any template that opens a `{#` comment without closing
+    it on the same line.
+    """
+
+    def test_no_template_opens_an_unclosed_comment(self):
+        import re
+        from pathlib import Path
+
+        from django.apps import apps
+        from django.conf import settings
+
+        dirs = []
+        for d in settings.TEMPLATES[0].get("DIRS", []):
+            if d:
+                dirs.append(Path(d))
+        for cfg in apps.get_app_configs():
+            p = Path(cfg.path) / "templates"
+            if p.is_dir():
+                dirs.append(p)
+        offender = re.compile(r"\{#(?:(?!#\}).)*$")
+        scanned = 0
+        for d in dirs:
+            for f in d.rglob("*.html"):
+                scanned += 1
+                lines = f.read_text(
+                    encoding="utf-8", errors="replace").splitlines()
+                for n, line in enumerate(lines, 1):
+                    m = offender.search(line)
+                    self.assertIsNone(
+                        m,
+                        msg=(f"{f}:{n} opens a multi-line {{# comment "
+                             f"(renders as literal text): "
+                             f"{line.strip()[:80]}"))
+        self.assertGreaterEqual(scanned, 20)
