@@ -15,7 +15,8 @@ Threat model (original): 1 owner PC + 2–3 phone users over Cloudflare tunnel. 
 ## Ranked findings
 
 ### CRITICAL-1 — Real Cloudinary API secret copied into nibba/.env
-- File/line: `nibba/.env:10-11` (`CLOUDINARY_API_KEY=623185556314658`, `CLOUDINARY_API_SECRET=UFTWDJoGo3UPkSGKhH-hobEpCsA`)
+- File/line: `nibba/.env:10-11` (`[REDACTED]`, `[REDACTED]`)
+- Status 2026-10-22: credential values redacted in this file; the original pair remains in git history - rotate/revoke the key pair in the Cloudinary dashboard (owner action).
 - Exploit: anyone who receives this folder (pen drive, zip, screenshot) can manage/delete your Cloudinary assets and burn quota. Secret was copied verbatim from the original project.
 - Fix: rotate the key pair in Cloudinary dashboard NOW; delete both lines from `nibba/.env` (photos are optional in PC build — blank is fine); never copy `.env` between projects; confirm `.gitignore` covers `.env` before any `git init`.
 
