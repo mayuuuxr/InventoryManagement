@@ -191,9 +191,17 @@ class OneClickStageTests(SimpleTestCase):
             self.assertIn("robocopy", text)
             self.assertIn("update-progress", text)
             self.assertNotIn("timeout /t", text)
-            # Only the two server (re)starts may invoke powershell now
-            # (comments may mention the word, invocations must not).
-            self.assertEqual(text.count("powershell -NoProfile"), 2)
+            # The applier restarts the server WINDOWLESS via pythonw
+            # (plain cmd start): no powershell invokes may remain, and
+            # the pip-generated waitress-serve.exe shim must never be
+            # used to start the server — it exits silently on some PCs
+            # (Oct 2026 shop outage: server never came up post-update).
+            self.assertEqual(text.count("powershell -NoProfile"), 0)
+            self.assertNotIn("%WS%", text)
+            self.assertIn(
+                'start "" /min "%PW%" -c "import sys,os; '
+                'sys.path.insert(0,os.getcwd())', text)
+            self.assertEqual(text.count('"%PW%" -c'), 2)
 
     def test_changelog_line_stripped(self):
         from unittest import mock
@@ -365,3 +373,26 @@ class ApplyUpdateViewTests(TestCase):
             got_last, _ = seen[-1]
             self.assertEqual(got_last, len(body))
             self.assertLess(seen[0][0], got_last)
+
+
+class LauncherScriptTests(SimpleTestCase):
+    """The daily opener must survive a broken pip-generated shim.
+
+    The Oct 2026 shop outage: the pip-generated waitress-serve.exe
+    launcher exited silently, the daily script kept going (browser
+    opened onto a dead port) and staff saw Chrome's refused page.
+    Guards: launch windowless via pythonw with an explicit sys.path
+    insert; never via the shim.
+    """
+
+    def test_launcher_is_windowless_python_never_shim(self):
+        root = Path(__file__).resolve().parent.parent
+        launcher = (root / "nibba-Shop.bat").read_text(
+            encoding="utf-8", errors="replace")
+        self.assertIn('start "" /min "%PYW%"', launcher)
+        self.assertIn("sys.path.insert(0,os.getcwd())", launcher)
+        self.assertIn("from waitress import serve", launcher)
+        self.assertNotIn("-FilePath '%WAITRESS%'", launcher)
+        self.assertNotIn("'core.wsgi:application'", launcher)
+        self.assertIn('if exist "runtime\\pythonw.exe"', launcher)
+        self.assertIn('if exist "venv\\Scripts\\pythonw.exe"', launcher)

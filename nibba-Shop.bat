@@ -54,8 +54,15 @@ REM Monthly Excel files for direct work (fail-soft: never blocks launch).
 if errorlevel 1 echo WARNING: monthly Excel files not updated - app still opens fine.
 powershell -NoProfile -WindowStyle Hidden -Command "$c = Get-NetTCPConnection -LocalPort 8000 -State Listen -ErrorAction SilentlyContinue; if ($c) { Stop-Process -Id $c.OwningProcess -Force }"
 powershell -NoProfile -WindowStyle Hidden -Command "Start-Sleep -Seconds 2"
-REM Hidden server window: no terminal on screen. Output goes to Logs/nibba.log.
-powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WAITRESS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
+REM Server runs WINDOWLESS (pythonw) so staff never see a terminal. Output goes to Logs/nibba.log.
+REM Launches python directly: the pip-generated launcher exe (waitress-serve.exe) exits
+REM silently on some PCs (observed after 22 Oct 2026; exact cause unresolved), so the
+REM app is served via python -c instead. The embeddable runtime does not put the app
+REM folder on its module path by itself, hence the explicit sys.path.insert.
+set "PYW=%PY%"
+if exist "runtime\pythonw.exe" set "PYW=runtime\pythonw.exe"
+if exist "venv\Scripts\pythonw.exe" set "PYW=venv\Scripts\pythonw.exe"
+start "" /min "%PYW%" -c "import sys,os; sys.path.insert(0,os.getcwd()); from waitress import serve; from core.wsgi import application; serve(application, listen='127.0.0.1:8000')"
 set TRIES=0
 :waitloop
 powershell -NoProfile -WindowStyle Hidden -Command "try { Invoke-WebRequest -UseBasicParsing -TimeoutSec 2 http://127.0.0.1:8000/accounts/login/ | Out-Null; exit 0 } catch { exit 1 }"

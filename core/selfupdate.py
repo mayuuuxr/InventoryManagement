@@ -227,9 +227,9 @@ setlocal
 cd /d "{appdir}"
 echo %date% %time% {tag} applying >> "Logs\\update-last-run.txt"
 REM Let the browser land on the updating page before the restart.
-REM (ping = cmd-native sleep: no popups. powershell flashes a window
-REM even with -WindowStyle Hidden, so only ONE powershell call remains
-REM in this script: the final hidden restart at the bottom.)
+REM (ping = cmd-native sleep: no popups. The server is launched
+REM windowless via pythonw, plain cmd start; no powershell invokes
+REM remain anywhere in this script.)
 ping -n 9 127.0.0.1 >nul
 REM Stop the server (Windows locks running files): kill by image name
 REM plus any PID still listening. Refuse to touch code if the port will
@@ -251,7 +251,9 @@ goto killagain
 :killok
 echo 30^|Copying new files > "Logs\\update-progress.txt"
 if exist "runtime\\python.exe" (set PY=runtime\\python.exe) else (set PY=venv\\Scripts\\python.exe)
-if exist "runtime\\Scripts\\waitress-serve.exe" (set WS=runtime\\Scripts\\waitress-serve.exe) else (set WS=venv\\Scripts\\waitress-serve.exe)
+set PW=%PY%
+if exist "runtime\\pythonw.exe" set PW=runtime\\pythonw.exe
+if exist "venv\\Scripts\\pythonw.exe" set PW=venv\\Scripts\\pythonw.exe
 REM Copy staged code only (robocopy = cmd-native, no popups; /XD + /XF
 REM mirror the protected list; /R:2 /W:2 so a stuck file fails fast
 REM instead of retrying for hours; exit 0-7 all mean success).
@@ -263,7 +265,7 @@ if errorlevel 1 goto migratefail
 echo 75^|Finishing up > "Logs\\update-progress.txt"
 "%PY%" manage.py collectstatic --noinput -v 0
 echo 90^|Restarting the app > "Logs\\update-progress.txt"
-powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
+start "" /min "%PW%" -c "import sys,os; sys.path.insert(0,os.getcwd()); from waitress import serve; from core.wsgi import application; serve(application, listen='127.0.0.1:8000')"
 echo %date% %time% {tag} OK >> "Logs\\update-last-run.txt"
 echo 100^|Done > "Logs\\update-progress.txt"
 rmdir /S /Q "{stage}"
@@ -276,7 +278,7 @@ goto restartonly
 :migratefail
 echo %date% %time% {tag} FAILED: migrate >> "Logs\\update-last-run.txt"
 :restartonly
-powershell -NoProfile -WindowStyle Hidden -Command "Start-Process -FilePath '%WS%' -ArgumentList '--listen=127.0.0.1:8000','core.wsgi:application' -WorkingDirectory '%CD%' -WindowStyle Hidden"
+start "" /min "%PW%" -c "import sys,os; sys.path.insert(0,os.getcwd()); from waitress import serve; from core.wsgi import application; serve(application, listen='127.0.0.1:8000')"
 del "Logs\\update-in-progress.txt"
 exit /b 1
 :stillrunning

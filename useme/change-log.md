@@ -8,7 +8,50 @@ log useful while honoring the no-mentions rule.
 
 ---
 
-## 2026-10-22 — Session: production-pages audit (checklist vs. evidence)
+## 2026-10-23 — Session: shop launch outage root-caused + v1.2.3 windowless restart hardening
+
+- **Version:** 1.2.3 (bumped from 1.2.2) · **git HEAD at session start:** fb861ac ·
+  **Tree:** clean before this change set (owner-approved scope mid-session).
+
+What & why (owner-reported: "after update the app took minutes and says no network"):
+- A read-only diagnostic script (delivered via OneDrive, auto-cleaned after) first
+  read the WRONG copy — the real app the desktop shortcut opens is
+  `AppData\Local\nibba` (v1.2.1), not this git repo folder. Corrected in-session.
+- Root cause chain (evidence-only): the in-app updater (v1.2.1→v1.2.2 attempt)
+  stopped the live server ~22:45 Oct 22 and died mid-flight (no pre-update backup,
+  VERSION still 1.2.1); every icon launch afterwards reached the monthly-export
+  step (its Django boot lines appear in that copy's log, 23:09→01:42) and no
+  server boot or request lines follow any of them — port 8000 empty on every
+  probe: the generated `runtime\Scripts\waitress-serve.exe`
+  launcher exits with zero output (even `--help`; no Defender/App-Event records).
+  Repair probes also revealed that runtime's pip is broken (certifi\cacert.pem
+  deleted — no AV trail; cause unresolved; app does not need certifi). The
+  db/.env were untouched throughout.
+- Mechanism fix (verified before shipping): the embeddable runtime does not put the
+  app folder on sys.path in `-c` mode (python312._pth '.' is exe-relative), so the
+  launch line injects `sys.path.insert(0,os.getcwd())` and starts via pythonw
+  (`start "" "%PYW%"`) — windowless for staff; verified HTTP 200 on
+  /accounts/login/ through the exact command the icon runs.
+- v1.2.3 (this tag) carries that launcher into the repo (`nibba-Shop.bat`) and
+  the SAME fix into `core/selfupdate.py` APPLY_TEMPLATE: the generated applier's
+  two restart lines used `%WS%` = waitress-serve.exe — the same silent-exit trap
+  that killed the post-update restart — they now use the pythonw start line.
+  `update.bat` needed no change (pip failure already warned-and-continued; it
+  never restarts the server).
+- Tests: applier-marker test now asserts ZERO powershell invokes, no `%WS%`, and
+  both restart lines on `%PW%`; new `LauncherScriptTests` asserts the launcher
+  starts via `%PYW%` + sys.path.insert and never via the shim (+5 net tests;
+  no model changes).
+- Transition note: the RUNNING server still carries the old template in memory, so
+  the owner re-launches the app once (icon), then runs Help → Install — the update
+  targets v1.2.3 directly (skips the still-published v1.2.2 asset whose
+  SECURITY-AUDIT.md embedding predates the redaction).
+- Owner-approved cleanups on the production copy: stale 140.5 MB `build\` deleted,
+  duplicate Start-Menu shortcut deleted (Desktop icon kept), diag/temp artifacts
+  removed. No commits pushed until the owner said go (this entry lands with the
+  v1.2.3 commit).
+
+
 
 - **Version:** 1.2.2 · **git HEAD at session start:** 30fa4e5 · **Tree:** 4 modified
   files + 2 new files, uncommitted (owner review pending).
