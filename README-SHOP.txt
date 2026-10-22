@@ -1,6 +1,6 @@
 nibba - SHOP (paints, hardware, interior, household)
 ====================================================
-DAILY USE (only 3 steps):
+DAILY USE (only 4 steps):
 1. Double-click the "nibba Shop" icon on the Desktop.
 2. Login with your username + PIN.
 3. PURCHASE when stock arrives (from supplier), SALE when it sells

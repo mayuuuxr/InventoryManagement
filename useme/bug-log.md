@@ -88,7 +88,7 @@ logout could offline-serve the previous user's pages from v2. Renamed the purge 
 ~95.5k inward / 70.5k outward entries attached) and pk=15 "park-2" (soft-deleted).
 `sites/models.py::get_default_site()` returns `None` whenever `Site.objects.count() != 1`,
 so the single-shop quick/bill screens redirect with "more than one site exists".
-This is the legacy multi-site handover DB, not a fresh install — behavior is by design,
+This is the legacy multi-site handover DB, not a fresh install — behaviour is by design,
 but worth remembering: this particular shop-PC DB never became "one site" shape.
 Owner decision required if bill screens should work on it (merge/purge the extra site, or
 make the default-site resolution smarter). Logged during the brand sweep.

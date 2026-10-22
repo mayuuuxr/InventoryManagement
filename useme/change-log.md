@@ -8,6 +8,23 @@ log useful while honoring the no-mentions rule.
 
 ---
 
+## 2026-10-22 — Session: junk cleanup + typo-audit close-out (post-v1.2.2)
+
+- **Version:** 1.2.2 · **git HEAD at session start:** eca5d08 · **Tree:** clean.
+
+What & why (owner-approved this session):
+- SECURITY-AUDIT.md: the CRITICAL-1 Cloudinary key + secret values redacted with
+  [REDACTED]; owner rotates/revokes the pair at cloudinary.com. Git history
+  still holds the pre-redaction values — rotation is the real fix.
+- Minimal typo-audit doc fixes (owner picked "sure rows only"): README-SHOP.txt
+  step count 3→4, AGENTS.md "paste"→"just", bug-log.md behavior→behaviour.
+  All other audit rows remain open (code-side rows need separate approval;
+  term-casing picks still pending).
+- Untracked junk deleted from the folder after approval: cloudflared.exe +
+  tunnel.log (dead tunnel era), build\ staging tree (~186 MB, regenerable via
+  BUILD-PORTABLE.bat), Temp\opencode session artifacts. backup_*.json kept
+  (safety snapshots referenced by these logs).
+
 ## 2026-10-22 — Session: owner decisions locked + unit normalization + dependency hardening (v1.2.2)
 
 - **Version:** 1.2.2 (bumped from 1.2.1) · **git HEAD at session start:** 5e3b1cf ·
