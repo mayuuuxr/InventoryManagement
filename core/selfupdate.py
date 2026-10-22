@@ -17,6 +17,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 import urllib.request
 import zipfile
 from datetime import datetime
@@ -417,6 +418,27 @@ def last_status(base_dir):
         return lines[-1].strip() or None
     except (OSError, IndexError):
         return None
+
+
+def just_updated(base_dir, version, window=600):
+    """True when the RUNNING build finished installing moments ago.
+
+    The applier appends '<date> <time> <tag> OK' to update-last-run.txt
+    after the server comes back on the new code. A success line for the
+    currently-running VERSION whose file was written within `window`
+    seconds (default 10 minutes) means the user is looking at a
+    just-updated dashboard: the "nibba updated" banner shows then.
+    Stateless by design — the window passes and the banner fades itself;
+    there is nothing to dismiss and nothing to remember.
+    """
+    line = last_status(base_dir)
+    if not line or f"v{version} OK" not in line:
+        return False
+    try:
+        age = time.time() - (Path(base_dir) / STATUS_FILE).stat().st_mtime
+    except OSError:
+        return False
+    return age <= window
 
 
 def write_progress(base_dir, percent, label):

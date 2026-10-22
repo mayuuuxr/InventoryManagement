@@ -51,7 +51,36 @@ What & why (owner-reported: "after update the app took minutes and says no netwo
   removed. No commits pushed until the owner said go (this entry lands with the
   v1.2.3 commit).
 
+### v1.2.4 (same session, one hour later, owner-approved follow-through)
 
+Owner request: "after updating it should show app updated" + scrolling and
+switching pages felt jittery. Answers + changes:
+
+- Update confirmation twice over: updating.html holds "nibba <tag> installed -
+  you're all set." for 2.5 s before the dashboard takes over (visible from the
+  NEXT update on — the page shown DURING a given update is served by the
+  pre-update code, by design), and dashboard.html shows a success banner
+  ("nibba updated to v<VERSION> — never touched") whenever the running build
+  finished installing within the last 10 minutes — that banner survives the
+  page-swap mechanics because the dashboard right after the restart is served
+  by the NEW code, so it confirms this machine's own update in real time.
+  Mechanism: new core/selfupdate.just_updated() — stateless freshness read of
+  update-last-run.txt (mtime window + version match; nothing to dismiss).
+- Scroll/page-switch smoothness (owner chose removing the fade): base.html
+  drops the @view-transition 120ms whole-page fade (full-page raster per
+  navigation = the option-switch stutter), adds scrollbar-gutter: stable
+  (no sideways reflow between long and short pages) and turns table-row
+  hover instant (row tweens repainted whole rows every scroll frame on the
+  shop GPU; buttons keep their transitions).
+- Restart UX (owner question, answered in the conversation): no manual
+  restart after an update — the applier restarts the server itself (pythonw
+  now); the icon relaunch stays the only daily habit. No UI element added.
+- Tests: JustUpdatedBannerTests (+2: missing file; fresh/stale window ×
+  version match). Suite green; no model/migration changes in v1.2.4.
+
+---
+
+## 2026-10-22 — Session: production-pages audit (checklist vs. evidence)
 
 - **Version:** 1.2.2 · **git HEAD at session start:** 30fa4e5 · **Tree:** 4 modified
   files + 2 new files, uncommitted (owner review pending).

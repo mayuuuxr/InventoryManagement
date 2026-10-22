@@ -56,21 +56,22 @@
     </script>
 
     <style>
-      /* Smooth page changes WITHOUT delaying content: only the OLD page
-         fades out (120ms); the new page | including its LCP element
-         (headings, balances, tables) | paints immediately with zero entrance
-         animation, fade-in, or stagger. Unsupported browsers ignore this and
-         navigate instantly. Opacity-only = compositor-cheap on phones. */
-      @view-transition {
-        navigation: auto;
-      }
-      ::view-transition-old(root) { animation: page-out 120ms ease both; }
-      ::view-transition-new(root) { animation: none; }
-      @keyframes page-out { to { opacity: 0; } }
-      @media (prefers-reduced-motion: reduce) {
-        ::view-transition-old(root) { animation: none; }
-      }
+      /* Instant page changes (owner choice, Oct 2026): the previous 120ms
+         view-transition fade rasterized the whole page on every navigation
+         and reads as stutter on the shop PC. Navigation is now a plain
+         instant swap - the cheapest possible paint. */
       html { background: #D4E9FA; } /* = frame token: match body so any paint gap never flashes */
+      /* Stable scrollbar gutter: Windows Chrome reflows the whole column
+         when one page needs a scrollbar and the next does not - that
+         sideways jump between pages reads as layout jitter. Reserving the
+         gutter keeps every page the same width. */
+      html { scrollbar-gutter: stable; }
+      /* Row-hover repaint judder: rows tween their hover color (150ms)
+         while the wheel scrolls the pointer across them, forcing whole-row
+         repaints every frame on the shop GPU. Rows switch color instantly;
+         buttons and small cards keep their transitions (user-initiated,
+         small area). */
+      main table tbody tr { transition-duration: 0s !important; }
       body { font-family: 'Poppins', system-ui, sans-serif; font-size: 14px; color: #0F2440; }
       h1 { font-size: 22px; font-weight: 700; }
       h2 { font-size: 17px; font-weight: 600; }

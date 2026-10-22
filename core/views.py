@@ -33,6 +33,16 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         ctx["today_inward"] = InwardEntry.objects.filter(date=today).count()
         ctx["today_outward"] = OutwardEntry.objects.filter(date=today).count()
 
+        # Just-updated confirmation (owner request, Oct 2026): when an
+        # update restarted this server a moment ago, the dashboard says so
+        # explicitly instead of a silent page swap. Fades itself out when
+        # the freshness window passes — never needs dismissing.
+        from core.selfupdate import just_updated
+        from core.update import read_local_version
+        version = read_local_version()
+        ctx["app_version"] = version
+        ctx["just_updated"] = just_updated(settings.BASE_DIR, version)
+
         sites = list(Site.objects.all())
         ctx["single_site"] = len(sites) == 1
         ctx["single_site_id"] = sites[0].pk if len(sites) == 1 else None

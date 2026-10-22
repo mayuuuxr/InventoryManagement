@@ -226,6 +226,42 @@ class OneClickStageTests(SimpleTestCase):
             self.assertIn("OK", last_status(base))
 
 
+class JustUpdatedBannerTests(SimpleTestCase):
+    """The dashboard's 'nibba updated' banner: stateless freshness check.
+
+    Banner shows only while a SUCCESS line for the RUNNING version is
+    younger than the window (10 min) — afterwards nothing is shown, no
+    dismiss state anywhere.
+    """
+
+    def test_missing_file_is_false(self):
+        from core.selfupdate import just_updated
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmp:
+            self.assertFalse(just_updated(Path(tmp), "1.2.4"))
+
+    def test_fresh_ok_line_for_running_version(self):
+        from core.selfupdate import just_updated
+        import os
+        import tempfile
+        import time
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp)
+            (base / "Logs").mkdir()
+            marker = base / "Logs" / "update-last-run.txt"
+            marker.write_text(
+                "Wed 10/22/2026 22:45:11.10 v1.2.1 OK\n"
+                "Thu 10/23/2026 02:59:04.88 v1.2.4 OK\n",
+                encoding="utf-8")
+            self.assertTrue(just_updated(base, "1.2.4"))
+            # A different running version: line not for it, banner stays off.
+            self.assertFalse(just_updated(base, "1.2.9"))
+            # Older than the window: banner even for the same version is off.
+            old = time.time() - 3600
+            os.utime(marker, (old, old))
+            self.assertFalse(just_updated(base, "1.2.4"))
+
+
 @override_settings(ALLOWED_HOSTS=["testserver"])
 class ApplyUpdateViewTests(TestCase):
     def setUp(self):

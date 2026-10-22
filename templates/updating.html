@@ -31,7 +31,11 @@
             if (body.progress) paint(body.progress.pct, body.progress.label);
             if (last.indexOf(tag + " OK") !== -1) {
                 paint(100, "Done");
-                window.location.href = "/dashboard/";
+                // Visible confirmation (owner request, Oct 2026): one beat
+                // of success text before the dashboard takes over, instead
+                // of a silent page swap.
+                state.textContent = "nibba " + tag + " installed - you're all set.";
+                setTimeout(function () { window.location.href = "/dashboard/"; }, 2500);
                 return;
             }
             if (last.indexOf("FAILED") !== -1) {

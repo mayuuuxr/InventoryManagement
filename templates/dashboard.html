@@ -5,6 +5,13 @@
 
 {% block content %}
 <div class="space-y-5">
+    {% if just_updated %}
+    {# Explicit update confirmation: the applier restarted this server seconds ago. The banner is stateless — it disappears by itself when the success line in update-last-run.txt is older than 10 minutes. #}
+    <div class="flex items-center gap-2 px-4 py-3 bg-success-bg border border-subtle rounded-lg" role="status" aria-live="polite">
+        <i data-lucide="check-circle" class="w-4 h-4 text-success-fg flex-shrink-0"></i>
+        <p class="text-sm text-charcoal"><span class="font-medium">nibba updated to v{{ app_version }}</span> — installation finished, you're all set. Saved entries were never touched.</p>
+    </div>
+    {% endif %}
     <div>
         <h1 class="text-charcoal">Dashboard</h1>
         <p class="text-sm text-muted mt-1">{{ today|date:"l, F j, Y" }} · live stock.</p>
