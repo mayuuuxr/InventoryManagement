@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0B3D91">
+    <title>Security check needed | nibba</title>
+    <style>
+        /* Standalone like 400.html/500.html: the security-check failure can
+           hit any POST (nothing else of the app was even reached), so this
+           page must render with zero app context. */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: system-ui, -apple-system, sans-serif; font-size: 14px;
+               color: #0F2440; background: #E8F6FF; min-height: 100vh;
+               display: flex; align-items: center; justify-content: center; padding: 16px; }
+        .card { background: #FFFFFF; border: 1px solid #C9E2F2; border-radius: 12px;
+                padding: 32px; max-width: 28rem; width: 100%; text-align: center; }
+        .mark { width: 48px; height: 48px; border-radius: 12px; background: #E3EDFB;
+                color: #0B3D91; font-size: 24px; font-weight: 700;
+                display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; }
+        h1 { font-size: 22px; margin-bottom: 8px; }
+        p { color: #5C738A; margin-bottom: 8px; line-height: 1.5; }
+        .row { display: flex; flex-direction: column; gap: 12px; margin-top: 24px; }
+        a.btn, button.btn { display: inline-flex; align-items: center; justify-content: center;
+                gap: 8px; padding: 10px 16px; min-height: 44px; border-radius: 12px;
+                font-size: 14px; font-weight: 500; text-decoration: none;
+                font-family: inherit; cursor: pointer; }
+        button.primary { background: #0B3D91; color: #FFF; border: none; }
+        a.ghost { background: #FFF; color: #0F2440; border: 1px solid #C9E2F2; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="mark">!</div>
+        <h1>Security check needed</h1>
+        <p>This page stayed open too long, or the form was sent twice - so the page's security check expired. Nothing from this attempt was saved.</p>
+        <p>Press your browser's Back button and submit again. The purchase and sale forms keep a typed draft, so your entries usually come back when the page reloads.</p>
+        <div class="row">
+            <button type="button" class="btn primary" onclick="history.back()">Go back and try again</button>
+            <a class="btn ghost" href="/dashboard/">Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -446,3 +446,51 @@ class DashboardOrdersTests(AuditTestBase):
         # No email address anywhere under the profile name.
         self.assertNotContains(r, "t_staff@")
         self.assertNotContains(r, "t_admin@")
+
+
+class CsrfAndSearchStateTests(AuditTestBase):
+    """2026-10-22 audit pass: CSRF-timeout page, topbar no-match feedback,
+    announced flash messages, and a privacy-page claim that matches reality."""
+
+    def test_403_csrf_page_is_standalone(self):
+        # Like 400/500: must render with zero app context (no tags left).
+        html = loader.get_template("403_csrf.html").render({})
+        self.assertIn("Security check needed", html)
+        self.assertNotIn("{%", html)
+
+    @override_settings(DEBUG=False)
+    def test_csrf_failure_uses_friendly_page(self):
+        from django.test import Client
+
+        self.client = Client(enforce_csrf_checks=True)
+        r = self.client.post(
+            "/accounts/login/", {"username": "x", "password": "1111"})
+        self.assertEqual(r.status_code, 403)
+        self.assertContains(r, "Security check needed", status_code=403)
+        self.assertContains(r, "Go back and try again", status_code=403)
+
+    def test_no_search_results_indicator_in_shell(self):
+        self.login(self.staff)
+        r = self.client.get("/dashboard/")
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'id="search-no-results"')
+        self.assertContains(r, "Clear the box to see all rows.")
+
+    def test_flash_messages_are_screen_reader_announced(self):
+        victim = User.objects.create_user(
+            username="t_del", password="9999", role=User.Role.STAFF)
+        self.login(self.admin)
+        r = self.client.post(
+            f"/accounts/staff/{victim.pk}/delete/", follow=True)
+        self.assertEqual(r.status_code, 200)
+        self.assertContains(r, 'aria-live="polite"')
+        self.assertContains(r, "deleted. Their past entries and audit history are kept.")
+
+    def test_privacy_cookie_claim_matches_reality(self):
+        # The claimed browser storage must match what the app actually uses:
+        # session cookie + CSRF cookie only (no localStorage, no ad trackers).
+        r = self.client.get("/privacy/")
+        self.assertEqual(r.status_code, 200)
+        self.assertNotContains(r, "dismissal ticks")
+        self.assertContains(r, "security cookie")
+        self.assertContains(r, "Last updated: October 22, 2026")

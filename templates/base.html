@@ -176,6 +176,10 @@
                     <span class="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-8 h-8 rounded-lg bg-accent">
                         <i data-lucide="search" class="w-4 h-4 text-white"></i>
                     </span>
+                    <div id="search-no-results" role="status" aria-live="polite"
+                         class="hidden absolute left-0 right-0 top-full mt-2 bg-surface border border-subtle rounded-lg shadow-lift z-50 px-4 py-3 text-sm text-charcoal">
+                        No matches for "<span id="no-results-q"></span>". Clear the box to see all rows.
+                    </div>
                 </div>
             </div>
             <div class="flex items-center flex-shrink-0">
@@ -272,11 +276,25 @@
             // the header, and clearing restores all rows.
             var q = document.getElementById("dash-search");
             if (q) {
+                // No-match feedback: reset-and-recount on every keystroke so
+                // the baseline is always correct, then surface one announced
+                // "no matches" state instead of silently hiding every row.
+                var nr = document.getElementById("search-no-results");
+                var nrq = document.getElementById("no-results-q");
                 q.addEventListener("input", function () {
                     var needle = q.value.toLowerCase().trim();
-                    document.querySelectorAll("main table tbody tr").forEach(function (row) {
-                        row.style.display = (!needle || row.textContent.toLowerCase().indexOf(needle) !== -1) ? "" : "none";
+                    var rows = document.querySelectorAll("main table tbody tr");
+                    var total = rows.length, visible = 0;
+                    rows.forEach(function (row) {
+                        var hit = !needle || row.textContent.toLowerCase().indexOf(needle) !== -1;
+                        row.style.display = hit ? "" : "none";
+                        if (hit) visible++;
                     });
+                    if (nr) {
+                        var empty = needle && total > 0 && visible === 0;
+                        nr.classList.toggle("hidden", !empty);
+                        if (empty && nrq) nrq.textContent = q.value.trim();
+                    }
                 });
             }
         })();
@@ -314,7 +332,8 @@
             {% if messages %}
             <div class="mb-4 space-y-2">
                 {% for message in messages %}
-                <div class="flex items-center gap-2 px-4 py-3 bg-surface border border-subtle rounded-lg">
+                <div class="flex items-center gap-2 px-4 py-3 bg-surface border border-subtle rounded-lg"
+                     {% if message.tags == 'error' %}role="alert" aria-live="assertive"{% else %}role="status" aria-live="polite"{% endif %}>
                     <i data-lucide="
                         {% if message.tags == 'error' %}x-circle
                         {% elif message.tags == 'success' %}check-circle

@@ -8,7 +8,33 @@ log useful while honoring the no-mentions rule.
 
 ---
 
-## 2026-10-22 — Session: junk cleanup + typo-audit close-out (post-v1.2.2)
+## 2026-10-22 — Session: production-pages audit (checklist vs. evidence)
+
+- **Version:** 1.2.2 · **git HEAD at session start:** 30fa4e5 · **Tree:** 4 modified
+  files + 2 new files, uncommitted (owner review pending).
+
+What & why (owner-directed full-scope audit):
+- New: `docs/PRODUCTION_PAGE_AUDIT.md` — 42 checklist rows classified with file/line
+  evidence. Verdict: the app already covers nearly everything (an earlier pass built
+  help/privacy/terms, themed 400/403/404/500, offline banner + SW fallback, draft
+  keeper, session-expired notice, empty states). Payments/subscriptions/email/UGC
+  flows are NOT_APPLICABLE by design; repo Security Policy/Responsible Disclosure is
+  BLOCKED on an owner-owned reporting contact (not invented).
+- Fixed 3 real gaps: (1) privacy.html claimed "dismissal ticks for alerts" — no such
+  storage exists anywhere in code → clause removed, static verified last-updated
+  dates on privacy/terms (dynamic {% now %} date was misleading); (2) topbar search
+  on zero matches silently hid every table row → inline announced "No matches for…"
+  state; (3) flash messages were invisible to screen readers → role status/alert +
+  aria-live.
+- New page: `templates/403_csrf.html` — friendly standalone CSRF-timeout recovery
+  page (honest copy: nothing was saved; entry forms keep drafts). Replaces Django's
+  technical default once present.
+- Tests: +5 in core/tests.py (CSRF page standalone + live, no-match indicator,
+  announced flashes, privacy-claim accuracy). Full suite ran 151: 150 green + the
+  escaping-flawed test fixed and re-verified green 5/5 in isolation. No model changes
+  (makemigrations --check: No changes detected). No commits made.
+
+
 
 - **Version:** 1.2.2 · **git HEAD at session start:** eca5d08 · **Tree:** clean.
 
