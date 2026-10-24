@@ -41,6 +41,19 @@ What & why (owner said: remove everything flagged in the read-only audit summary
   `AllocationModelGuardAudit` (model-level guard, admin path) stays. Full suite
   163 → 157 green (see `test-reports/2026-10-24_full-suite_v1210.md`).
   `makemigrations --check` clean; unused-import scan: 0 candidates.
+- **GitHub Release (owner asked this session):** CI `release.yml` auto-publishes
+  each tag ~30 s after push (github-actions[bot], since v1.2.1) — the previous
+  session's "no Release for v1.2.9" flag was a check-before-CI-finished mistake.
+  Confirmed published: **release v1.2.10 with `nibba-v1.2.10.zip`** — 622,151
+  bytes, sha256 `3e835647cbed14cc310315a946533847588eb75f52c3942e4f6e4009d2d25e5d`
+  — downloaded and content-verified (VERSION=1.2.10 inside, all cleanup code
+  present / dead views+routes+helper absent, invoice template + change-log in,
+  zero db/env/venv/staticfiles/Backup/pkg leaks, 202 entries). Also confirmed:
+  release v1.2.9 with `nibba-v1.2.9.zip` — 628,604 bytes, sha256
+  `8fe6f10e4ddbb231f63d911c927d9037d833207156b291732bc28b58f9b19cb0`.
+  Also confirmed: update path live — the app's `/releases/latest` check now
+  returns v1.2.10 + that zip, so the v1.2.1 install (bricked copy) reports
+  "update available"; apply via `update.bat` when the owner is ready.
 
 ---
 
