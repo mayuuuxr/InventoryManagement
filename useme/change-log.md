@@ -32,6 +32,13 @@ and Windows never indexes AppData\Local):
   at its next `nibba-Shop` open after taking v1.2.11 via the updater).
 - **Gate:** full suite 157/157 OK (185s); `makemigrations --check` clean.
   No Python/product-UI code touched — batch/docs only.
+- **GitHub Release:** CI auto-published release v1.2.11 with `nibba-v1.2.11.zip`
+  — 625,224 bytes, sha256 `128e90fd00f32c5827ebf7ce45320759e60dcedbb9a07d87af
+  02595e0af3a97c` — downloaded and content-verified (VERSION=1.2.11 inside,
+  pin-app.bat + the nibba-Shop.bat auto-pin guard present, zero leaks, 203
+  entries). Shop PC next step for the owner: run `update.bat` in the live
+  copy (v1.2.1 -> 1.2.11) or open the app once — it auto-updates; either
+  way the next `nibba-Shop` open also pins itself so Windows search finds it.
 
 ---
 
