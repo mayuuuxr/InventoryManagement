@@ -220,6 +220,33 @@
         moneyTotal.textContent = money(moneySum);
     }
 
+    // In-place totals refresh for TYPING: updates every row's AMOUNT cell
+    // (td.bill-money) plus the footer price total, without touching any
+    // input — so the caret keeps its position while the user types. The
+    // old code called renderRows() on every keystroke, which rebuilt
+    // tbody.innerHTML and destroyed the focused input (caret jumped,
+    // a half-typed "1." was rewritten to "1" and lost the decimal).
+    // renderRows() stays for add/remove/init only, where a rebuild is
+    // safe because nobody is typing.
+    function refreshMoney() {
+        var sum = 0;
+        var moneySum = 0;
+        rows.forEach(function (row, idx) {
+            sum += row.qty;
+            var rateNum = parseFloat(row.rate);
+            var lineAmount = (!isNaN(rateNum) && rateNum >= 0)
+                ? money(row.qty * rateNum) : null;
+            if (lineAmount !== null) moneySum += row.qty * rateNum;
+            var tr = tbody.children[idx];
+            if (tr) {
+                var cell = tr.querySelector(".bill-money");
+                if (cell) cell.textContent = (lineAmount !== null ? lineAmount : "—");
+            }
+        });
+        total.textContent = fmt(sum);
+        moneyTotal.textContent = money(moneySum);
+    }
+
     function showError(message) {
         errorText.textContent = message;
         errorBox.classList.remove("hidden");
@@ -245,25 +272,29 @@
         if (t.dataset.rate !== undefined) {
             // Rate per unit (₹): decimals allowed, never negative.
             // Every printed purchase line must carry one.
+            // Never rebuild the table or rewrite the input here — the
+            // focused input must survive the keystroke (caret + the
+            // half-typed "1." decimal). Only the amounts move.
             var raw = t.value.trim();
             var v = parseFloat(raw);
             if (raw !== "" && (isNaN(v) || v < 0)) {
                 t.value = rows[+t.dataset.rate].rate;
+                refreshMoney();
                 return;
             }
             rows[+t.dataset.rate].rate = raw === "" ? "" : v;
-            renderRows();
-            var again = tbody.querySelector('[data-rate="' + t.dataset.rate + '"]');
-            if (again) {
-                again.focus();
-                if (again.value) again.setSelectionRange(again.value.length, again.value.length);
-            }
+            refreshMoney();
             return;
         }
+        // Quantity: whole units only, at least 1.
         var qi = parseInt(t.value, 10);
-        if (isNaN(qi) || qi < 1) { t.value = rows[+t.dataset.qty].qty; return; }
+        if (isNaN(qi) || qi < 1) {
+            t.value = rows[+t.dataset.qty].qty;
+            refreshMoney();
+            return;
+        }
         rows[+t.dataset.qty].qty = qi;
-        renderRows();
+        refreshMoney();
     });
     tbody.addEventListener("click", function (e) {
         var btn = e.target.closest("[data-remove]");

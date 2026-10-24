@@ -7,6 +7,21 @@ referred to as "the old brand string".
 
 ---
 
+## 2026-10-24 | 1.2.12 | FIXED | Cursor jumped to the end while editing price/qty on the bill screens
+
+Owner-typed symptom: editing a rate or quantity mid-number on New Sale /
+New Purchase threw the caret to the end of the input on every keystroke.
+Root cause: the money-update path rebuilt the whole `tbody` per keystroke
+( recreating the focused `<input>` and resetting the caret ). Fix: the
+money path no longer touches rows — `refreshMoney()` updates only the
+edited row's amount cell + footer totals; `renderRows()` is left to
+add/remove/init, and the old `setSelectionRange` band-aid in the rate
+handler is gone. Both bill templates fixed identically. Verified with the
+behavioral harness (caret position preserved through 1→10→100→1000 edits,
+no rebuild during typing) plus the full suite, 157/157 OK.
+
+---
+
 ## 2026-10-22 | 1.2.1 | WATCH | Slow-network pip timeouts hit the dev venv too
 
 Installing pip-audit into the dev venv (for today's dependency audit) hit

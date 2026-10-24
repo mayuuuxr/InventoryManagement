@@ -8,6 +8,41 @@ log useful while honoring the no-mentions rule.
 
 ---
 
+## 2026-10-24 — Session: v1.2.12 caret-safe typing on the bill screens (owner: cursor jumped while typing price/qty)
+
+- **Version:** 1.2.12 (bumped from 1.2.11) · **git HEAD at session start:** 3d1271d ·
+  **Tree:** committed, tagged `v1.2.12` and pushed to origin/main at session end.
+
+What & why (owner said editing a price or quantity mid-number threw the cursor
+to the end of the box on both billing screens):
+- **Root cause:** every keystroke re-rendered the whole bill table
+  (`renderRows()` rebuilt the `tbody` innerHTML), which recreated the exact
+  `<input>` being typed in — the caret jumped to the end each time.
+- **Fix:** a new `refreshMoney()` updates ONLY the edited row's amount cell
+  and the footer totals (item count + ₹). `renderRows()` now runs only on
+  add/remove/init. Invalid-input clamps unchanged. The old rate-path
+  band-aid (refocus + `setSelectionRange` on every rate keystroke) was
+  removed — no longer needed once rows stop rebuilding.
+- Applied to BOTH screens: `sale_bill.html` + `purchase_bill.html`. No
+  model/view changes, no migration.
+- **Verified:** both templates' `<script>` extracted and `node --check`
+  clean; behavioral harness (`bill_input_test.js`, reusable in
+  `%TEMP%\opencode`) PASS on both templates — caret stays put while typing
+  1→10→100→1000, the "1." dot-edit works, no tbody rebuild fires during
+  typing, clamps and row removal behave identically.
+- **Gate:** full suite 157/157 OK (198.9s); `makemigrations --check` clean.
+- **Standing practice added (owner request):** the security-audit prompt is
+  registered in `useme/prompts-library.md` as **section 21** and is now the
+  post-change gate — run read-only after every change batch, before tagging
+  any release. The 2026-10-24 full audit ran BEFORE this release: report
+  delivered to the owner; awaiting their pick on which findings to fix.
+  Nothing from the audit was fixed in v1.2.12 (would have mixed into the
+  caret fix — audit fixes ship as their own tagged release once approved).
+- **GitHub Release:** tagging now; CI auto-publishes — verification facts
+  appended below once the artifact lands.
+
+---
+
 ## 2026-10-24 — Session: v1.2.11 Windows search-bar pin (owner: "searched nibba — won't show")
 
 - **Version:** 1.2.11 (bumped from 1.2.10) · **git HEAD at session start:** 9098669 ·

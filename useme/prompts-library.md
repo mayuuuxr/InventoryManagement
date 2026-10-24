@@ -666,6 +666,52 @@ verified before launch.
 
 ---
 
+## 21. nibba standing security audit (prompt 16 upgraded, read-only)
+
+This is prompt #16 specialized for nibba and marked as the **standing
+post-change check**. Run it after EVERY change batch (feat / fix /
+refactor), before tagging or shipping a release. Read-only: report only,
+wait for owner approval before any fix.
+
+You are an application security engineer doing a pre-launch audit of this
+codebase (nibba, PC-only Django app — read AGENTS.md first for the threat
+model: single shop PC, listens on 127.0.0.1 only, local users only).
+
+Review for:
+- Authentication and session handling flaws
+- Authorization gaps (can user A reach user B's data?)
+- Hardcoded secrets, keys or tokens; anything sensitive exposed client-side
+- Injection risks (SQL, NoSQL, command, XSS)
+- Unprotected or unvalidated API routes
+- Missing input validation and sanitization
+- Missing rate limiting / brute force protection
+- Insecure direct object references
+- Over-permissive CORS, missing security headers, unsafe cookie flags
+- Known-vulnerable dependencies
+- Sensitive data leaking into logs or error responses
+
+For each finding give me:
+- Severity: Critical / High / Medium / Low
+- File and line
+- How it would actually be exploited
+- The exact code fix
+
+Then list all findings ranked by severity. Do NOT modify any code until I
+approve. If a category is clean, say so explicitly rather than staying
+silent.
+
+RULES:
+Read-only audit. Never print secret values in the report — key names only.
+Verify the previous audit's claims against CURRENT code instead of trusting
+them (the bill screens, the A4 invoice and the self-updater all postdate the
+last formal audit). Re-check every timestamped claim in SECURITY-AUDIT.md
+as part of this prompt.
+
+OUTPUT: findings ranked by severity, clean categories explicitly stated,
+and an approved-fix plan for the owner to tick off.
+
+---
+
 ## Nibba coverage map (for future sessions)
 
 | Prompt phase | nibba status |
@@ -679,7 +725,7 @@ verified before launch.
 | 7–11 Plan/Setup/Feature/DB/Auth | done across sessions (see change-log) |
 | 14 Testing | 162 tests green (`useme/test-reports/`) |
 | 15 Debugging | practice logged in `useme/bug-log.md` |
-| 16 Security audit | hardening built-in; formal audit pass not yet run |
+| 16 Security audit | standing post-change check added (prompt 21); full pass re-run 2026-10-24 |
 | 17 Code review | on demand (appalling only when owner asks) |
 | 18 Deployment | done (waitress + `nibba-Shop.bat`, offline build) |
 | 19 Monitoring | Logs/ dir + no third-party telemetry; simple by design |
