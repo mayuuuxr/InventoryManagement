@@ -27,6 +27,11 @@
                        class="w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
             </div>
             <div>
+                <label for="bill-supplier-gstin" class="block text-xs font-medium text-muted mb-1.5">Supplier GSTIN</label>
+                <input id="bill-supplier-gstin" type="text" placeholder="Optional, e.g. 27ABCDE1234F1Z5" maxlength="20"
+                       class="w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
+            </div>
+            <div>
                 <label for="bill-date" class="block text-xs font-medium text-muted mb-1.5">Date</label>
                 <input id="bill-date" type="date" value="{{ default_date }}"
                        class="w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">
@@ -321,6 +326,7 @@
         });
         var body = JSON.stringify({
             supplier: supplier,
+            supplier_gstin: document.getElementById("bill-supplier-gstin").value.trim(),
             date: document.getElementById("bill-date").value,
             time: document.getElementById("bill-time").value,
             items: items

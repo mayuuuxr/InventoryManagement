@@ -13,6 +13,7 @@ is written to handle them the moment TransferEntry is recorded, with no
 signature change.
 """
 from decimal import Decimal
+import re
 
 from django.db.models import Sum
 
@@ -20,6 +21,12 @@ from .models import InwardEntry, OutwardEntry, TransferEntry
 
 
 ZERO = Decimal("0")
+
+# Indian 15-char GSTIN: 2 digits, 5 letters, 4 digits, 1 letter, 1 alnum,
+# 1 letter, 1 check char (0-9A-Z). See entries/models.py clean().
+_GSTIN_RE = re.compile(
+    r"^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[0-9A-Z]{1}[A-Z]{1}[0-9A-Z]{1}$"
+)
 
 
 def fmt_qty(value):
@@ -282,6 +289,40 @@ def low_stock_items(sites, limit=5):
             "balance": balance,
         })
     return items
+
+
+# --- GSTIN helper -----------------------------------------------------------
+#
+# Optional party GSTIN fields live on InwardEntry (supplier_gstin) and
+# OutwardEntry (customer_gstin). Both are blank=True with a default of "",
+# i.e. walk-in sales / un-GST'd suppliers legitimately leave them empty.
+#
+# normalize_gstin() is the shared validator used by model.clean() (and may
+# be reused by forms). It returns:
+#   * ""      -> input is empty/blank: keep the optional field empty,
+#                do NOT raise (caller: `if gstin is None: raise` stays off).
+#   * None    -> input is non-empty but malformed: caller raises ValidationError.
+#   * cleaned -> the stripped + uppercased, validated 15-char GSTIN.
+# Local import note: this module already imports the entry models at top
+# (see entries.utils docstring) — no circular dependency introduced here.
+
+
+def normalize_gstin(value):
+    """
+    Normalize + validate an optional GSTIN.
+
+    See the module header above for the return-value contract. The 15-char
+    Indian GSTIN shape is enforced: 2 digits, 5 letters, 4 digits, then
+    6 check chars (letter/digit mix ending on a letter check char).
+    """
+    if value is None:
+        return ""
+    s = str(value).strip().upper()
+    if not s:
+        return ""
+    if len(s) != 15 or not _GSTIN_RE.match(s):
+        return None
+    return s
 
 
 # --- Bill (tax invoice) math ------------------------------------------------

@@ -109,10 +109,11 @@
     </div>
   </div>
 
-  <table class="meta">
+    <table class="meta">
     <tr>
       <td style="width:60%">
         <strong>{{ party_label }}:</strong> {{ party }}
+        {% if party_gstin %}<br><strong>GSTIN:</strong> {{ party_gstin }}{% endif %}
         <br><strong>Place of supply:</strong> {{ shop_name }} (intra-state)
       </td>
       <td class="right">

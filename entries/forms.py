@@ -446,13 +446,18 @@ class PurchaseForm(forms.ModelForm):
 
     class Meta:
         model = InwardEntry
-        fields = ("material", "date", "time", "qty", "rate", "received_from")
+        fields = ("material", "date", "time", "qty", "rate", "received_from", "supplier_gstin")
         widgets = {
             "date": forms.DateInput(attrs=DATE_WIDGET),
             "qty": forms.NumberInput(attrs=QTY_WIDGET),
             "received_from": forms.TextInput(attrs={
                 "placeholder": "e.g. Sharma Traders",
                 "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
+            }),
+            "supplier_gstin": forms.TextInput(attrs={
+                "placeholder": "Optional supplier GSTIN (e.g. 27ABCDE1234F1Z5)",
+                "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
+                "maxlength": 20,
             }),
             "rate": forms.NumberInput(attrs=RATE_WIDGET),
         }
@@ -508,13 +513,18 @@ class SaleForm(forms.ModelForm):
 
     class Meta:
         model = OutwardEntry
-        fields = ("material", "date", "time", "qty", "rate", "customer")
+        fields = ("material", "date", "time", "qty", "rate", "customer", "customer_gstin")
         widgets = {
             "date": forms.DateInput(attrs=DATE_WIDGET),
             "qty": forms.NumberInput(attrs=QTY_WIDGET),
             "customer": forms.TextInput(attrs={
                 "placeholder": "Buyer name (optional, walk-in ok)",
                 "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
+            }),
+            "customer_gstin": forms.TextInput(attrs={
+                "placeholder": "Optional buyer GSTIN (regular customers only)",
+                "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
+                "maxlength": 20,
             }),
             "rate": forms.NumberInput(attrs=RATE_WIDGET),
         }

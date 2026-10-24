@@ -29,6 +29,13 @@ class InwardEntry(models.Model):
         help_text="Price per unit (₹) at the time of this entry.",
     )
     received_from = models.CharField(max_length=200)
+    # Optional GST number of the SUPPLIER on this purchase bill (v1.2.13).
+    # Every row of one bill gets the same value at save time; the printed
+    # A4 purchase bill shows it under the party name when present.
+    supplier_gstin = models.CharField(
+        max_length=20, blank=True, default="",
+        help_text="Optional GSTIN of the supplier (e.g. 27ABCDE1234F1Z5).",
+    )
     # Who recorded this entry. Reads are global (all roles see true stock
     # and every entry); edit/delete stay own-only via
     # EntryWriterRequiredMixin. NULL for pre-ownership legacy rows.
@@ -81,6 +88,19 @@ class InwardEntry(models.Model):
                 raise ValidationError(
                     {"qty": "Quantity must be a whole number (no decimals)."}
                 )
+        # Optional supplier GSTIN: trim + uppercase + 15-character shape
+        # check on EVERY save path. Local import — entries.utils imports
+        # this module at the top (circular otherwise).
+        from .utils import normalize_gstin
+        gstin = normalize_gstin(self.supplier_gstin)
+        if gstin is None:
+            raise ValidationError(
+                {"supplier_gstin":
+                 "This GSTIN looks wrong — it must be 15 characters like "
+                 "27ABCDE1234F1Z5. Leave it blank if the supplier has none."}
+            )
+        if gstin:
+            self.supplier_gstin = gstin
 
 class OutwardEntry(models.Model):
     """
@@ -112,6 +132,14 @@ class OutwardEntry(models.Model):
     customer = models.CharField(
         max_length=200, blank=True, default="",
         help_text="Buyer name for shop sales (optional).",
+    )
+    # Optional GST number of the CUSTOMER (regular customers, v1.2.13).
+    # NOT mandatory — walk-in sales stay blank. The sale billing screen
+    # auto-recalls it when a customer billed with a GSTIN before is typed
+    # again, and the printed A4 tax invoice shows it when present.
+    customer_gstin = models.CharField(
+        max_length=20, blank=True, default="",
+        help_text="Optional GSTIN of the buyer (regular customers only).",
     )
     # Which inward delivery this usage consumes from. PROTECT: a delivery
     # that has been consumed cannot be deleted (delete the outward rows

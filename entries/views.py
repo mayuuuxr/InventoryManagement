@@ -659,6 +659,8 @@ class OrderDetailView(EntryWriterRequiredMixin, TemplateView):
             "print_url": print_url,
             "fifo": fifo,
             "total_qty": fmt_qty(sum(e.qty for e in bill_entries)),
+            "party_gstin": (bill_entries[0].supplier_gstin.strip() if kind == "inward" and bill_entries[0].supplier_gstin else
+                             bill_entries[0].customer_gstin.strip() if kind == "outward" and bill_entries[0].customer_gstin else None),
             "recorded_at": timezone.localtime(entry.created_at).strftime(
                 "%d-%m-%Y at %I:%M %p"),
         }
@@ -883,6 +885,7 @@ class SaleBillView(EntryWriterRequiredMixin, View):
             return fail("Could not read the bill. Try again.")
 
         customer = str(payload.get("customer") or "").strip()[:100]
+        customer_gstin_raw = str(payload.get("customer_gstin") or "").strip()[:20]
         try:
             bill_date = _DateField().clean(payload.get("date") or "")
         except Exception:
@@ -972,7 +975,9 @@ class SaleBillView(EntryWriterRequiredMixin, View):
                     entry = OutwardEntry.objects.create(
                         site=self.site, material=material,
                         date=bill_date, time=bill_time, qty=qty,
-                        rate=rate, customer=customer, inward_entry=delivery,
+                        rate=rate, customer=customer,
+                        customer_gstin=customer_gstin_raw,
+                        inward_entry=delivery,
                         created_by=request.user)
                     log_audit(request.user, AuditLog.Action.CREATE,
                               AuditLog.EntryType.OUTWARD, entry.pk,
@@ -1069,6 +1074,7 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
             return fail("Could not read the bill. Try again.")
 
         supplier = str(payload.get("supplier") or "").strip()[:200]
+        supplier_gstin_raw = str(payload.get("supplier_gstin") or "").strip()[:20]
         if not supplier:
             return fail("Enter the supplier name (who did you buy from).")
         try:
@@ -1146,6 +1152,7 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
                         site=self.site, material=materials[mid],
                         date=bill_date, time=bill_time, qty=qty,
                         rate=rate, received_from=supplier,
+                        supplier_gstin=supplier_gstin_raw,
                         created_by=request.user)
                     log_audit(request.user, AuditLog.Action.CREATE,
                               AuditLog.EntryType.INWARD, entry.pk,
