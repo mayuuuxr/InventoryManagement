@@ -16,7 +16,7 @@
 <div class="max-w-3xl space-y-4">
     <div>
         <h1 class="text-charcoal">New Sale</h1>
-        <p class="text-sm text-muted mt-1">Add items to the bill. Stock deducts automatically, oldest purchase first.</p>
+        <p class="text-sm text-muted mt-1">Type the rate (price ₹, before GST) beside each product — the printed A4 bill prices every line with its GST. Stock deducts automatically, oldest purchase first.</p>
     </div>
 
     <div class="bg-surface border border-subtle rounded-xl p-4 md:p-6 space-y-4">
@@ -50,7 +50,10 @@
                 <thead>
                     <tr class="bg-gray-50 text-muted text-xs uppercase tracking-wide">
                         <th class="text-left font-medium px-3 py-2">Product</th>
+                        <th class="font-medium px-3 py-2 w-24 text-right">Rate ₹</th>
                         <th class="font-medium px-3 py-2 w-28 text-center">Qty</th>
+                        <th class="font-medium px-3 py-2 w-24 text-right">Amount ₹</th>
+                        <th class="font-medium px-3 py-2 w-14 text-center">GST%</th>
                         <th class="font-medium px-3 py-2 w-20">Unit</th>
                         <th class="w-10"></th>
                     </tr>
@@ -69,6 +72,9 @@
             <div class="text-sm text-charcoal">
                 <span class="font-semibold" id="bill-total">0</span>
                 <span class="text-muted">items in bill</span>
+                <span class="mx-2 text-muted">·</span>
+                <span class="font-semibold" id="bill-money-total">0.00</span>
+                <span class="text-muted">₹ (excl. GST)</span>
             </div>
             <button id="bill-save" type="button"
                     class="inline-flex items-center justify-center gap-2 px-6 py-2.5 min-h-[44px] bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors">
@@ -92,10 +98,15 @@
     var total = document.getElementById("bill-total");
     var errorBox = document.getElementById("bill-error");
     var errorText = document.getElementById("bill-error-text");
+    var moneyTotal = document.getElementById("bill-money-total");
     var csrf = document.querySelector('[name=csrfmiddlewaretoken]');
 
     function fmt(n) {
         return Number.isInteger(n) ? String(n) : n.toFixed(1);
+    }
+
+    function money(n) {
+        return n.toFixed(2);
     }
 
     function badgeFor(m) {
@@ -148,20 +159,39 @@
         if (existing) {
             existing.qty += 1;
         } else {
-            rows.push({ id: material.id, name: material.name, unit: material.unit, qty: 1 });
+            rows.push({
+                id: material.id, name: material.name, unit: material.unit,
+                qty: 1, rate: "",
+                gst: material.gst
+            });
         }
         renderRows();
         search.value = "";
         results.classList.add("hidden");
-        search.focus();
+        // The rate is required on every printed line — put the caret
+        // into the Rate box of the row just added so it is what the
+        // owner types next.
+        var newIdx = null;
+        for (var j = 0; j < rows.length; j++) {
+            if (rows[j].id === material.id) { newIdx = j; break; }
+        }
+        var rateInput = tbody.querySelector('[data-rate="' + newIdx + '"]');
+        if (rateInput) rateInput.focus();
     }
 
     function renderRows() {
         tbody.innerHTML = "";
         empty.style.display = rows.length ? "none" : "";
         var sum = 0;
+        var moneySum = 0;
         rows.forEach(function (row, idx) {
             sum += row.qty;
+            var rateNum = parseFloat(row.rate);
+            var lineAmount = (!isNaN(rateNum) && rateNum >= 0)
+                ? money(row.qty * rateNum) : null;
+            if (lineAmount !== null) moneySum += row.qty * rateNum;
+            var gstLabel = (row.gst === undefined || row.gst === null
+                            || row.gst <= 0) ? "-" : row.gst + "%";
             var tr = document.createElement("tr");
             tr.innerHTML =
                 '<td class="px-3 py-2">' +
@@ -171,10 +201,19 @@
                 '<span class="text-sm font-medium text-charcoal">' + row.name + "</span>" +
                 "</span>" +
                 "</td>" +
+                '<td class="px-3 py-2 text-right">' +
+                '<input type="number" min="0" step="0.01" inputmode="decimal" value="' + row.rate + '" data-rate="' + idx + '" ' +
+                'placeholder="e.g. 250" ' +
+                'class="w-24 px-2 py-1.5 bg-surface border border-subtle rounded-md text-sm text-charcoal text-right focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">' +
+                "</td>" +
                 '<td class="px-3 py-2 text-center">' +
                 '<input type="number" min="1" step="1" value="' + row.qty + '" data-qty="' + idx + '" ' +
                 'class="w-20 px-2 py-1.5 bg-surface border border-subtle rounded-md text-sm text-charcoal text-center focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20">' +
                 "</td>" +
+                '<td class="px-3 py-2 text-right text-sm text-charcoal bill-money">' +
+                (lineAmount !== null ? lineAmount : "—") +
+                "</td>" +
+                '<td class="px-3 py-2 text-center text-sm text-muted">' + gstLabel + "</td>" +
                 '<td class="px-3 py-2 text-sm text-muted">' + row.unit + "</td>" +
                 '<td class="px-3 py-2 text-center">' +
                 '<button type="button" data-remove="' + idx + '" aria-label="Remove" ' +
@@ -184,6 +223,7 @@
             tbody.appendChild(tr);
         });
         total.textContent = fmt(sum);
+        moneyTotal.textContent = money(moneySum);
     }
 
     function showError(message) {
@@ -207,10 +247,28 @@
     });
     tbody.addEventListener("input", function (e) {
         var t = e.target;
-        if (t.dataset.qty === undefined) return;
-        var v = parseInt(t.value, 10);
-        if (isNaN(v) || v < 1) { t.value = rows[+t.dataset.qty].qty; return; }
-        rows[+t.dataset.qty].qty = v;
+        if (t.dataset.qty === undefined && t.dataset.rate === undefined) return;
+        if (t.dataset.rate !== undefined) {
+            // Rate per unit (₹, before GST): decimals allowed, never
+            // negative. Every printed line must carry one.
+            var raw = t.value.trim();
+            var v = parseFloat(raw);
+            if (raw !== "" && (isNaN(v) || v < 0)) {
+                t.value = rows[+t.dataset.rate].rate;
+                return;
+            }
+            rows[+t.dataset.rate].rate = raw === "" ? "" : v;
+            renderRows();
+            var again = tbody.querySelector('[data-rate="' + t.dataset.rate + '"]');
+            if (again) {
+                again.focus();
+                if (again.value) again.setSelectionRange(again.value.length, again.value.length);
+            }
+            return;
+        }
+        var qi = parseInt(t.value, 10);
+        if (isNaN(qi) || qi < 1) { t.value = rows[+t.dataset.qty].qty; return; }
+        rows[+t.dataset.qty].qty = qi;
         renderRows();
     });
     tbody.addEventListener("click", function (e) {
@@ -222,9 +280,17 @@
 
     document.getElementById("bill-save").addEventListener("click", function () {
         if (!rows.length) { showError("Add at least one item to the bill."); return; }
+        var missingRate = rows.some(function (r) {
+            return !(r.rate !== "" && r.rate !== null
+                     && !isNaN(parseFloat(r.rate)) && parseFloat(r.rate) >= 0);
+        });
+        if (missingRate) {
+            showError("Type the rate (price per unit ₹) beside every product — the printed bill prices each item from it.");
+            return;
+        }
         errorBox.classList.add("hidden");
         var items = rows.map(function (r) {
-            return { material_id: r.id, qty: r.qty };
+            return { material_id: r.id, qty: r.qty, rate: r.rate };
         });
         var body = JSON.stringify({
             customer: document.getElementById("bill-customer").value,

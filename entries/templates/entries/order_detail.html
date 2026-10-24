@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 {% load quantities %}
 {# One saved order from the Orders page (IN-12 / OUT-5). Every stored #}
-{# field + the other lines of the SAME bill + a Print receipt button #}
-{# that opens the 80mm bill paper for the whole bill. No price fields — #}
-{# per the shop rule, printed Rate/Amount/Total stay blank. Multi-line #}
-{# template comments render as literal text (single-line pairs only); #}
-{# this note printed above every order page until Oct 2026. #}
+{# field + the other lines of the SAME bill + their printed money #}
+{# preview (rate + GST from the material, Oct 2026 design) + a Print #}
+{# bill (A4) button that opens the tax invoice for the whole bill. #}
 
 {% block title %}{{ ref }} | nibba{% endblock %}
 
@@ -32,7 +30,7 @@
         <div class="flex items-center gap-2">
             <a href="{{ print_url }}" target="_blank" rel="noopener" class="inline-flex items-center gap-2 px-4 py-2 bg-accent text-white text-sm font-medium rounded-lg hover:bg-accent-hover transition-colors">
                 <i data-lucide="printer" class="w-4 h-4"></i>
-                Print receipt
+                Print bill (A4)
             </a>
             <a href="{% url 'entries:detail' entry.site_id entry.material_id %}" class="inline-flex items-center gap-2 px-4 py-2 text-sm text-charcoal border border-subtle rounded-lg hover:border-accent hover:text-accent transition-colors">
                 <i data-lucide="book-open" class="w-4 h-4"></i>
@@ -88,7 +86,7 @@
 <div class="bg-surface border border-subtle rounded-xl mt-5 p-4 md:p-6">
     <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
         <h2 class="text-charcoal text-sm font-semibold">Same bill — {{ bill_entries|length }} item{{ bill_entries|length|pluralize }}</h2>
-        <span class="text-xs text-muted">Print receipt prints every line of this bill on one 80mm roll.</span>
+        <span class="text-xs text-muted">Print bill (A4) prints every line of this bill with its saved rate + GST.</span>
     </div>
     <div class="overflow-x-auto -mx-4 md:mx-0 px-4 md:px-0">
         <table class="w-full text-sm">
@@ -97,25 +95,39 @@
                     <th class="font-medium py-2 pr-4">#</th>
                     <th class="font-medium py-2 pr-4">Item</th>
                     <th class="font-medium py-2 pr-4 text-right">Qty</th>
-                    <th class="font-medium py-2">Rate / Amount</th>
+                    <th class="font-medium py-2 pr-4 text-right">Rate ₹</th>
+                    <th class="font-medium py-2 pr-4 text-right">Amount ₹</th>
+                    <th class="font-medium py-2 text-center">GST%</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-subtle">
-                {% for line in bill_entries %}
-                <tr {% if line.pk == entry.pk %}class="bg-accent-hover bg-opacity-5"{% endif %}>
+                {% for item, line in bill_lines %}
+                <tr {% if item.pk == entry.pk %}class="bg-accent-hover bg-opacity-5"{% endif %}>
                     <td class="py-2.5 pr-4 text-muted">{{ forloop.counter }}.</td>
                     <td class="py-2.5 pr-4 text-charcoal">
-                        {{ line.material.display_name }}
-                        {% if line.pk == entry.pk %}<span class="text-xs text-muted">(this order)</span>{% endif %}
+                        {{ item.material.display_name }}
+                        {% if item.pk == entry.pk %}<span class="text-xs text-muted">(this order)</span>{% endif %}
                     </td>
-                    <td class="py-2.5 pr-4 text-right text-charcoal">{{ line.qty|whole }} {{ line.material.unit }}</td>
-                    <td class="py-2.5 text-muted text-xs">written by hand on paper</td>
+                    <td class="py-2.5 pr-4 text-right text-charcoal">{{ item.qty|whole }} {{ item.material.unit }}</td>
+                    {% if line.has_price %}
+                    <td class="py-2.5 pr-4 text-right text-charcoal">{{ line.rate_label }}</td>
+                    <td class="py-2.5 pr-4 text-right text-charcoal">{{ line.amount }}</td>
+                    {% else %}
+                    <td class="py-2.5 pr-4 text-muted">— <span class="text-xs">not recorded</span></td>
+                    <td class="py-2.5 pr-4 text-muted">—</td>
+                    {% endif %}
+                    <td class="py-2.5 text-center text-muted text-xs">{{ line.gst_label }}</td>
                 </tr>
                 {% endfor %}
                 <tr class="border-t border-subtle">
                     <td class="py-2.5 pr-4 text-charcoal font-medium" colspan="2">TOTAL</td>
-                    <td class="py-2.5 pr-4 text-right text-charcoal font-medium">{{ total_qty }}<span class="text-muted text-xs font-normal"> items qty on paper</span></td>
-                    <td class="py-2.5 text-muted text-xs">blank strip on the bill</td>
+                    <td class="py-2.5 pr-4 text-right text-charcoal font-medium">{{ total_qty }}<span class="text-muted text-xs font-normal"> items qty</span></td>
+                    <td class="py-2.5 pr-4" colspan="2"></td>
+                    <td class="py-2.5"></td>
+                </tr>
+                <tr>
+                    <td class="pt-1 pr-4 text-muted text-xs" colspan="3">Taxable Sub Total (before GST)</td>
+                    <td class="pt-1 pr-4 text-right text-charcoal text-sm" colspan="3">{{ bill_subtotal }}</td>
                 </tr>
             </tbody>
         </table>
@@ -124,6 +136,6 @@
 
 <div class="flex items-start gap-2 mt-4 text-xs text-muted">
     <i data-lucide="info" class="w-3.5 h-3.5 mt-px shrink-0"></i>
-    <span>No prices are stored in the app (shop rule) — the printed bill shows the shop header, party, date/time, items and qty, and leaves Rate, Amount and Total blank to fill in by hand. Edit or delete this entry from the material ledger.</span>
+    <span>Every line's price was saved with the bill (Oct 2026) — the printed A4 tax invoice shows the shop header, party, HSN, qty, rate, GST% and the CGST + SGST breakup, round-off, grand total and the amount in words. Legacy rows saved before prices print "-" and honestly add 0.00. Edit or delete this entry from the material ledger.</span>
 </div>
 {% endblock %}

@@ -333,3 +333,179 @@ def low_stock_items(sites, limit=5):
             "balance": balance,
         })
     return items
+
+
+# --- Bill (tax invoice) math ------------------------------------------------
+#
+# Owner, Oct 2026: bills print WITH prices and the shop's GST breakup (A4
+# tax invoice). The app stores NO totals — every rupee below is derived at
+# print time from the saved line rates + each material's gst_rate, so a
+# corrected entry always re-prints correct money.
+#
+# Rate convention: the rate a staff types is BEFORE tax (exclusive), and
+# GST is added on top of the grouped taxable amounts — same as typical
+# Indian billing software and the sample invoice the owner shared.
+
+TWO_DP = Decimal("0.01")
+
+
+def amount_in_words(amount):
+    """
+    ₹ amount -> Indian-English words for the invoice footer, e.g.
+    968.00  -> "Nine Hundred Sixty-Eight Rupees and Zero Paise Only"
+    1256.50 -> "One Thousand Two Hundred Fifty-Six Rupees and Fifty Paise Only"
+
+    Indian numbering (crore / lakh / thousand). Used for printed bills only —
+    no third-party dependency by owner rule.
+    """
+    if amount is None:
+        return ""
+    try:
+        d = (amount if isinstance(amount, Decimal)
+             else Decimal(str(amount)))
+    except Exception:
+        return ""
+    d = d.quantize(TWO_DP)
+    rupees = int(d)
+    paise = int((d - rupees) * 100)
+
+    ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven",
+            "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen",
+            "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen",
+            "Nineteen"]
+    tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty",
+            "Seventy", "Eighty", "Ninety"]
+
+    def under_thousand(n):
+        parts = []
+        if n >= 100:
+            parts.append(ones[n // 100] + " Hundred")
+            n %= 100
+            if n:
+                parts.append("and")
+        if n >= 20:
+            parts.append(tens[n // 10])
+            n %= 10
+        if n:
+            parts.append(ones[n])
+        return " ".join(p for p in parts if p)
+
+    def indian(n):
+        # Indian system: crore (10^7), lakh (10^5), thousand (10^3), then
+        # plain 3-digit groups.
+        if n == 0:
+            return "Zero"
+        chunks = []
+        for label, size in (("Crore", 10_000_000), ("Lakh", 100_000),
+                            ("Thousand", 1000)):
+            if n >= size:
+                chunks.append(f"{under_thousand(n // size)} {label}")
+                n %= size
+        if n:
+            chunks.append(under_thousand(n))
+        return " ".join(chunks)
+
+    rupees_words = f"{indian(rupees)} Rupee" if rupees == 1 else \
+        f"{indian(rupees)} Rupees"
+    if paise == 0:
+        return f"{rupees_words} and Zero Paise Only"
+    paise_words = under_thousand(paise) + " Paise"
+    return f"{rupees_words} and {paise_words} Only"
+
+
+def bill_invoice_totals(entries):
+    """
+    Full invoice math for a set of entry rows (one saved bill).
+
+    Reads each row's qty, rate and the MATERIAL's gst_rate (rate lives on the
+    entry — a price snapshot at sale time — while the GST% lives on the
+    material, exactly like a real price list). Rows without a stored rate
+    (pre-Oct-2026 legacy) print with a blank rate/amount and NO tax — they
+    never silently shift totals.
+
+    Returns a dict for the invoice template:
+      lines:       [{sr, name, hsn, qty_label, rate_label, amount, has_price}]
+      qty_total:   sum of qty (display via fmt_qty)
+      subtotal:    taxable value (sum of line amounts)
+      tax_groups:  [{rate_label, rate, base, tax, cgst, sgst}] — sorted by rate,
+                   GST split half CGST + half SGST (single local shop,
+                   intra-state sales only; no IGST by design)
+      total_tax:   sum of group taxes
+      round_off:   grand_total rounded to the nearest rupee minus exact total
+      grand_total: rounded total actually printed/worded
+      words:       amount_in_words(grand_total)
+    """
+    import decimal
+
+    lines = []
+    qty_total = Decimal("0")
+    subtotal = Decimal("0")
+    groups = {}
+    for i, e in enumerate(entries, start=1):
+        name = e.material.display_name
+        hsn = (getattr(e.material, "hsn_code", "") or "")
+        qty_label = f"{fmt_qty(e.qty)} {e.material.unit}"
+        gst = getattr(e.material, "gst_rate", None)
+        gst_d = Decimal(str(gst)) if gst is not None else Decimal("0")
+        if e.rate is not None:
+            rate = Decimal(str(e.rate)).quantize(TWO_DP)
+            amount = (e.qty * rate).quantize(TWO_DP)
+            has_price = True
+            subtotal += amount
+            if gst_d > 0:
+                groups[gst_d] = groups.get(gst_d, Decimal("0")) + amount
+        else:
+            rate = None
+            amount = None
+            has_price = False
+        lines.append({
+            "sr": i,
+            "name": name,
+            "hsn": hsn,
+            "qty_label": qty_label,
+            "rate_label": f"{rate:.2f}" if rate is not None else None,
+            "amount": f"{amount:.2f}" if amount is not None else None,
+            "gst_label": (fmt_qty(gst_d) + "%" if gst is not None and gst_d
+                          > 0 else "-"),
+            "has_price": has_price,
+        })
+        qty_total += e.qty
+
+    tax_groups = []
+    total_tax = Decimal("0")
+    for rate in sorted(groups):
+        base = groups[rate].quantize(TWO_DP)
+        tax = (base * rate / Decimal("100")).quantize(TWO_DP)
+        cgst = sgst = (tax / 2).quantize(TWO_DP)
+        # Splitting an odd tax to two halves can lose a paisa; push the
+        # remainder into SGST so CGST+SGST always equals the printed tax.
+        if cgst + sgst != tax:
+            sgst = tax - cgst
+        total_tax += tax
+        tax_groups.append({
+            "rate_label": fmt_qty(rate) + "%",
+            # CGST/SGST are the TWO HALVES of the item's GST% (intra-state
+            # sale): 28% prints as CGST @14% + SGST @14%.
+            "half_rate_label": fmt_qty(rate / 2) + "%",
+            "rate": rate,
+            "base": f"{base:.2f}",
+            "base_label": fmt_qty(base),
+            "tax_label": f"{tax:.2f}",
+            "cgst_label": f"{cgst:.2f}",
+            "sgst_label": f"{sgst:.2f}",
+        })
+
+    exact_total = subtotal + total_tax
+    grand_total = exact_total.quantize(Decimal("1"), rounding=decimal.ROUND_HALF_UP)
+    round_off = (grand_total - exact_total).quantize(TWO_DP)
+
+    return {
+        "lines": lines,
+        "qty_total": fmt_qty(qty_total),
+        "subtotal": f"{subtotal:.2f}",
+        "tax_groups": tax_groups,
+        "total_tax": f"{total_tax:.2f}",
+        "round_off": f"{round_off:.2f}",
+        "grand_total": f"{grand_total:.2f}",
+        "words": amount_in_words(grand_total),
+    }

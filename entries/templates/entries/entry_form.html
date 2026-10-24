@@ -89,6 +89,22 @@
                 {% endif %}
             </div>
 
+            {% if form.rate %}
+            <div>
+                <label for="{{ form.rate.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                    {{ form.rate.label }}
+                </label>
+                {{ form.rate }}
+                {% if form.rate.errors %}
+                <p class="mt-1 text-xs text-red-600">{{ form.rate.errors.0 }}</p>
+                {% endif %}
+                <p class="mt-1 text-xs text-muted">
+                    Printed on the bill when saved. Optional here — fill it to
+                    price up an old row; blank rows print "-" on bills.
+                </p>
+            </div>
+            {% endif %}
+
             {% if form.received_from %}
             <div>
                 <label for="{{ form.received_from.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
@@ -169,7 +185,7 @@
     var form = document.getElementById("entry-form");
     if (!form || !window.sessionStorage) return;
     var KEY = "nibba_entry_draft:" + location.pathname;
-    var FIELDS = ["qty", "date", "time", "received_from", "sub_location"];
+    var FIELDS = ["qty", "rate", "date", "time", "received_from", "sub_location"];
     var MAX_AGE = 24 * 60 * 60 * 1000;
     function read() {
         try { return JSON.parse(sessionStorage.getItem(KEY)) || {}; }

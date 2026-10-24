@@ -1,7 +1,8 @@
 import json
+from decimal import Decimal
 
 from django.core.exceptions import ValidationError
-from django.test import TestCase
+from django.test import SimpleTestCase, TestCase
 from django.urls import reverse
 
 from accounts.models import User
@@ -9,6 +10,7 @@ from materials.models import Category, Material, SubCategory
 from sites.models import Site
 
 from .models import InwardEntry, OutwardEntry, SubLocation
+from .utils import amount_in_words
 
 
 class SubLocationFreeTextTests(TestCase):
@@ -174,37 +176,57 @@ class SaleBillViewTests(TestCase):
         r = self._post(self.staff, {
             "customer": "Ramesh", "date": "2026-10-16", "time": "10:00",
             "items": [
-                {"material_id": self.cement.pk, "qty": 5},
-                {"material_id": self.steel.pk, "qty": 2},
+                {"material_id": self.cement.pk, "qty": 5, "rate": "380"},
+                {"material_id": self.steel.pk, "qty": 2, "rate": "70"},
             ]})
         self.assertEqual(r.status_code, 200)
         self.assertTrue(r.json()["ok"])
-        # Save lands on the printable thermal bill (Rate/Amount blank),
-        # not the orders list.
+        # Save lands straight on the printable A4 tax invoice, not the
+        # orders list.
         self.assertTrue(r.json()["redirect"].startswith(
             "/entries/sale/bill/print/?ids="))
         self.assertEqual(OutwardEntry.objects.count(), 2)
         sale = OutwardEntry.objects.get(material=self.cement)
         self.assertEqual(sale.qty, 5)
+        # Rate snapshot (owner, Oct 2026): the printed invoice prices
+        # every line from the stored rate — taxes come from the material.
+        self.assertEqual(sale.rate.quantize(Decimal("0.01")),
+                         Decimal("380.00"))
         self.assertEqual(sale.customer, "Ramesh")
         self.assertEqual(sale.inward_entry, self.inw)
         self.assertEqual(sale.created_by, self.staff)
+
+    def test_missing_rate_rejected(self):
+        # Owner, Oct 2026: every printed invoice line needs a price —
+        # a bill POST without a rate is a 400 and saves nothing.
+        r = self._post(self.staff, {
+            "customer": "Ramesh", "date": "2026-10-16", "time": "10:00",
+            "items": [{"material_id": self.cement.pk, "qty": 5}]})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("rate", r.json()["error"].lower())
+        self.assertEqual(OutwardEntry.objects.count(), 0)
 
     def test_same_material_aggregated_to_one_entry(self):
         r = self._post(self.admin, {
             "customer": "", "date": "2026-10-16", "time": "10:00",
             "items": [
-                {"material_id": self.cement.pk, "qty": 3},
-                {"material_id": self.cement.pk, "qty": 4},
+                {"material_id": self.cement.pk, "qty": 3, "rate": "375"},
+                {"material_id": self.cement.pk, "qty": 4, "rate": "390"},
             ]})
         self.assertEqual(r.status_code, 200)
-        self.assertEqual(OutwardEntry.objects.count(), 1)
-        self.assertEqual(OutwardEntry.objects.get().qty, 7)
+        saved = OutwardEntry.objects.get()
+        # Quantities sum into ONE stock row…
+        self.assertEqual(saved.qty, 7)
+        # …and the LAST typed rate wins (the billing UI keeps one
+        # editable rate per product row).
+        self.assertEqual(saved.rate.quantize(Decimal("0.01")),
+                         Decimal("390.00"))
 
     def test_over_stock_rejected_nothing_saved(self):
         r = self._post(self.admin, {
             "customer": "X", "date": "2026-10-16", "time": "10:00",
-            "items": [{"material_id": self.cement.pk, "qty": 101}]})
+            "items": [{"material_id": self.cement.pk, "qty": 101,
+                       "rate": "380"}]})
         self.assertEqual(r.status_code, 400)
         self.assertIn("Only 100 bags", r.json()["error"])
         self.assertEqual(OutwardEntry.objects.count(), 0)
@@ -223,7 +245,8 @@ class SaleBillViewTests(TestCase):
             created_by=self.admin)
         r = self._post(self.admin, {
             "customer": "B", "date": "2026-10-16", "time": "10:00",
-            "items": [{"material_id": self.cement.pk, "qty": 1}]})
+            "items": [{"material_id": self.cement.pk, "qty": 1,
+                       "rate": "380"}]})
         self.assertEqual(r.status_code, 400)
         self.assertIn("already has a sale", r.json()["error"])
 
@@ -271,19 +294,31 @@ class PurchaseBillViewTests(TestCase):
             "supplier": "Sharma Paints", "date": "2026-10-17",
             "time": "11:00",
             "items": [
-                {"material_id": self.paint.pk, "qty": 10},
-                {"material_id": self.tap.pk, "qty": 4},
+                {"material_id": self.paint.pk, "qty": 10, "rate": "450"},
+                {"material_id": self.tap.pk, "qty": 4, "rate": "35"},
             ]})
         self.assertEqual(r.status_code, 200)
         self.assertTrue(r.json()["ok"])
-        # Straight to the printable purchase bill (thermal, blank prices).
+        # Straight to the printable A4 purchase bill (printed money).
         self.assertTrue(r.json()["redirect"].startswith(
             "/entries/purchase/bill/print/?ids="))
         self.assertEqual(InwardEntry.objects.count(), 2)
         inward = InwardEntry.objects.get(material=self.paint)
         self.assertEqual(inward.qty, 10)
+        # Rate snapshot: purchase slips print with money too.
+        self.assertEqual(inward.rate.quantize(Decimal("0.01")),
+                         Decimal("450.00"))
         self.assertEqual(inward.received_from, "Sharma Paints")
         self.assertEqual(inward.created_by, self.staff)
+
+    def test_missing_rate_rejected_purchase(self):
+        r = self._post(self.staff, {
+            "supplier": "Sharma Paints", "date": "2026-10-17",
+            "time": "11:00",
+            "items": [{"material_id": self.paint.pk, "qty": 10}]})
+        self.assertEqual(r.status_code, 400)
+        self.assertIn("rate", r.json()["error"].lower())
+        self.assertEqual(InwardEntry.objects.count(), 0)
 
     def test_empty_supplier_rejected(self):
         r = self._post(self.admin, {
@@ -300,23 +335,34 @@ class PurchaseBillViewTests(TestCase):
 
 
 class BillPrintViewTests(TestCase):
-    """Printable bills (entries/*bill/print/): 80mm thermal layout,
-    Rate/Amount/TOTAL left blank — prices are hand-written on paper."""
+    """Printable bills (entries/*bill/print/): A4 tax-invoice layout with
+    the saved rates, GST breakup, round-off and amount in words (Oct
+    2026 design). Pre-price legacy rows (saved before the rate column
+    existed) print "-" and add a truthful 0.00 — nothing invented."""
 
     def setUp(self):
         self.admin = User.objects.create_user(
             username="pr_admin", password="1111", role=User.Role.ADMIN)
         self.site = Site.objects.get(name="Shop")
         cat = Category.objects.create(name="Pr Cat")
+        # Priced item with full invoice details (the owner's real paint).
         self.paint = Material.objects.create(
-            category=cat, name="Asian Paint 4L", unit="pcs", reorder_point=5)
+            category=cat, name="Asian Paint 4L", unit="pcs",
+            hsn_code="3209", gst_rate=Decimal("28"), reorder_point=5)
+        # Legacy sale row saved BEFORE prices existed (no rate). It must
+        # print "-" and never smuggle money into the totals.
         self.out = OutwardEntry.objects.create(
             site=self.site, material=self.paint, date="2026-10-17",
             time="18:30", qty=2, customer="Suresh", created_by=self.admin)
+        # Priced sale row for the GST math (rate+qty snapshot).
+        self.sale = OutwardEntry.objects.create(
+            site=self.site, material=self.paint, date="2026-10-17",
+            time="19:00", qty=2, rate=Decimal("100.00"),
+            customer="Suresh", created_by=self.admin)
         self.inw = InwardEntry.objects.create(
             site=self.site, material=self.paint, date="2026-10-17",
-            time="18:30", qty=5, received_from="Sharma Paints",
-            created_by=self.admin)
+            time="18:30", qty=5, rate=Decimal("180.00"),
+            received_from="Sharma Paints", created_by=self.admin)
 
     def _sale_url(self):
         return reverse("entries:sale_bill_print") + f"?ids={self.out.pk}"
@@ -324,31 +370,89 @@ class BillPrintViewTests(TestCase):
     def _pur_url(self):
         return reverse("entries:purchase_bill_print") + f"?ids={self.inw.pk}"
 
-    def test_sale_print_renders_with_blank_price_cells(self):
+    def test_sale_print_renders_tax_invoice(self):
         self.client.force_login(self.admin)
         r = self.client.get(self._sale_url())
         self.assertEqual(r.status_code, 200)
-        self.assertContains(r, "SALE BILL")
+        # A4 tax invoice header (was the 80mm thermal roll).
+        self.assertContains(r, "TAX INVOICE")
+        self.assertContains(r, "TAX INVOICE No:")
+        self.assertContains(r, "OUT-" + str(self.out.pk))
         self.assertContains(r, "Suresh")
         self.assertContains(r, "Asian Paint 4L")
-        self.assertContains(r, "TOTAL")
+        self.assertContains(r, "HSN/SAC")
+        self.assertContains(r, "3209")
         body = r.content.decode()
-        self.assertIn(">Rate</th>", body)
-        self.assertIn(">Amt</th>", body)
-        # Blank hand-fill cells exist for item amounts and the total.
-        self.assertIn('class="blank total-blank"', body)
+        # Legacy row (no stored rate): explicit "-" cells, never blank.
+        self.assertIn('<td class="rate legacy">-</td>', body)
+        self.assertIn('<td class="amt legacy">-</td>', body)
+        # Truthful money on a rate-less bill: sub total shows 0.00.
+        self.assertIn("<td>Sub Total</td>", body)
+        self.assertIn('class="right">0.00</td>', body)
 
     def test_sale_print_whole_qty(self):
         self.client.force_login(self.admin)
         body = self.client.get(self._sale_url()).content.decode()
-        # Decimal 2.00 renders as plain "2" on the paper.
+        # Decimal 2.00 renders as plain "2 pcs" on the paper.
         self.assertIn(">2 pcs<", body)
+
+    def test_sale_print_gst_breakup_and_words(self):
+        self.client.force_login(self.admin)
+        r = self.client.get(
+            reverse("entries:sale_bill_print") + f"?ids={self.sale.pk}")
+        self.assertEqual(r.status_code, 200)
+        body = r.content.decode()
+        # GST% lives on the MATERIAL (a price list, not the entry)…
+        self.assertIn("28%", body)
+        # …and the printed breakup splits it into its two intra-state
+        # halves: 28% → CGST @14% + SGST @14% — exactly like the sample
+        # bill the owner shared.
+        self.assertIn("Base Amt: 200.00", body)
+        self.assertIn("CGST @14% = 28.00", body)
+        self.assertIn("SGST @14% = 28.00", body)
+        self.assertIn("Total Tax (CGST + SGST)", body)
+        self.assertIn('class="right">56.00</td>', body)
+        # Grand: taxable 200.00 + tax 56.00 (already whole rupees → no
+        # ROUND OFF row), then the legal amount in words.
+        self.assertIn('class="right">256.00</td>', body)
+        self.assertIn(
+            "Two Hundred and Fifty Six Rupees and Zero Paise Only", body)
+
+    def test_sale_print_rounds_half_up_with_paise(self):
+        # 2 × ₹100.50 at a 3% GST: ₹6.03 of tax splits into an
+        # odd-paisa pair — CGST 3.02 / SGST 3.01 (remainder pushed to
+        # SGST) — and the grand rounds HALF-UP to the rupee with an
+        # explicit ROUND OFF row.
+        cat = Category.objects.get(name="Pr Cat")
+        item = Material.objects.create(
+            category=cat, name="Wall Putty 5kg", unit="pkts",
+            gst_rate=Decimal("3"))
+        entry = OutwardEntry.objects.create(
+            site=self.site, material=item, date="2026-10-18",
+            time="12:00", qty=2, rate=Decimal("100.50"),
+            customer="Deepa", created_by=self.admin)
+        self.client.force_login(self.admin)
+        body = self.client.get(
+            reverse("entries:sale_bill_print") + f"?ids={entry.pk}"
+        ).content.decode()
+        self.assertIn("Base Amt: 201.00", body)
+        self.assertIn("CGST @1.5% = 3.02", body)
+        self.assertIn("SGST @1.5% = 3.01", body)
+        self.assertIn("Round Off", body)
+        self.assertIn('class="right">-0.03</td>', body)
+        self.assertIn('class="right">207.00</td>', body)
+        # Words read the ROUNDED grand (207.00), so the footer says
+        # zero paise even though the exact sum was 207.03.
+        self.assertIn(
+            "Two Hundred and Seven Rupees and Zero Paise Only", body)
 
     def test_purchase_print_shows_supplier(self):
         self.client.force_login(self.admin)
         r = self.client.get(self._pur_url())
         self.assertEqual(r.status_code, 200)
         self.assertContains(r, "PURCHASE BILL")
+        self.assertContains(r, "PURCHASE BILL No:")
+        self.assertContains(r, "IN-" + str(self.inw.pk))
         self.assertContains(r, "Sharma Paints")
         self.assertContains(r, "Asian Paint 4L")
 
@@ -375,11 +479,44 @@ class BillPrintViewTests(TestCase):
         self.assertIn("/accounts/login/", r["Location"])
 
 
+class AmountInWordsTests(SimpleTestCase):
+    """The invoice footer words — pure functions, no DB (SimpleTestCase)."""
+
+    def test_whole_and_paise(self):
+        self.assertEqual(
+            amount_in_words(Decimal("968")),
+            "Nine Hundred and Sixty Eight Rupees and Zero Paise Only")
+        self.assertEqual(
+            amount_in_words(Decimal("207.03")),
+            "Two Hundred and Seven Rupees and Three Paise Only")
+
+    def test_one_rupee_singular(self):
+        self.assertEqual(amount_in_words(Decimal("1")),
+                         "One Rupee and Zero Paise Only")
+
+    def test_lakh_and_crore(self):
+        self.assertEqual(
+            amount_in_words(Decimal("234567")),
+            "Two Lakh Thirty Four Thousand Five Hundred and Sixty Seven "
+            "Rupees and Zero Paise Only")
+        self.assertEqual(
+            amount_in_words(Decimal("12345678")),
+            "One Crore Twenty Three Lakh Forty Five Thousand Six Hundred "
+            "and Seventy Eight Rupees and Zero Paise Only")
+
+    def test_zero_and_none(self):
+        self.assertEqual(amount_in_words(Decimal("0")),
+                         "Zero Rupees and Zero Paise Only")
+        self.assertEqual(amount_in_words(None), "")
+        self.assertEqual(amount_in_words("not-a-number"), "")
+
+
 class OrderDetailViewTests(TestCase):
     """Order sheets opened by clicking a row on the Orders page
     (entries/orders/<inward|outward>/<pk>/): every stored field, the
-    sibling lines of the same bill (same party + date + time), and a
-    Print receipt link to the 80mm bill paper for the whole bill."""
+    sibling lines of the same bill (same party + date + time), their
+    printed money preview, and a Print bill (A4) link for the whole
+    bill."""
 
     def setUp(self):
         self.admin = User.objects.create_user(
@@ -483,17 +620,18 @@ class OrderDetailViewTests(TestCase):
             + str(self.inw.pk))
 
     def test_print_paper_adds_bill_no(self):
-        """The receipt pins the bill to the Orders page: Bill No reuses
-        the bill's first line order id (extra Indian-shop detail)."""
+        """The printed sheet pins the bill back to the Orders page: the
+        doc reference reuses the bill's first line order id."""
         self.client.force_login(self.admin)
         body = self.client.get(
             reverse("entries:sale_bill_print")
             + f"?ids={self.sale_a.pk},{self.sale_b.pk}").content.decode()
-        self.assertIn("Bill No:", body)
+        self.assertIn("TAX INVOICE No:", body)
         self.assertIn("OUT-" + str(self.sale_a.pk), body)
         body = self.client.get(
             reverse("entries:purchase_bill_print")
             + f"?ids={self.inw.pk}").content.decode()
+        self.assertIn("PURCHASE BILL No:", body)
         self.assertIn("IN-" + str(self.inw.pk), body)
 
     def test_orders_page_rows_link_to_detail(self):

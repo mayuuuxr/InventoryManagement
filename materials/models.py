@@ -198,6 +198,19 @@ class Material(CatalogAuditMixin, models.Model):
         default=10,
         help_text="Alert when stock falls to this quantity or below.",
     )
+    # Tax-invoice details (owner, Oct 2026 — bills now print with prices).
+    # hsn_code is free text (owners may keep the 4- or 8-digit HSN/SAC the
+    # supplier's bill uses). gst_rate is the GST percentage for this item
+    # (e.g. 28 for paints/cement, 18 for hardware). NULL = no GST on bills:
+    # legacy rows (and deliberately exempt items) keep printing with a "-".
+    hsn_code = models.CharField(
+        max_length=20, blank=True, default="",
+        help_text="HSN / SAC code printed on invoices (optional).",
+    )
+    gst_rate = models.DecimalField(
+        max_digits=5, decimal_places=2, null=True, blank=True,
+        help_text="GST % for invoices (e.g. 28). Blank = no GST on bills.",
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

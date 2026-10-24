@@ -8,6 +8,44 @@ log useful while honoring the no-mentions rule.
 
 ---
 
+## 2026-10-24 — Session: v1.2.9 A4 tax invoice (prices + GST on printed bills)
+
+- **Version:** 1.2.9 (bumped from 1.2.8) · **git HEAD at session start:** 4f8930a ·
+  **Tree:** committed, tagged `v1.2.9` and pushed to origin/main at session end
+  (owner approved; working tree left clean).
+
+What & why (owner decision, Oct 2026: bills must print with prices + GST, A4 only):
+- **Feature (A4 tax invoice):** rate typed beside the product name on both billing
+  screens, saved per entry (`InwardEntry.rate` / `OutwardEntry.rate`, `materials` gained
+  `hsn_code` + `gst_rate` — migrations `entries/0026_entry_rate_fields`,
+  `materials/0009_material_hsn_gst`). After a bill saves, `entries/{sale,purchase}/bill/print/`
+  now renders `invoice_print.html`: TAX INVOICE / PURCHASE BILL layout with per-line
+  HSN + GST%, per-rate CGST/SGST breakup (each item's GST% split as two half-rate groups,
+  odd paisa pushed into SGST), round-off (half-up to the rupee) and amount-in-words —
+  all derived at print time by `entries/utils.py: bill_invoice_totals()` / `amount_in_words()`
+  (no new dependencies). Rates are exclusive of tax; legacy rate-less rows print "-"
+  and truthfully add 0.00. New quick-form entries REQUIRE a rate; ledger edit forms keep
+  it optional. Shop identity env vars extended (`BILL_SHOP_ADDRESS/PHONE/EMAIL/GSTIN/PAN`).
+- **Retired:** the 80mm thermal `bill_print.html` template deleted — every print is A4 now.
+- **Tests:** grew 146 → 163 (missing-rate rejections on both bill POSTs, rate aggregation
+  last-rate-wins, GST breakup 200→256 exact, odd-paisa round-off 201.00@3% → 207.00,
+  `AmountInWordsTests`, TAX INVOICE assertions, words helper). `test_no_update_redirects`
+  fixed hermetic: it read `UPDATE_REPO` from the owner's live `.env` and hit real GitHub —
+  pinned empty via `override_settings` for that test only.
+- **Docs updated:** `AGENTS.md`, `prd.md`, `architecture.md`, `.env.example` (BILL_SHOP block),
+  full-suite report `useme/test-reports/2026-10-24_full-suite_v129.md`.
+- **Session incident (worth remembering):** a mid-session rollback wiped `edit`-based
+  changes everywhere (code, tests, templates, docs) while `write`-created files survived
+  (migrations 0009/0026, `invoice_print.html`, the test report, this log's version line).
+  The feature was re-applied from the session summary; this log entry documents the
+  re-application.
+- **Also added:** `useme/prompts-library.md` — 20 reusable vibecoding prompts + a nibba
+  coverage map (gaps: formal security audit pass, final production audit).
+- **Owner follow-ups after ship:** fill HSN/GST% per product, set the `BILL_SHOP_*` lines
+  in `.env` (name/address/phone/GSTIN/PAN) so invoices carry the real shop identity.
+
+---
+
 ## 2026-10-23 — Session: shop launch outage root-caused + v1.2.3 windowless restart hardening
 
 - **Version:** 1.2.3 (bumped from 1.2.2) · **git HEAD at session start:** fb861ac ·

@@ -313,8 +313,13 @@ class ApplyUpdateViewTests(TestCase):
             self.assertEqual(read_progress(tmp)[0], 100)
 
     def test_no_update_redirects(self):
-        self.client.force_login(self.admin)
-        r = self.client.post("/update/apply/")
+        # Hermetic: with no UPDATE_REPO configured, ApplyUpdateView must
+        # redirect to /help/ without touching GitHub. The repo default
+        # comes from .env, so pin it empty for THIS test only (the
+        # polling-page test mocks resolve_update and stays wired as-is).
+        with override_settings(UPDATE_REPO="", UPDATE_TOKEN=""):
+            self.client.force_login(self.admin)
+            r = self.client.post("/update/apply/")
         self.assertEqual(r.status_code, 302)
         self.assertIn("/help/", r["Location"])
 

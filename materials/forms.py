@@ -36,7 +36,8 @@ class MaterialForm(forms.ModelForm):
 
     class Meta:
         model = Material
-        fields = ("category", "sub_category", "name", "unit", "reorder_point")
+        fields = ("category", "sub_category", "name", "unit", "reorder_point",
+                  "hsn_code", "gst_rate")
         widgets = {
             "category": forms.Select(attrs={"class": SELECT_CLASS}),
             "sub_category": forms.Select(attrs={"class": SELECT_CLASS}),
@@ -54,6 +55,20 @@ class MaterialForm(forms.ModelForm):
                 "min": "0",
                 "step": "1",
                 "inputmode": "numeric",
+                "class": INPUT_CLASS,
+            }),
+            # Tax-invoice fields (owner, Oct 2026). Both optional: legacy
+            # items stay GST-free until the owner fills them in.
+            "hsn_code": forms.TextInput(attrs={
+                "placeholder": "e.g. 3209 or 3214",
+                "class": INPUT_CLASS,
+            }),
+            "gst_rate": forms.NumberInput(attrs={
+                "placeholder": "e.g. 28",
+                "min": "0",
+                "max": "99",
+                "step": "0.01",
+                "inputmode": "decimal",
                 "class": INPUT_CLASS,
             }),
         }

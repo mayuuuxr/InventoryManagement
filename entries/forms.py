@@ -17,6 +17,19 @@ ENTRY_TIME_INPUT_FORMATS = list(settings.TIME_INPUT_FORMATS) + [
 ]
 
 
+# Rate per unit (₹, taxes added later from the material's GST%): printed on
+# the A4 tax invoice. Decimals allowed (₹11.50), never negative.
+RATE_WIDGET = {
+    "placeholder": "e.g. 250 or 250.00",
+    "step": "0.01",
+    "min": "0",
+    "inputmode": "decimal",
+    "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm "
+             "text-charcoal placeholder:text-muted focus:outline-none "
+             "focus:border-accent focus:ring-2 focus:ring-accent/20",
+}
+
+
 def entry_time_field(required=True):
     return forms.TimeField(
         required=required,
@@ -42,7 +55,7 @@ class InwardEntryForm(forms.ModelForm):
 
     class Meta:
         model = InwardEntry
-        fields = ("date", "time", "qty", "received_from")
+        fields = ("date", "time", "qty", "received_from", "rate")
         widgets = {
             "date": forms.DateInput(attrs={
                 "type": "date",
@@ -62,6 +75,7 @@ class InwardEntryForm(forms.ModelForm):
                 "placeholder": "e.g. ABC Traders",
                 "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
             }),
+            "rate": forms.NumberInput(attrs=RATE_WIDGET),
         }
 
     def __init__(self, *args, site=None, material=None, **kwargs):
@@ -131,7 +145,7 @@ class OutwardEntryForm(forms.ModelForm):
         # submits never leave orphan SubLocation rows. Excluded from Meta
         # so ModelForm.construct_instance never assigns a raw string to
         # the FK descriptor.
-        fields = ("date", "time", "qty", "inward_entry")
+        fields = ("date", "time", "qty", "inward_entry", "rate")
         widgets = {
             "date": forms.DateInput(attrs={
                 "type": "date",
@@ -150,6 +164,7 @@ class OutwardEntryForm(forms.ModelForm):
             "inward_entry": forms.Select(attrs={
                 "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
             }),
+            "rate": forms.NumberInput(attrs=RATE_WIDGET),
         }
 
     def __init__(self, *args, site=None, material=None, user=None, **kwargs):
@@ -538,7 +553,7 @@ class PurchaseForm(forms.ModelForm):
 
     class Meta:
         model = InwardEntry
-        fields = ("material", "date", "time", "qty", "received_from")
+        fields = ("material", "date", "time", "qty", "rate", "received_from")
         widgets = {
             "date": forms.DateInput(attrs=DATE_WIDGET),
             "qty": forms.NumberInput(attrs=QTY_WIDGET),
@@ -546,6 +561,7 @@ class PurchaseForm(forms.ModelForm):
                 "placeholder": "e.g. Sharma Traders",
                 "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
             }),
+            "rate": forms.NumberInput(attrs=RATE_WIDGET),
         }
 
     def __init__(self, *args, site=None, **kwargs):
@@ -553,6 +569,11 @@ class PurchaseForm(forms.ModelForm):
         self.site = site
         self.fields["material"].label_from_instance = (
             lambda obj: f"{obj.display_name} ({obj.unit})")
+        # Purchase slips print with money now — a rate is required on every
+        # new quick purchase (owner, Oct 2026); the ledger edit form keeps
+        # it optional for fixing up pre-price legacy rows.
+        self.fields["rate"].label = "Rate per unit (₹, before GST)"
+        self.fields["rate"].required = True
 
     def clean_qty(self):
         qty = self.cleaned_data.get("qty")
@@ -594,7 +615,7 @@ class SaleForm(forms.ModelForm):
 
     class Meta:
         model = OutwardEntry
-        fields = ("material", "date", "time", "qty", "customer")
+        fields = ("material", "date", "time", "qty", "rate", "customer")
         widgets = {
             "date": forms.DateInput(attrs=DATE_WIDGET),
             "qty": forms.NumberInput(attrs=QTY_WIDGET),
@@ -602,6 +623,7 @@ class SaleForm(forms.ModelForm):
                 "placeholder": "Buyer name (optional, walk-in ok)",
                 "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
             }),
+            "rate": forms.NumberInput(attrs=RATE_WIDGET),
         }
 
     def __init__(self, *args, site=None, **kwargs):
@@ -610,6 +632,11 @@ class SaleForm(forms.ModelForm):
         self.fields["material"].label_from_instance = (
             lambda obj: f"{obj.display_name} ({obj.unit})")
         self.fields["customer"].required = False
+        # Sale bills print with money now — a rate is required on every new
+        # quick sale (owner, Oct 2026). Ledger-style edits of old rows
+        # (InwardEntryForm/OutwardEntryForm path) keep rate optional.
+        self.fields["rate"].label = "Rate per unit (₹, before GST)"
+        self.fields["rate"].required = True
 
     def clean_qty(self):
         qty = self.cleaned_data.get("qty")

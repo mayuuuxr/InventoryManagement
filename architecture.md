@@ -29,15 +29,15 @@
 **Category / SubCategory / Material** (`materials/models.py`)
 - Category: name (unique where not deleted)
 - SubCategory: category (FK PROTECT), name (unique per category where not deleted)
-- Material: category (FK PROTECT), sub_category (FK PROTECT, nullable), name (variant, e.g. `8mm`), unit, reorder_point (default 10), created_at
+- Material: category (FK PROTECT), sub_category (FK PROTECT, nullable), name (variant, e.g. `8mm`), unit, reorder_point (default 10), hsn_code (optional, prints on bills), gst_rate (optional %, invoices; NULL = no GST on bills), created_at
 - `display_name`: `Steel > 8mm`, or plain `Cement` when no sub-category
 
 **InwardEntry = Purchase** (`entries/models.py`)
-- site (FK), material (FK), date, time (default noon), qty (Decimal, whole numbers only), received_from (supplier), created_by (FK User), created_at. NO photo field.
+- site (FK), material (FK), date, time (default noon), qty (Decimal, whole numbers only), received_from (supplier), rate (nullable ₹ snapshot at entry time — required on the quick purchase form, optional on ledger edits), created_by (FK User), created_at. NO photo field.
 - Unique: (site, material, date, time)
 
 **OutwardEntry = Sale** (`entries/models.py`)
-- site (FK), material (FK), date, time, qty (whole numbers only), customer (buyer name), inward_entry (FK PROTECT, nullable — FIFO: which purchase this sale consumes), sub_location (FK PROTECT, nullable), created_by (FK User), created_at. NO photo field.
+- site (FK), material (FK), date, time, qty (whole numbers only), customer (buyer name), rate (nullable ₹ snapshot at sale time — required on the quick sale/bill forms, optional on ledger edits), inward_entry (FK PROTECT, nullable — FIFO: which purchase this sale consumes), sub_location (FK PROTECT, nullable), created_by (FK User), created_at. NO photo field.
 - NOTE: `supplied_to` / `place_of_supply` were removed (migration 0004). Multiple entries per date allowed (told apart by time), no DB uniqueness.
 
 **TransferEntry** (`entries/models.py`)
@@ -52,11 +52,15 @@
 **AuditLog** (`entries/models.py`)
 - user, action (create/edit/delete/login/export), entry_type, entry_id, entry_summary, timestamp
 
-**Bill printing (`entries/views.py`)** — after a bill saves, POST returns a redirect to
-`entries:{sale,purchase}_bill_print?ids=…`; `_bill_print_context()` renders
-`entries/bill_print.html` (80mm thermal layout, standard Indian-shop format). Rate/Amount/Total
-cells are intentionally blank — the app stores no price fields; the shop writes prices by hand.
-Header comes from env `BILL_SHOP_NAME` (default `nibba`) / `BILL_SHOP_TAGLINE`.
+**Bill printing (A4 tax invoice — `entries/views.py`)** — after a bill saves, POST returns a redirect to
+`entries:{sale,purchase}_bill_print?ids=…`; `_bill_print_context()` renders `entries/invoice_print.html`
+(the 80mm thermal `bill_print.html` is retired). Doc label: TAX INVOICE (sale) / PURCHASE BILL (purchase).
+Every printed number derives at print time from `entries/utils.py: bill_invoice_totals()` — per-line
+`qty × saved rate`, each material's `gst_rate` grouped and split CGST/SGST (two equal halves, odd paisa
+pushed into SGST), round-off half-up to the rupee, hand-rolled amount-in-words. Totals are never stored,
+so a corrected ledger row always re-prints true; legacy rows without a rate print "-" and honestly add
+0.00. Shop identity comes from env `BILL_SHOP_NAME`, `BILL_SHOP_TAGLINE`, `BILL_SHOP_ADDRESS`,
+`BILL_SHOP_PHONE`, `BILL_SHOP_EMAIL`, `BILL_SHOP_GSTIN`, `BILL_SHOP_PAN`.
 
 **Balance (calculated, never stored — `entries/utils.py`)**
 - `balance_for(site, material)`; `balances_for_site()` bulk; `balance_for_sub_location()` = allocated-here − used-here, falls back to site balance when zero allocations

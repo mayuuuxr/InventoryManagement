@@ -110,6 +110,29 @@
                 {% endif %}
             </div>
 
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label for="{{ form.hsn_code.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                        HSN / SAC code
+                    </label>
+                    {{ form.hsn_code }}
+                    {% if form.hsn_code.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ form.hsn_code.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-muted">Prints in the HSN column of bills (from your supplier's bill).</p>
+                </div>
+                <div>
+                    <label for="{{ form.gst_rate.id_for_label }}" class="block text-xs font-medium text-muted mb-1.5">
+                        GST % <span class="text-xs font-normal">(optional)</span>
+                    </label>
+                    {{ form.gst_rate }}
+                    {% if form.gst_rate.errors %}
+                    <p class="mt-1 text-xs text-red-600">{{ form.gst_rate.errors.0 }}</p>
+                    {% endif %}
+                    <p class="mt-1 text-xs text-muted">e.g. 28 for paints/cement, 18 for hardware. Blank = no GST on bills.</p>
+                </div>
+            </div>
+
             <div class="flex flex-col sm:flex-row sm:items-center gap-3 pt-2">
                 <button type="submit"
                         class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-4 py-2 min-h-[44px] md:min-h-0 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2">

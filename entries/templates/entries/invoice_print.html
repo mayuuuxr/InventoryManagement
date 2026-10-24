@@ -1,0 +1,212 @@
+{% load quantities %}
+{# Printable A4 bill (sale + purchase) — replaces the old 80mm thermal roll. #}
+{# Owner, Oct 2026: TAX INVOICE layout with saved prices, per-line HSN/GST%, #}
+{# the CGST+SGST breakup grouped by rate, round-off, grand total and the #}
+{# amount in words. Shop identity comes from BILL_SHOP_* env vars (.env). #}
+{# Every line's numbers derive at print time from entry.rate + material #}
+{# gst_rate — the app still stores no totals, so corrections re-print true. #}
+{# NOTE: every template comment here is single-line by design (see #}
+{# core TemplateCommentLint) — no nested brace pairs inside comments. #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{{ doc_label|title }} | {{ shop_name }}</title>
+<style>
+  /* A4 portrait. Browser margins hide Chromium's date/URL stamp only if
+     margins are 0 — screen padding below keeps ink off the paper edge, so
+     keep @page margin 0 and let the sheet use its own inner padding. */
+  @page { size: A4 portrait; margin: 0; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000;
+    margin: 0;
+    padding: 12mm 14mm;
+    width: 210mm;
+  }
+  .center { text-align: center; }
+  .right { text-align: right; }
+  .doc-title {
+    font-size: 22px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin: 2px 0 10px;
+  }
+  .shop-name { font-size: 26px; font-weight: bold; }
+  .shop-line { font-size: 12px; }
+  table.meta { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table.meta td { padding: 3px 4px; font-size: 12px; vertical-align: top; }
+  table.items { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  table.items th, table.items td {
+    border: 1px solid #000;
+    padding: 4px 6px;
+    font-size: 12px;
+    vertical-align: top;
+  }
+  table.items th { background: #eee; font-size: 11px; }
+  .sr { width: 7%; text-align: center; }
+  .name { width: 33%; }
+  .hsn { width: 14%; text-align: center; }
+  .qty { width: 12%; text-align: right; white-space: nowrap; }
+  .gst { width: 8%; text-align: center; }
+  .rate { width: 12%; text-align: right; white-space: nowrap; }
+  .amt { width: 13%; text-align: right; white-space: nowrap; }
+  .legacy { color: #555; }
+  .breakup { margin: 10px 4px 0; font-size: 12px; line-height: 1.5; }
+  table.totals { width: 100%; border-collapse: collapse; margin-top: 8px; }
+  table.totals td { padding: 2px 4px; font-size: 12px; }
+  .grand td {
+    font-size: 15px;
+    font-weight: bold;
+    border-top: 1.5px solid #000;
+    border-bottom: 2.5px double #000;
+    padding: 5px 4px;
+  }
+  .words { margin-top: 8px; font-size: 12px; }
+  .footer { margin-top: 18px; font-size: 11px; }
+  .thanks { margin-top: 14px; font-weight: bold; }
+  /* On-screen controls only — hidden on paper. */
+  .screen-only { display: none; }
+  @media screen {
+    .screen-only {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      padding: 14px 0;
+      font-family: system-ui, sans-serif;
+    }
+    .screen-only a,
+    .screen-only button {
+      font-size: 13px;
+      padding: 8px 16px;
+      border: 1px solid #888;
+      border-radius: 6px;
+      background: #fff;
+      color: #111;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .screen-only button:hover,
+    .screen-only a:hover { background: #f2f2f2; }
+  }
+</style>
+</head>
+<body>
+  <div class="center">
+    <div class="doc-title">{{ doc_label }}</div>
+    <div class="shop-name">{{ shop_name }}</div>
+    {% if shop_tagline %}<div class="shop-line">{{ shop_tagline }}</div>{% endif %}
+    {% if shop_address %}<div class="shop-line">{{ shop_address }}</div>{% endif %}
+    <div class="shop-line">
+      {% if shop_phone %}Phone: {{ shop_phone }}{% endif %}
+      {% if shop_email %}{% if shop_phone %} &nbsp;|&nbsp; {% endif %}Email: {{ shop_email }}{% endif %}
+    </div>
+    <div class="shop-line">
+      {% if shop_gstin %}GSTIN: {{ shop_gstin }}{% endif %}
+      {% if shop_pan %}{% if shop_gstin %} &nbsp;|&nbsp; {% endif %}PAN: {{ shop_pan }}{% endif %}
+    </div>
+  </div>
+
+  <table class="meta">
+    <tr>
+      <td style="width:60%">
+        <strong>{{ party_label }}:</strong> {{ party }}
+        <br><strong>Place of supply:</strong> {{ shop_name }} (intra-state)
+      </td>
+      <td class="right">
+        <strong>Date:</strong> {{ bill_date }} &nbsp; {{ bill_time }}<br>
+        <strong>{{ doc_label }} No:</strong> {{ bill_ref }}
+      </td>
+    </tr>
+  </table>
+
+  <table class="items">
+    <thead>
+      <tr>
+        <th class="sr">Sr.<br>No</th>
+        <th class="name">Item Name</th>
+        <th class="hsn">HSN/SAC</th>
+        <th class="qty">Qty</th>
+        <th class="gst">GST%</th>
+        <th class="rate">Rate (&#8377;)</th>
+        <th class="amt">Amount (&#8377;)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for line in totals.lines %}
+      <tr>
+        <td class="sr">{{ line.sr }}</td>
+        <td class="name">{{ line.name }}</td>
+        <td class="hsn">{% if line.hsn %}{{ line.hsn }}{% else %}-{% endif %}</td>
+        <td class="qty">{{ line.qty_label }}</td>
+        <td class="gst">{{ line.gst_label }}</td>
+        {% if line.has_price %}
+        <td class="rate">{{ line.rate_label }}</td>
+        <td class="amt">{{ line.amount }}</td>
+        {% else %}
+        {# Pre-price legacy row: explicitly blank, no hand-written look. #}
+        <td class="rate legacy">-</td>
+        <td class="amt legacy">-</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="breakup">
+    {% for g in totals.tax_groups %}
+    {# One line per GST rate group, like the sample bill the owner shared. #}
+    {# CGST + SGST are the two halves of the item's GST% (intra-state). #}
+    <div>Base Amt: {{ g.base }}, CGST @{{ g.half_rate_label }} = {{ g.cgst_label }}, SGST @{{ g.half_rate_label }} = {{ g.sgst_label }}</div>
+    {% endfor %}
+  </div>
+
+  <table class="totals">
+    <tr>
+      <td>Sub Total</td>
+      <td class="right">{{ totals.subtotal }}</td>
+    </tr>
+    {% if totals.tax_groups %}
+    <tr>
+      <td>Total Tax (CGST + SGST)</td>
+      <td class="right">{{ totals.total_tax }}</td>
+    </tr>
+    {% endif %}
+    {% if totals.round_off != "0.00" %}
+    <tr>
+      <td>Round Off</td>
+      <td class="right">{{ totals.round_off }}</td>
+    </tr>
+    {% endif %}
+    <tr class="grand">
+      <td>Amount (&#8377;)</td>
+      <td class="right">{{ totals.grand_total }}</td>
+    </tr>
+  </table>
+
+  <div class="words">
+    <strong>Total Qty:</strong> {{ totals.qty_total }}
+    &nbsp;&nbsp;
+    <strong>&#8377; {{ totals.words }}</strong>
+  </div>
+
+  <div class="footer">
+    This is a computer generated {{ doc_label|lower }} — no signature is required.
+  </div>
+  <p class="center thanks">!! Thanks &amp; Visit Again !!</p>
+
+  <div class="screen-only">
+    <button type="button" onclick="window.print()">Print bill</button>
+    <a href="{% url 'entries:orders' %}">Done — back to Orders</a>
+  </div>
+
+  {# Auto-trigger once the page has painted, like the old roll bill did. #}
+  <script>
+  window.addEventListener("load", function () {
+    setTimeout(function () { window.print(); }, 400);
+  });
+  </script>
+</body>
+</html>

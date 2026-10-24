@@ -6,7 +6,7 @@ Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (
 ## Shop Profile
 - Shop **paint aur household hardware materials** bechti hai.
 - **Sites ka concept shop ke liye NAHI hai** — one shop, one catalog (koi site picker UI nahi; code-level `Shop` row sirf backend ke liye).
-- Prices bill par haath se likhe jate hain; app me koi price field nahi (see 5a Bill Printing).
+- **Prices + GST on the bill (v1.2.9, owner Oct 2026):** rate billing screen par hi type hota hai aur entry ke saath save hota hai; printed A4 bill par price + GST breakup khud print hota hai (see 5a Bill Printing).
 
 ## Users
 - Owner/Admin — full access, catalog, reports, staff PIN, updates
@@ -34,24 +34,28 @@ Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (
   Purane spellings migration `materials/migrations/0008_normalize_units` se normalize
   hote hain (miter/m/mtrs→mtr, no→nos, bkt→L). Naya material add karte waqt isi list
   ka unit use karein.
+- Optional per item (owner, Oct 2026): **HSN/SAC code** + **GST %** (e.g. 28) —
+  bill ke HSN/GST columns me print hota hai. Blank = item GST-free print hota hai ("-" in the GST column).
 
 ### 4. Purchase Entry (Inward)
-- Fields: Date, Time, Qty (whole numbers only), Received From (supplier), Material
+- Fields: Date, Time, Qty (whole numbers only), Received From (supplier), Material, **Rate (₹ per unit — naye entries par required)**
 - Koi photo proof nahi — values seedha save hote hain
 - Quick form: `entries/purchase/add/`; duplicate rule: same material+date+time blocked with friendly error
 
 ### 5. Sale Entry (Outward)
-- Fields: Date, Time, Qty (whole numbers only), Customer (buyer name), delivery link (FIFO — kaunsi purchase se maal gaya), Sub-location (free text, auto-created)
+- Fields: Date, Time, Qty (whole numbers only), Customer (buyer name), **Rate (₹ per unit — naye entries par required)**, delivery link (FIFO — kaunsi purchase se maal gaya), Sub-location (free text, auto-created)
 - Koi photo proof nahi
 - Quick form: `entries/sale/add/`; Orders history: `entries/orders/`
 - NOTE: purane `Supplied To` / `Place of Supply` fields hata diye gaye hain — material sirf apni shop se bikta hai (no external supply concept).
 
-### 5a. Bill Printing (thermal, prices hand-written)
-- Sale/Purchase **billing screens** (`entries/sale/bill/`, `entries/purchase/bill/`): ek bill me multiple items; fields sirf — party (customer/supplier) name, items, qty, date, time.
-- Save ke turant baad printable bill khulta hai (`entries/sale/bill/print/?ids=…`) aur print dialog auto-chal jata hai (80mm roll).
-- Paper format: centered shop header (`BILL_SHOP_NAME`/`BILL_SHOP_TAGLINE` env), party + date/time, **Bill No: line** (`OUT-…`/`IN-…` = bill ki pehli line ka order id — Orders page se cross-reference), items table (#, Item, Qty), **Rate aur Amount columns BLANK**, **TOTAL blank** — sab haath se likha jata hai.
-- Orders page se kisi bhi order par click karne se uska **order sheet khulta hai** (`entries/orders/<kind>/<pk>/`): saare stored fields + same bill ki baaki lines + Print receipt button (same 80mm paper).
-- Prices/price fields app me kahin store NAHI hote — bilkul design ke hisaab se.
+### 5a. Bill Printing (A4 tax invoice, printed money — v1.2.9)
+- Sale/Purchase **billing screens** (`entries/sale/bill/`, `entries/purchase/bill/`): ek bill me multiple items; fields — party (customer/supplier) name, items, **rate (₹ per unit, required — product ke naam ke bagal me type hota hai)**, qty, date, time. Line ka Amount (qty × rate, GST se pehle) billing screen par live dikhta hai.
+- Save ke turant baad printable bill khulta hai (`entries/sale/bill/print/?ids=…`) aur print dialog auto-chal jata hai — **A4 sheet** (purana 80mm thermal roll retire).
+- Paper format (**TAX INVOICE** sale / **PURCHASE BILL** purchase): shop header (`BILL_SHOP_NAME/TAGLINE/ADDRESS/PHONE/EMAIL/GSTIN/PAN` env sab optional), party + date/time, **Doc No** (`OUT-…`/`IN-…` = bill ki pehli line ka order id), items table (#, Item, HSN/SAC, Qty, Rate ₹, Amount ₹, GST%) — har line ka rate bilkul SAVED rate se print hota hai.
+- GST breakup: per-rate grouped — `Base Amt, CGST @half% = half tax, SGST @half% = half tax` (28% → CGST @14% + SGST @14%; odd paisa SGST me chala jata hai). Sale me breakup aata hai (item ki `gst_rate` se, rates EXCLUSIVE of tax); purchase sheet par item list + rates print hote hain, GST breakup nahi.
+- Totals: Sub Total → Total Tax (CGST + SGST) → **Round Off (half-up to the rupee)** → Grand Total, plus **amount in words** (hand-rolled, no new dependency). Sab PRINT TIME par derive hota hai (`entries/utils.py: bill_invoice_totals`) — app koi total STORE nahi karti, ledger correction ke baad reprint hamesha sahi hai.
+- Pre-price legacy rows (rate bachaya hi nahi tha) Rate/Amount par **"-"** print karte hain aur totals me honestly 0.00 dete hain — fake number kabhi nahi.
+- Orders page order sheet (`entries/orders/<kind>/<pk>/`): saare stored fields + same bill ki baaki lines unke rate/amount + Taxable Sub Total + **Print bill (A4)** button (whole bill one click).
 
 ### 6. Transfer Entry
 - Shop-to-shop transfer ka concept nahi hai (single shop)
@@ -82,7 +86,7 @@ Ek single retail shop ke liye PC-only system jo purchase (stock aaya) aur sale (
 - Har launch par automatic: SQLite backup (`Backup/`, 30 copies) + monthly Excel export
 
 ## Non-goals (explicitly OUT)
-- No photo proof, no push notifications, no phones, no LAN/tunnel access, no cloud hosting, no multi-shop sync, no GPS/QR, no accounting/GST, no Transfer UI in v1
+- No photo proof, no push notifications, no phones, no LAN/tunnel access, no cloud hosting, no multi-shop sync, no GPS/QR, no accounting/GST-return filing app (bills sirf breakup PRINT karte hain — books waise hi bahar hote hain), no Transfer UI in v1
 
 ## Open Questions (client se confirm karna baaki)
 - Negative balance allow karna hai ya block karna hai — DECIDED: blocked in app forms

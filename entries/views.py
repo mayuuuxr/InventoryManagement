@@ -11,6 +11,7 @@ from django.views.generic import CreateView, DeleteView, DetailView, ListView, T
 
 import os
 import logging
+from decimal import Decimal
 
 from materials.models import Material
 from sites.models import Site
@@ -589,11 +590,10 @@ class OrderDetailView(EntryWriterRequiredMixin, TemplateView):
     Shows every stored field plus the other lines of the SAME bill — one
     bill is one party + date + time (exactly what a bill save writes, so
     merging follows identical stored data; nothing merges that the
-    registry can tell apart). A Print receipt button opens the 80mm
-    thermal bill containing ALL those lines (standard Indian-shop
-    format, Rate/Amount/Total blank for hand-writing). Read-only on
-    purpose: edit/delete happens in the material ledger so balance rules
-    stay enforced there.
+    registry can tell apart). A Print bill (A4) button opens the A4 tax
+    invoice for ALL those lines (saved rates + GST breakup — Oct 2026
+    design). Read-only on purpose: edit/delete happens in the material
+    ledger so balance rules stay enforced there.
     """
 
     template_name = "entries/order_detail.html"
@@ -627,6 +627,14 @@ class OrderDetailView(EntryWriterRequiredMixin, TemplateView):
             "entries:sale_bill_print" if kind == "outward"
             else "entries:purchase_bill_print") + "?ids=" + bill_ids
 
+        # On-page money preview mirrors the printed A4 tax invoice
+        # (Oct 2026): priced rows carry rate/amount; pre-price legacy
+        # rows show "-" and truthfully add 0.00 — nothing is invented.
+        from .utils import bill_invoice_totals
+        bill_totals = bill_invoice_totals(bill_entries)
+        bill_lines = list(zip(bill_entries, bill_totals["lines"]))
+        bill_subtotal = bill_totals["subtotal"]
+
         fifo = None
         if kind == "outward" and entry.inward_entry:
             fifo = {
@@ -646,6 +654,8 @@ class OrderDetailView(EntryWriterRequiredMixin, TemplateView):
             "ref": f"{'OUT' if kind == 'outward' else 'IN'}-{entry.pk}",
             "bill_entries": bill_entries,
             "bill_ids": bill_ids,
+            "bill_lines": bill_lines,
+            "bill_subtotal": bill_subtotal,
             "print_url": print_url,
             "fifo": fifo,
             "total_qty": fmt_qty(sum(e.qty for e in bill_entries)),
@@ -837,6 +847,11 @@ class SaleBillView(EntryWriterRequiredMixin, View):
                 "unit": m.unit,
                 "balance": int(bal) if float(bal).is_integer() else bal,
                 "reorder": m.reorder_point,
+                # Invoice details (owner, Oct 2026): the bill row shows the
+                # GST% beside the price input and prints GST on the A4 bill.
+                "gst": (float(m.gst_rate)
+                        if m.gst_rate is not None else None),
+                "hsn": m.hsn_code or "",
             })
         return json.dumps(items)
 
@@ -883,7 +898,27 @@ class SaleBillView(EntryWriterRequiredMixin, View):
         if not isinstance(raw_items, list) or not raw_items:
             return fail("Add at least one item to the bill.")
 
+        from decimal import (
+            Decimal as _Dec,
+            InvalidOperation,
+            ROUND_HALF_UP,
+        )
+
+        def parse_rate(raw):
+            """Per-row price snapshot (₹, before GST). Required now so every
+            printed bill shows money; quantized to 2dp, never negative."""
+            try:
+                rate = _Dec(str(raw)).quantize(
+                    _Dec("0.01"), rounding=ROUND_HALF_UP)
+            except (TypeError, ValueError, InvalidOperation, ArithmeticError):
+                return None
+            if rate < 0:
+                return None
+            return rate
+
         # Aggregate same material into one entry (one row per material).
+        # Quantities sum; when a product is added twice the LAST typed rate
+        # wins (the billing UI keeps one editable row per product).
         wanted = {}
         for row in raw_items:
             try:
@@ -893,7 +928,11 @@ class SaleBillView(EntryWriterRequiredMixin, View):
                 return fail("Each item needs a product and a whole quantity.")
             if qty <= 0:
                 return fail("Quantities must be greater than zero.")
-            wanted[mid] = wanted.get(mid, 0) + qty
+            rate = parse_rate(row.get("rate"))
+            if rate is None:
+                return fail("Each item needs a rate (price per unit, 0 or more).")
+            prev = wanted.get(mid)
+            wanted[mid] = [qty, rate] if prev is None else [prev[0] + qty, rate]
 
         materials = {m.pk: m for m in Material.objects.filter(pk__in=wanted)}
         missing = [mid for mid in wanted if mid not in materials]
@@ -914,7 +953,7 @@ class SaleBillView(EntryWriterRequiredMixin, View):
         saved = []
         try:
             with transaction.atomic():
-                for mid, qty in wanted.items():
+                for mid, (qty, rate) in wanted.items():
                     material = materials[mid]
                     lock_stock_rows(self.site, material)
                     fresh = balance_for(self.site, material)
@@ -933,7 +972,7 @@ class SaleBillView(EntryWriterRequiredMixin, View):
                     entry = OutwardEntry.objects.create(
                         site=self.site, material=material,
                         date=bill_date, time=bill_time, qty=qty,
-                        customer=customer, inward_entry=delivery,
+                        rate=rate, customer=customer, inward_entry=delivery,
                         created_by=request.user)
                     log_audit(request.user, AuditLog.Action.CREATE,
                               AuditLog.EntryType.OUTWARD, entry.pk,
@@ -948,8 +987,8 @@ class SaleBillView(EntryWriterRequiredMixin, View):
             f"Bill saved: {len(saved)} item{'s' if len(saved) != 1 else ''}"
             f" ({fmt_qty(total_qty)} total)"
             f" to {customer or 'walk-in'}.")
-        # Straight to the printable bill (80mm thermal): Rate/Amount print
-        # blank for hand-filling, since the app stores no price fields.
+        # Straight to the printable bill (A4 tax invoice): every line carries
+        # its saved rate, GST comes from the material (Oct 2026 design).
         ids = ",".join(str(e.pk) for e in saved)
         return JsonResponse(
             {"ok": True,
@@ -994,6 +1033,11 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
                 "unit": m.unit,
                 "balance": int(bal) if float(bal).is_integer() else bal,
                 "reorder": m.reorder_point,
+                # Invoice details (owner, Oct 2026): the bill row shows the
+                # GST% beside the price input and prints GST on the A4 bill.
+                "gst": (float(m.gst_rate)
+                        if m.gst_rate is not None else None),
+                "hsn": m.hsn_code or "",
             })
         return json.dumps(items)
 
@@ -1042,6 +1086,27 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
         if not isinstance(raw_items, list) or not raw_items:
             return fail("Add at least one item to the bill.")
 
+        from decimal import (
+            Decimal as _Dec,
+            InvalidOperation,
+            ROUND_HALF_UP,
+        )
+
+        def parse_rate(raw):
+            """Per-row price snapshot (₹, before GST). Required now so every
+            printed bill shows money; quantized to 2dp, never negative."""
+            try:
+                rate = _Dec(str(raw)).quantize(
+                    _Dec("0.01"), rounding=ROUND_HALF_UP)
+            except (TypeError, ValueError, InvalidOperation, ArithmeticError):
+                return None
+            if rate < 0:
+                return None
+            return rate
+
+        # Aggregate same material into one entry (one row per material).
+        # Quantities sum; when a product is added twice the LAST typed rate
+        # wins (the billing UI keeps one editable rate per product).
         wanted = {}
         for row in raw_items:
             try:
@@ -1051,7 +1116,11 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
                 return fail("Each item needs a product and a whole quantity.")
             if qty <= 0:
                 return fail("Quantities must be greater than zero.")
-            wanted[mid] = wanted.get(mid, 0) + qty
+            rate = parse_rate(row.get("rate"))
+            if rate is None:
+                return fail("Each item needs a rate (price per unit, 0 or more).")
+            prev = wanted.get(mid)
+            wanted[mid] = [qty, rate] if prev is None else [prev[0] + qty, rate]
 
         materials = {m.pk: m for m in Material.objects.filter(pk__in=wanted)}
         missing = [mid for mid in wanted if mid not in materials]
@@ -1072,11 +1141,12 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
         saved = []
         try:
             with transaction.atomic():
-                for mid, qty in wanted.items():
+                for mid, (qty, rate) in wanted.items():
                     entry = InwardEntry.objects.create(
                         site=self.site, material=materials[mid],
                         date=bill_date, time=bill_time, qty=qty,
-                        received_from=supplier, created_by=request.user)
+                        rate=rate, received_from=supplier,
+                        created_by=request.user)
                     log_audit(request.user, AuditLog.Action.CREATE,
                               AuditLog.EntryType.INWARD, entry.pk,
                               entry_summary(entry, AuditLog.EntryType.INWARD))
@@ -1090,8 +1160,8 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
             f"Purchase bill saved: {len(saved)} item"
             f"{'s' if len(saved) != 1 else ''} ({fmt_qty(total_qty)} total)"
             f" from {supplier}.")
-        # Straight to the printable bill (80mm thermal): Rate/Amount cells
-        # print blank for hand-filling — the app stores no price fields.
+        # Straight to the printable bill (A4 tax invoice): every line carries
+        # its saved rate, GST comes from the material (Oct 2026).
         ids = ",".join(str(e.pk) for e in saved)
         return JsonResponse(
             {"ok": True,
@@ -1100,16 +1170,18 @@ class PurchaseBillView(EntryWriterRequiredMixin, View):
 
 
 def _bill_print_context(
-        request, site, model, ids, *, bill_kind, party_label,
+        request, site, model, ids, *, bill_kind, doc_label, party_label,
         related=("material",)):
-    """Shared context for the printed bill pages (sale / purchase).
+    """Shared context for the printed A4 bill pages (sale / purchase).
 
-    Fetches the named entry rows (this shop only). Rate/Amount are
-    intentionally absent — the app stores no price fields; the printed
-    bill leaves those cells blank so the owner writes prices by hand
-    (owner decision). Shop header comes from BILL_SHOP_NAME and
-    BILL_SHOP_TAGLINE env vars (.env), so rebranding the print needs no
-    code edit. Raises Http404 when nothing resolves (bad/tampered ids).
+    Fetches the named entry rows (this shop only) and derives the whole
+    tax invoice at print time via bill_invoice_totals() — per-line rate,
+    GST%, the CGST+SGST breakup, round-off, grand total and the amount
+    in words. Nothing money-related is stored, so a corrected ledger row
+    re-prints true. Pre-price legacy rows print "-" and never enter the
+    totals. Shop identity comes from BILL_SHOP_* env vars (.env), so
+    rebranding the print needs no code edit. Raises Http404 when
+    nothing resolves (bad/tampered ids).
     """
     id_list = []
     for chunk in str(ids or "").split(","):
@@ -1125,31 +1197,40 @@ def _bill_print_context(
     if not entries:
         raise Http404("Nothing to print — the bill was not found.")
 
+    from .utils import bill_invoice_totals
+
     head = entries[0]
     party = getattr(head, "customer", None) or getattr(
         head, "received_from", "") or "-"
-    return render(request, "entries/bill_print.html", {
+    return render(request, "entries/invoice_print.html", {
         "entries": entries,
+        "totals": bill_invoice_totals(entries),
         "bill_kind": bill_kind,
+        "doc_label": doc_label,
         "bill_ref": ("OUT-" if bill_kind == "SALE" else "IN-")
                     + str(head.pk),
         "party_label": party_label,
         "party": party or "-",
         "bill_date": head.date.strftime("%d-%m-%Y"),
         "bill_time": head.time.strftime("%I:%M %p").lstrip("0"),
-        "total_qty": fmt_qty(sum(e.qty for e in entries)),
         "shop_name": os.environ.get("BILL_SHOP_NAME", "nibba"),
         "shop_tagline": os.environ.get("BILL_SHOP_TAGLINE", ""),
+        "shop_address": os.environ.get("BILL_SHOP_ADDRESS", ""),
+        "shop_phone": os.environ.get("BILL_SHOP_PHONE", ""),
+        "shop_email": os.environ.get("BILL_SHOP_EMAIL", ""),
+        "shop_gstin": os.environ.get("BILL_SHOP_GSTIN", ""),
+        "shop_pan": os.environ.get("BILL_SHOP_PAN", ""),
     })
 
 
 class SaleBillPrintView(LoginRequiredMixin, View):
-    """Print-ready 80mm thermal bill for a just-saved multi-item sale.
+    """Print-ready A4 TAX INVOICE for a just-saved multi-item sale.
 
-    GET entries/sale/bill/print/?ids=31,32 — Rate and Amount cells print
-    blank (prices are filled by hand on the paper; entry models hold no
-    price fields by design). Reads are global, so any logged-in user may
-    print any saved bill of this shop (matches read policy everywhere).
+    GET entries/sale/bill/print/?ids=31,32 — every line prints with its
+    saved rate; the GST breakup, round-off, grand total and the amount
+    in words are derived at print time by bill_invoice_totals (Oct 2026
+    design). Reads are global, so any logged-in user may print any
+    saved bill of this shop (matches read policy everywhere).
     """
 
     def dispatch(self, request, *args, **kwargs):
@@ -1165,16 +1246,18 @@ class SaleBillPrintView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         return _bill_print_context(
             request, self.site, OutwardEntry, request.GET.get("ids", ""),
-            bill_kind="SALE", party_label="Customer",
+            bill_kind="SALE", doc_label="TAX INVOICE",
+            party_label="Customer",
             related=("material", "sub_location"))
 
 
 class PurchaseBillPrintView(LoginRequiredMixin, View):
-    """Print-ready 80mm thermal bill for a just-saved multi-item purchase.
+    """Print-ready A4 PURCHASE BILL for a just-saved multi-item purchase.
 
-    Same blank-price layout as the sale bill; the party line shows the
-    supplier (received_from). Reserved for stock-in slips the owner may
-    hand-check against the supplier's own bill.
+    Same printed-money layout as the sale tax invoice; the party line
+    shows the supplier (received_from). The owner checks his own
+    purchases against the supplier's own bill; purchases carry no GST
+    breakup of their own (input tax lives on the supplier's invoice).
     """
 
     def dispatch(self, request, *args, **kwargs):
@@ -1190,7 +1273,8 @@ class PurchaseBillPrintView(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         return _bill_print_context(
             request, self.site, InwardEntry, request.GET.get("ids", ""),
-            bill_kind="PURCHASE", party_label="Supplier")
+            bill_kind="PURCHASE", doc_label="PURCHASE BILL",
+            party_label="Supplier")
 
 
 def entry_summary(entry, entry_type):
@@ -1204,8 +1288,12 @@ def entry_summary(entry, entry_type):
                 f" (from inward "
                 f"{entry.inward_entry.date.strftime('%b %d, %Y')})"
             )
+    rate_bit = ""
+    if getattr(entry, "rate", None) is not None:
+        rate_bit = f" @ ₹{entry.rate.quantize(Decimal('0.01'))}"
     return (
-        f"{entry.material.display_name} | {fmt_qty(entry.qty)} {entry.material.unit} | "
+        f"{entry.material.display_name} | {fmt_qty(entry.qty)} {entry.material.unit}"
+        f"{rate_bit} | "
         f"{entry.site.name} | {extra} | "
         f"{entry.date.strftime('%b %d, %Y')} "
         f"{entry.time.strftime('%I:%M %p').lstrip('0')}"

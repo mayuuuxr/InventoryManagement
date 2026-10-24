@@ -382,7 +382,8 @@ class DashboardOrdersTests(AuditTestBase):
         self.assertEqual(r.status_code, 200)
         r = self.client.post("/entries/purchase/add/", {
             "material": str(self.material.pk), "date": "2026-10-01",
-            "time": "09:00", "qty": "100", "received_from": "SUP"})
+            "time": "09:00", "qty": "100", "rate": "80",
+            "received_from": "SUP"})
         self.assertEqual(r.status_code, 302, r.content[:400])
         self.assertEqual(InwardEntry.objects.count(), 1)
 
@@ -393,7 +394,8 @@ class DashboardOrdersTests(AuditTestBase):
         self.assertEqual(r.status_code, 200)
         r = self.client.post("/entries/sale/add/", {
             "material": str(self.material.pk), "date": "2026-10-01",
-            "time": "10:00", "qty": "5", "customer": "Walk-in"})
+            "time": "10:00", "qty": "5", "rate": "80",
+            "customer": "Walk-in"})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(OutwardEntry.objects.count(), 0)
 
@@ -402,11 +404,13 @@ class DashboardOrdersTests(AuditTestBase):
         self.login(self.staff)
         self.client.post("/entries/purchase/add/", {
             "material": str(self.material.pk), "date": "2026-10-01",
-            "time": "09:00", "qty": "100", "received_from": "SUP"})
+            "time": "09:00", "qty": "100", "rate": "80",
+            "received_from": "SUP"})
         inw = InwardEntry.objects.get()
         r = self.client.post("/entries/sale/add/", {
             "material": str(self.material.pk), "date": "2026-10-01",
-            "time": "10:00", "qty": "30", "customer": "Bulk Buyer"})
+            "time": "10:00", "qty": "30", "rate": "80",
+            "customer": "Bulk Buyer"})
         self.assertEqual(r.status_code, 302, r.content[:400])
         out = OutwardEntry.objects.get()
         self.assertEqual(out.customer, "Bulk Buyer")
@@ -419,10 +423,11 @@ class DashboardOrdersTests(AuditTestBase):
         self.login(self.staff)
         self.client.post("/entries/purchase/add/", {
             "material": str(self.material.pk), "date": "2026-10-01",
-            "time": "09:00", "qty": "10", "received_from": "SUP"})
+            "time": "09:00", "qty": "10", "rate": "80",
+            "received_from": "SUP"})
         r = self.client.post("/entries/sale/add/", {
             "material": str(self.material.pk), "date": "2026-10-01",
-            "time": "11:00", "qty": "5000", "customer": ""})
+            "time": "11:00", "qty": "5000", "rate": "80", "customer": ""})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(OutwardEntry.objects.count(), 0)
 

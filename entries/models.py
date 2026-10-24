@@ -21,6 +21,13 @@ class InwardEntry(models.Model):
     date = models.DateField()
     time = models.TimeField(default=DEFAULT_ENTRY_TIME)
     qty = models.DecimalField(max_digits=12, decimal_places=2)
+    # Price snapshot at entry time (₹ per unit, taxes of that moment).
+    # Nullable so pre-price legacy rows keep printing on bills (blank rate),
+    # and so internal stock ledgers stay usable — new bill saves require it.
+    rate = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        help_text="Price per unit (₹) at the time of this entry.",
+    )
     received_from = models.CharField(max_length=200)
     # Who recorded this entry. Reads are global (all roles see true stock
     # and every entry); edit/delete stay own-only via
@@ -93,6 +100,13 @@ class OutwardEntry(models.Model):
     date = models.DateField()
     time = models.TimeField(default=DEFAULT_ENTRY_TIME)
     qty = models.DecimalField(max_digits=12, decimal_places=2)
+    # Price snapshot at sale time (₹ per unit, before GST). Null for legacy
+    # rows only — new sales always save a rate (the printed tax invoice
+    # multiplies qty × rate and breaks the GST up from it).
+    rate = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        help_text="Sale price per unit (₹) at the time of this sale.",
+    )
     # Shop sale: who bought it (walk-in customer name, contractor, bulk
     # order ref). Optional free text; blank means counter sale.
     customer = models.CharField(
