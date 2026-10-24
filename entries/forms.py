@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 
-from .models import InwardEntry, OutwardEntry, SubLocation, SubLocationAllocation
+from .models import InwardEntry, OutwardEntry, SubLocation
 from .utils import balance_for, fmt_qty
 
 
@@ -400,113 +400,6 @@ class OutwardEntryForm(forms.ModelForm):
                 self.add_error(
                     "time",
                     f"Outward time ({outward_time.strftime('%I:%M %p')}) cannot be earlier than latest inward ({latest_inward.time.strftime('%I:%M %p')}) for {self.material.display_name} on {outward_date}."
-                )
-        return cleaned
-
-
-# --- SubLocation form ------------------------------------------------------
-
-class SubLocationForm(forms.ModelForm):
-    class Meta:
-        model = SubLocation
-        fields = ("name", "description")
-        widgets = {
-            "name": forms.TextInput(attrs={
-                "placeholder": "e.g. Banglo 1, Plot 5",
-                "class": "w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
-            }),
-            "description": forms.Textarea(attrs={
-                "rows": 3,
-                "placeholder": "Optional description",
-                "class": "w-full min-w-0 max-w-full block px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
-            }),
-        }
-
-    def __init__(self, *args, site=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Site comes from the view (URL), not the form — needed for the
-        # case-insensitive duplicate check below.
-        self.site = site or getattr(self.instance, "site", None)
-
-    def clean_name(self):
-        from .models import normalize_sub_location_name
-        name = normalize_sub_location_name(self.cleaned_data.get("name"))
-        if not name:
-            raise forms.ValidationError("Sub-location name is required.")
-        # Case-insensitive duplicate within the site ("Banglo 1" == "banglo 1").
-        # The DB constraint is the final backstop; this gives a friendly error.
-        if self.site is not None:
-            dup = SubLocation.objects.filter(
-                site=self.site, name__iexact=name)
-            if self.instance.pk:
-                dup = dup.exclude(pk=self.instance.pk)
-            if dup.exists():
-                raise forms.ValidationError(
-                    f"'{name}' already exists at this site (names are "
-                    f"case-insensitive).")
-        return name
-
-
-# --- SubLocationAllocation form --------------------------------------------
-
-class SubLocationAllocationForm(forms.ModelForm):
-    class Meta:
-        model = SubLocationAllocation
-        fields = ("sub_location", "qty_allocated")
-        widgets = {
-            "qty_allocated": forms.NumberInput(attrs={
-                "placeholder": "e.g. 100",
-                "step": "1",
-                "min": "0",
-                "class": "w-full px-3 py-2 bg-surface border border-subtle rounded-md text-sm text-charcoal placeholder:text-muted focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20",
-            }),
-        }
-
-    def __init__(self, *args, inward_entry=None, site=None, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.inward_entry = inward_entry
-        # Pre-assign the FK on new instances so model-level clean()/save()
-        # see it even before the view sets it explicitly.
-        if inward_entry is not None and self.instance.pk is None:
-            self.instance.inward_entry = inward_entry
-        if site:
-            self.fields["sub_location"].queryset = SubLocation.objects.filter(site=site)
-        else:
-            self.fields["sub_location"].queryset = SubLocation.objects.none()
-
-    def clean_qty_allocated(self):
-        qty = self.cleaned_data.get("qty_allocated")
-        if qty is None:
-            return qty
-        if qty <= 0:
-            raise forms.ValidationError("Quantity must be greater than zero.")
-        check_whole_qty(qty)
-        return qty
-
-    def clean(self):
-        cleaned = super().clean()
-        sub_location = cleaned.get("sub_location")
-        qty = cleaned.get("qty_allocated")
-        if self.inward_entry and sub_location and qty:
-            if self.inward_entry.site_id != sub_location.site_id:
-                raise forms.ValidationError("Sub-location must belong to the same site as the inward entry.")
-            from django.db.models import Sum
-            total = SubLocationAllocation.objects.filter(
-                inward_entry=self.inward_entry
-            ).aggregate(total=Sum("qty_allocated"))["total"] or 0
-            # Exclude this row when editing so it doesn't double-count itself.
-            # Fetch the saved DB value (instance already holds the new qty).
-            if self.instance.pk:
-                saved = SubLocationAllocation.objects.filter(
-                    pk=self.instance.pk
-                ).values_list("qty_allocated", flat=True).first() or 0
-                total_excluding_self = total - saved
-            else:
-                total_excluding_self = total
-            if qty + total_excluding_self > self.inward_entry.qty:
-                raise forms.ValidationError(
-                    f"Total allocated ({fmt_qty(qty + total_excluding_self)}) exceeds "
-                    f"inward quantity ({fmt_qty(self.inward_entry.qty)})."
                 )
         return cleaned
 

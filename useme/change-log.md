@@ -8,6 +8,42 @@ log useful while honoring the no-mentions rule.
 
 ---
 
+## 2026-10-24 — Session: v1.2.10 dead-code cleanup (owner-approved audit removals)
+
+- **Version:** 1.2.10 (bumped from 1.2.9) · **git HEAD at session start:** 6e3d064 ·
+  **Tree:** committed, tagged `v1.2.10` and pushed to origin/main at session end.
+
+What & why (owner said: remove everything flagged in the read-only audit summary):
+- **Removed stub pages:** `accounts:admin_dashboard` / `accounts:staff_dashboard`
+  routes + the two placeholder redirect views. Old bookmarks to those URLs (never
+  linked by any page) now 404 — approved.
+- **Removed unwired management UI (was unreachable from every template/redirect):**
+  7 routes in `entries/urls.py` (`sub_location_add/edit/delete`,
+  `allocation_add`, `allocation_add_for_inward`, `allocation_edit`,
+  `allocation_delete`), the 6 admin-only views in `entries/views.py`
+  (SubLocation Create/Update/Delete + Allocation Create/Update/Delete, ~309 lines),
+  the two forms they alone used (`SubLocationForm`, `SubLocationAllocationForm`),
+  4 orphan templates (`sub_location_form`, `sub_location_confirm_delete`,
+  `allocation_form`, `allocation_confirm_delete`), and the dead helper
+  `balance_for_sub_location()` in `entries/utils.py` (zero callers, incl. tests).
+  Sub-location DATA is untouched: sale-form free text auto-creates rows, ledger/
+  orders/reports still show them, Django admin still manages the models.
+- **Removed 6+1 unused imports:** `render` (accounts/views), `User`
+  (core/utils), `reverse` (materials/views), `settings` (sites/forms),
+  `login_required` (sites/views + post-removal accounts/views), plus
+  `SubLocationForm/SubLocationAllocationForm` imports. Deleted empty stubs
+  `reports/admin.py` + `materials/tests.py` (Django's default scaffolding).
+- **Stale copy fixed:** `entries/urls.py` comments now describe the A4 tax
+  invoice (not the retired 80mm roll); `import_opening_stock` docstring no
+  longer claims a "Reports → Import opening stock" web UI (never existed);
+  `architecture.md` balance bullet drops the removed helper.
+- **Tests:** removed the 6 tests that exercised the removed routes directly;
+  `AllocationModelGuardAudit` (model-level guard, admin path) stays. Full suite
+  163 → 157 green (see `test-reports/2026-10-24_full-suite_v1210.md`).
+  `makemigrations --check` clean; unused-import scan: 0 candidates.
+
+---
+
 ## 2026-10-24 — Session: v1.2.9 A4 tax invoice (prices + GST on printed bills)
 
 - **Version:** 1.2.9 (bumped from 1.2.8) · **git HEAD at session start:** 4f8930a ·

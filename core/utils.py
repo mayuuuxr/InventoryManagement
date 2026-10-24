@@ -1,7 +1,6 @@
 """
 Common utility functions shared across apps.
 """
-from accounts.models import User
 
 
 def _user_is_admin(user):

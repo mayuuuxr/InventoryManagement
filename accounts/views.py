@@ -1,9 +1,8 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, FormView, ListView, UpdateView
@@ -162,18 +161,6 @@ class CustomLoginView(LoginView):
         # redirect_authenticated_user — so no redirect loop is possible.
         # Default for plain logins is the Dashboard for both roles.
         return self.get_redirect_url() or reverse_lazy("dashboard")
-
-
-# Kept for backward compatibility (bookmarks to /accounts/admin-dashboard/ and
-# /accounts/staff-dashboard/ still work) — they now redirect to the Dashboard.
-@login_required
-def admin_dashboard(request):
-    return redirect("dashboard")
-
-
-@login_required
-def staff_dashboard(request):
-    return redirect("dashboard")
 
 
 # --- Staff management (admin only) -------------------------------------------

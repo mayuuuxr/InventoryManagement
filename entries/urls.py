@@ -30,8 +30,8 @@ urlpatterns = [
         name="orders",
     ),
     # Clicked from Orders: one saved order (IN-12 / OUT-5) with all its
-    # fields, the sibling lines of the same bill, and a Print receipt
-    # button (reuses the 80mm thermal bill paper).
+    # fields, the sibling lines of the same bill, and a Print button for
+    # the A4 tax invoice.
     path(
         "orders/<str:kind>/<int:pk>/",
         views.OrderDetailView.as_view(),
@@ -60,7 +60,7 @@ urlpatterns = [
         views.SaleBillView.as_view(),
         name="sale_bill",
     ),
-    # Printable bill (80mm thermal, Rate/Amount blank for hand-filling)
+    # Printable A4 tax invoice (money derived at print time, never stored)
     path(
         "sale/bill/print/",
         views.SaleBillPrintView.as_view(),
@@ -111,44 +111,5 @@ urlpatterns = [
         "sites/<int:site_id>/materials/<int:material_id>/outward/<int:pk>/delete/",
         views.OutwardEntryDeleteView.as_view(),
         name="outward_delete",
-    ),
-    # Sub-location management (admin only)
-    path(
-        "sites/<int:site_id>/sub-locations/add/",
-        views.SubLocationCreateView.as_view(),
-        name="sub_location_add",
-    ),
-    path(
-        "sites/<int:site_id>/sub-locations/<int:pk>/edit/",
-        views.SubLocationUpdateView.as_view(),
-        name="sub_location_edit",
-    ),
-    path(
-        "sites/<int:site_id>/sub-locations/<int:pk>/delete/",
-        views.SubLocationDeleteView.as_view(),
-        name="sub_location_delete",
-    ),
-    # Allocation management (admin only)
-    # Legacy URL (kept): inward chosen via ?inward=<id> query param.
-    path(
-        "sites/<int:site_id>/materials/<int:material_id>/allocate/",
-        views.AllocationCreateView.as_view(),
-        name="allocation_add",
-    ),
-    # Preferred URL: inward id in the path (unambiguous, bookmarkable).
-    path(
-        "sites/<int:site_id>/materials/<int:material_id>/inward/<int:inward_id>/allocate/",
-        views.AllocationCreateView.as_view(),
-        name="allocation_add_for_inward",
-    ),
-    path(
-        "sites/<int:site_id>/materials/<int:material_id>/allocations/<int:pk>/edit/",
-        views.AllocationUpdateView.as_view(),
-        name="allocation_edit",
-    ),
-    path(
-        "sites/<int:site_id>/materials/<int:material_id>/allocations/<int:pk>/delete/",
-        views.AllocationDeleteView.as_view(),
-        name="allocation_delete",
     ),
 ]

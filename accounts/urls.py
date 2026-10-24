@@ -12,10 +12,6 @@ urlpatterns = [
     # land on the login page after logging out (matches LOGOUT_REDIRECT_URL).
     path("logout/", LogoutView.as_view(next_page="accounts:login"), name="logout"),
 
-    # Dashboards (placeholders for now)
-    path("admin-dashboard/", views.admin_dashboard, name="admin_dashboard"),
-    path("staff-dashboard/", views.staff_dashboard, name="staff_dashboard"),
-
     # Staff management (admin only — enforced in the views)
     path("staff/", views.StaffListView.as_view(), name="staff_list"),
     path("staff/add/", views.StaffCreateView.as_view(), name="staff_add"),

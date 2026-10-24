@@ -75,57 +75,6 @@ def balance_for(site, material):
     return inward - outward - transferred_out + transferred_in
 
 
-def balance_for_sub_location(sub_location, material):
-    """
-    Available qty of `material` at `sub_location`.
-
-    Formula (per AGENTS.md sub-location split):
-        Allocated to this sub-location (via SubLocationAllocation rows whose
-        inward_entry is for this material)
-        - Used at this sub-location (via OutwardEntry rows)
-
-    Fallback (user-approved): when NO allocations exist yet for
-    (sub_location.site, material), return site-level balance_for() so legacy
-    flows and sites that haven't adopted allocations keep working instead of
-    blocking every outward entry with "0 available".
-
-    Returns a Decimal. Accepts model instances (or PKs, resolved defensively).
-    """
-    from .models import SubLocation, SubLocationAllocation
-
-    # Accept PKs defensively — forms always pass instances, but callers/tests
-    # may pass ids. Resolve to instances to get .site / .id uniformly.
-    if isinstance(sub_location, int):
-        sub_location = SubLocation.objects.filter(pk=sub_location).first()
-        if sub_location is None:
-            return ZERO
-    site = sub_location.site
-
-    allocated_here = (
-        SubLocationAllocation.objects
-        .filter(sub_location=sub_location, inward_entry__material=material)
-        .aggregate(total=Sum("qty_allocated"))["total"]
-    ) or ZERO
-
-    used_here = (
-        OutwardEntry.objects
-        .filter(sub_location=sub_location, material=material)
-        .aggregate(total=Sum("qty"))["total"]
-    ) or ZERO
-
-    # Any allocation at all for (site, material)? If none, allocations aren't
-    # in use for this material — fall back to site-level balance.
-    allocated_anywhere = (
-        SubLocationAllocation.objects
-        .filter(sub_location__site=site, inward_entry__material=material)
-        .aggregate(total=Sum("qty_allocated"))["total"]
-    ) or ZERO
-    if allocated_anywhere == ZERO:
-        return balance_for(site, material)
-
-    return allocated_here - used_here
-
-
 def balance_for_user(site, material, user):
     """
     True stock of `material` at `site`, for ANY role (owner decision Sep 2026:

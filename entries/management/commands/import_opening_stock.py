@@ -7,8 +7,7 @@ Two header schemes accepted (first row = header, case-insensitive):
     (uses In Stock rounded whole, syncs units from UOM, creates unknown
     materials under Uncategorized/Imported, dates everything today)
 
-See entries/importer.py for the full rules. A web UI with preview lives at
-Reports -> Import opening stock (admin only).
+See entries/importer.py for the full rules (CLI only; no web UI for imports).
 
 Example:
     python manage.py import_opening_stock opening.xlsx --user Admin --dry-run

@@ -8,7 +8,7 @@ from django.template import loader
 from django.test import SimpleTestCase, TestCase, override_settings
 
 from accounts.models import User
-from entries.models import InwardEntry, OutwardEntry, SubLocation, SubLocationAllocation
+from entries.models import InwardEntry, OutwardEntry
 from materials.models import Category, Material, SubCategory
 from sites.models import Site
 
@@ -265,39 +265,6 @@ class ReportExportTests(AuditTestBase):
         r = self.client.get(
             f"/reports/site-summary/export/?site={self.site.id}")
         self.assertEqual(r.status_code, 200)
-
-
-@override_settings(ALLOWED_HOSTS=["testserver"])
-class AllocationEdgeTests(AuditTestBase):
-    def setUp(self):
-        super().setUp()
-        self.login(self.admin)
-        self.sub = SubLocation.objects.create(
-            site=self.site, name="T Banglo 1")
-        self.inward = InwardEntry.objects.create(
-            site=self.site, material=self.material,
-            date="2026-09-12", time="10:00", qty=10,
-            received_from="TEST", created_by=self.admin)
-        self.url = (f"/entries/sites/{self.site.id}/materials/"
-                    f"{self.material.id}/inward/{self.inward.id}/allocate/")
-
-    def test_over_allocation_blocked(self):
-        r = self.client.post(self.url, {
-            "sub_location": self.sub.id, "qty_allocated": "11"})
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(SubLocationAllocation.objects.count(), 0)
-
-    def test_valid_allocation_saved(self):
-        r = self.client.post(self.url, {
-            "sub_location": self.sub.id, "qty_allocated": "6"})
-        self.assertEqual(r.status_code, 302)
-        self.assertEqual(SubLocationAllocation.objects.count(), 1)
-
-    def test_staff_gets_403_on_allocate(self):
-        self.client.force_login(
-            User.objects.get(username="t_staff"))
-        self.assertEqual(self.client.get(self.url).status_code, 403)
-
 
 
 @override_settings(ALLOWED_HOSTS=["testserver"])

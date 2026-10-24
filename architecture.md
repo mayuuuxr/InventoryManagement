@@ -63,7 +63,7 @@ so a corrected ledger row always re-prints true; legacy rows without a rate prin
 `BILL_SHOP_PHONE`, `BILL_SHOP_EMAIL`, `BILL_SHOP_GSTIN`, `BILL_SHOP_PAN`.
 
 **Balance (calculated, never stored — `entries/utils.py`)**
-- `balance_for(site, material)`; `balances_for_site()` bulk; `balance_for_sub_location()` = allocated-here − used-here, falls back to site balance when zero allocations
+- `balance_for(site, material)`; `balances_for_site()` and `balances_for_sites()` bulk (site detail, summary + all-sites reports)
 - `LOW_STOCK_THRESHOLD = 10` (per-material `reorder_point` overrides); dashboard low/out-of-stock tabs via `low_stock_items()`
 
 **User** (`accounts/models.py`)

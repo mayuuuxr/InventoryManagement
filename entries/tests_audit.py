@@ -194,50 +194,6 @@ class WorkflowAudit(TestCase):
         self.assertEqual(InwardEntry.objects.count(), 1)
         self.assertContains(r, "Cannot delete")
 
-    def test_allocation_over_delivery_blocked(self):
-        # Allocations are admin-only — staff correctly get 403 (verified),
-        # so this flow runs as admin.
-        self.client.force_login(self.admin)
-        self._inward(qty=100)
-        inw = InwardEntry.objects.get()
-        aurl = (f"/entries/sites/{self.site.id}/materials/{self.mat.id}/"
-                f"inward/{inw.pk}/allocate/")
-        sl = SubLocation.objects.create(site=self.site, name="B1")
-        sl2 = SubLocation.objects.create(site=self.site, name="B2")
-        r = self.client.post(aurl, {"sub_location": str(sl.pk),
-                                    "qty_allocated": "60"})
-        self.assertEqual(r.status_code, 302, r.content[:400])
-        r = self.client.post(aurl, {"sub_location": str(sl2.pk),
-                                    "qty_allocated": "50"})
-        self.assertEqual(r.status_code, 200)
-        from entries.models import SubLocationAllocation
-        self.assertEqual(SubLocationAllocation.objects.count(), 1)
-
-    def test_sublocation_case_duplicate_blocked(self):
-        # Sub-location management is admin-only (staff 403 verified).
-        self.client.force_login(self.admin)
-        surl = f"/entries/sites/{self.site.id}/sub-locations/add/"
-        self.assertEqual(
-            self.client.post(surl, {"name": "Banglo 1"}).status_code, 302)
-        r = self.client.post(surl, {"name": "banglo 1"})
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(SubLocation.objects.count(), 1)
-
-    def test_staff_forbidden_suballocation_views(self):
-        # Staff (self.client is s1) get 403 on admin-only management views.
-        self.assertEqual(
-            self.client.post(
-                f"/entries/sites/{self.site.id}/sub-locations/add/",
-                {"name": "Nope"}).status_code, 403)
-        inw = InwardEntry.objects.create(
-            site=self.site, material=self.mat, date="2026-09-12",
-            time="09:00", qty=10, received_from="X", created_by=self.s1)
-        self.assertEqual(
-            self.client.post(
-                f"/entries/sites/{self.site.id}/materials/{self.mat.id}/"
-                f"inward/{inw.pk}/allocate/",
-                {"sub_location": "1", "qty_allocated": "5"}).status_code, 403)
-
     def test_repeat_prefills_from_any_visible_row(self):
         # Reads are global (owner decision Sep 2026): staff may repeat from
         # a co-worker's row. Edit/delete of others rows stays 404 (IdorAudit).
