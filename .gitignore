@@ -24,6 +24,8 @@ tunnel.log
 cloudflared.exe
 # one-click updater artifacts (generated at runtime, never commit)
 apply_update.bat
+# pin-app.bat output (Windows icon built from core/pwa_files at install time)
+nibba.ico
 # never commit stray secret files (tokens, keys pasted during setup)
 nibbakey.txt
 *token*.txt

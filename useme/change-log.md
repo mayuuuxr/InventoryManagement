@@ -8,6 +8,33 @@ log useful while honoring the no-mentions rule.
 
 ---
 
+## 2026-10-24 — Session: v1.2.11 Windows search-bar pin (owner: "searched nibba — won't show")
+
+- **Version:** 1.2.11 (bumped from 1.2.10) · **git HEAD at session start:** 9098669 ·
+  **Tree:** committed, tagged `v1.2.11` and pushed to origin/main at session end.
+
+What & why (owner typed "nibba" into the Windows search bar on the shop PC and
+nothing appeared; the app is launched from `%LocalAppData%\nibba\nibba-Shop.bat`
+and Windows never indexes AppData\Local):
+- **NEW `pin-app.bat`:** builds `nibba.ico` offline from the app's own PWA icon
+  (`core/pwa_files/icon-512.png` → 7 sizes 16-256 via .NET System.Drawing, no
+  downloads, no new dependencies) and creates "**nibba Shop**" shortcuts in
+  **%APPDATA%\...\Start Menu\Programs** (the folder Windows search reads) and
+  on the **Desktop**, both targeting this folder's `nibba-Shop.bat`.
+  Idempotent; `quiet` mode for automated use.
+- **`nibba-Shop.bat`:** guarded one-time call — if the Start-menu shortcut is
+  missing, the daily opener calls `pin-app.bat quiet` (non-blocking, warns
+  only). Every future install/updated copy pins itself automatically.
+- **`README-SHOP.txt`:** new "WINDOWS SEARCH" section; `.gitignore`: `nibba.ico`.
+- **Tested live on this PC:** valid 7-size .ico (header `00 00 01 00 07`),
+  both .lnk created with correct targets; test shortcuts then removed (the
+  dev-copy pin would point at the wrong folder — the real install pins itself
+  at its next `nibba-Shop` open after taking v1.2.11 via the updater).
+- **Gate:** full suite 157/157 OK (185s); `makemigrations --check` clean.
+  No Python/product-UI code touched — batch/docs only.
+
+---
+
 ## 2026-10-24 — Session: v1.2.10 dead-code cleanup (owner-approved audit removals)
 
 - **Version:** 1.2.10 (bumped from 1.2.9) · **git HEAD at session start:** 6e3d064 ·

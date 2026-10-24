@@ -48,6 +48,9 @@ for /f %%t in ('powershell -NoProfile -WindowStyle Hidden -Command "Get-Date -Fo
 if not exist "db.sqlite3" goto servstep
 copy /Y "db.sqlite3" "Backup\db_%STAMP%.sqlite3" >nul
 powershell -NoProfile -WindowStyle Hidden -Command "Get-ChildItem 'Backup\db_*.sqlite3' | Sort-Object LastWriteTime -Descending | Select-Object -Skip 30 | Remove-Item -Force"
+REM One-time: pin "nibba Shop" to the Start menu + Desktop so the Windows
+REM SEARCH BAR finds it (Windows never indexes AppData\Local). Idempotent.
+if not exist "%APPDATA%\Microsoft\Windows\Start Menu\Programs\nibba Shop.lnk" call "%~dp0pin-app.bat" quiet
 :servstep
 REM Monthly Excel files for direct work (fail-soft: never blocks launch).
 "%PY%" manage.py export_monthly_files -v 0

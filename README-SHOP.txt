@@ -23,6 +23,12 @@ BACKUP (automatic):
 - Every opening saves a Backup copy. Once a month, copy the
   Backup folder to a pen drive.
 
+WINDOWS SEARCH (asks: "how do I find the app?"):
+- On first open the app pins a "nibba Shop" icon to the Start menu
+  and Desktop automatically (pin-app.bat; run it by hand anytime —
+  safe to repeat). After that, typing "nibba" in the Windows search
+  bar shows the app like any installed program.
+
 SUPPORT:
 - Updates: Help page shows the version and an Install button when
   a new version is ready. One click — the app updates and restarts
