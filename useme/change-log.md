@@ -38,8 +38,14 @@ to the end of the box on both billing screens):
   delivered to the owner; awaiting their pick on which findings to fix.
   Nothing from the audit was fixed in v1.2.12 (would have mixed into the
   caret fix — audit fixes ship as their own tagged release once approved).
-- **GitHub Release:** tagging now; CI auto-publishes — verification facts
-  appended below once the artifact lands.
+- **GitHub Release:** CI auto-published release v1.2.12 (workflow run #23,
+  success, ~20s) with `nibba-v1.2.12.zip` — 628,214 bytes, sha256
+  `688da6bf2bcefd98bf283c4cd3c3c7c1203adbcc3e0ac584d6d294b147146be4` (matches
+  the GitHub-reported digest) — downloaded and content-verified:
+  VERSION=1.2.12 inside, `refreshMoney` present in BOTH bill templates,
+  203 entries, zero protected-data members (no .env / .sqlite3 / Backup).
+  Shop PC next step: Help → Install updates (or update.bat); the caret jump
+  is gone once v1.2.12 lands there.
 
 ---
 
